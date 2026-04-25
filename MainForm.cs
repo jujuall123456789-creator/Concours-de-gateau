@@ -434,12 +434,21 @@ namespace DuelDeGateaux
             ExecuteWithErrorHandling(() =>
             {
                 SaveConfig();
-                var assignments = DrawService.AssignChallengers(config);
-                EmailService.toto();
-                if (config.IsTest)
+                try 
                 {
-                    HistoryService.Add(config, assignments);
+                    List<Participant> gagnants = DrawService.AssignChallengers(maConfig);
+                    EmailService.toto();
+                    if (config.IsTest)
+                    {
+                        HistoryService.Add(config, assignments);
+                    }
                 }
+                catch (InvalidOperationException ex)
+                {
+                    // Si la vérification échoue, on affiche l'erreur à l'utilisateur sans faire crasher l'app !
+                    MessageBox.Show(ex.Message, "Attention", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                
             },"Emails envoyées! ");
         }
         /// <summary>
