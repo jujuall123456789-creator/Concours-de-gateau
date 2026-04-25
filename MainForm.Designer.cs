@@ -5,6 +5,160 @@ namespace DuelDeGateaux
     partial class MainForm
     {
         /// <summary>
+        /// Zone de groupe contenant tous les champs liés au concours.
+        /// Ce groupe contient les informations de base sur le concours comme la date,
+        /// l'heure, le lieu, le thème, les règles, le prix et le message de participation.
+        /// </summary>
+        private GroupBox grpContest;
+
+        /// <summary>
+        /// Sélecteur de date pour la date du concours.
+        /// Ce contrôle permet à l'utilisateur de sélectionner la date du concours
+        /// de manière interactive.
+        /// </summary>
+        private DateTimePicker datePicker;
+
+        /// <summary>
+        /// Sélecteur de temps pour l'heure du concours.
+        /// Ce contrôle permet à l'utilisateur de sélectionner l'heure du concours
+        /// de manière interactive.
+        /// </summary>
+        private DateTimePicker timePicker;
+
+        /// <summary>
+        /// Champ salle
+        /// </summary>
+        private TextBox txtRoom;
+
+        /// <summary>
+        /// Champ thème
+        /// </summary>
+        private TextBox txtTheme;
+
+        /// <summary>
+        /// Champ règles
+        /// </summary>
+        private TextBox txtRules;
+
+        /// <summary>
+        /// Champ prix
+        /// </summary>
+        private TextBox txtPrice;
+
+        /// <summary>
+        /// Message obligatoire
+        /// </summary>
+        private TextBox txtParticipation;
+
+        /// <summary>
+        /// Liste des titres challengers
+        /// </summary>
+        private TextBox txtTitles;
+        /// <summary>
+        /// Radio bouton permettant la sélection de deux participants
+        /// </summary>
+        private RadioButton rb2Challengers;
+        /// <summary>
+        ///Radio bouton permettant la sélection de trois participants
+        /// </summary>
+        private RadioButton rb3Challengers;
+        /// <summary>
+        /// GroupeBox regroupant les radio boutons
+        /// </summary>
+        private GroupBox grpChallengersCount;
+        /// <summary>
+        /// Groupe affichage
+        /// </summary>
+        private GroupBox grpDisplay;
+
+        /// <summary>
+        /// Taille de police
+        /// </summary>
+        private NumericUpDown numFontSize;
+
+        /// <summary>
+        /// Chemin image header
+        /// </summary>
+        private TextBox txtImageHeader;
+
+        /// <summary>
+        /// Bouton sélection image header
+        /// </summary>
+        private Button btnBrowseHeader;
+
+        /// <summary>
+        /// Apperçu de l'image du header
+        /// </summary>
+        private PictureBox pictureHeaderImage;
+
+        /// <summary>
+        /// Chemin image footer
+        /// </summary>
+        private TextBox txtImageFooter;
+
+        /// <summary>
+        /// Bouton sélection image footer
+        /// </summary>
+        private Button btnBrowseFooter;
+
+        /// <summary>
+        /// Apperçu de l'image du footer
+        /// </summary>
+        private PictureBox pictureFooterImage;
+
+        /// <summary>
+        /// Hauteur image header
+        /// </summary>
+        private NumericUpDown numImageHeight;       
+
+        /// <summary>
+        /// Groupe SMTP
+        /// </summary>
+        private GroupBox grpSmtp;
+
+        /// <summary>
+        /// Email expéditeur
+        /// </summary>
+        private TextBox txtSender;
+
+        /// <summary>
+        /// Mode test
+        /// </summary>
+        private CheckBox chkTest;
+
+        /// <summary>
+        /// Mail de test
+        /// </summary>
+        private TextBox txtTestMail;
+
+        /// <summary>
+        /// Zone contenant le DataGrid participant
+        /// </summary>
+        private GroupBox grpParticipants;
+
+        /// <summary>
+        /// Liste des participants dans une DatagriedView
+        /// </summary>
+        private DataGridView dgvParticipants;
+
+        /// <summary>
+        /// Bouton Ajout de particpant au DatagridView
+        /// </summary>
+        private Button btnAddParticipants;
+        /// <summary>
+        /// Boutons principaux
+        /// </summary>
+        private Button btnSend;
+        private Button btnSave;
+        private Button btnOpenJson;
+        private Button btnHistory;
+
+        /// <summary>
+        /// Composant permettant d'afficher des bulles d'aide quand l'utilisateur survole un champ avec la souris
+        /// </summary>
+        private ToolTip toolTip;
+        
+        /// <summary>
         /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
@@ -31,6 +185,7 @@ namespace DuelDeGateaux
         private void InitializeComponent()
         {
             SuspendLayout();
+            this.Load += new System.EventHandler(this.MainForm_Load);
             // 
             // MainForm
             // 
