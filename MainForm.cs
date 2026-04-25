@@ -103,6 +103,8 @@ namespace DuelDeGateaux
                 txtSender.Text = config.SenderEmail;
                 chkTest.Checked = config.IsTest;
                 txtTestMail.Text = config.TesterEmail;
+                txtSubjectChallenger.Text = config.SubjectMailChallenger;
+                txtSubjectEater.Text = config.SubjectMailEater;
                 // 👥 PARTICIPANTS                
                 participantBindingSource.DataSource = config.Participants;
                 dgvParticipants.DataSource = participantBindingSource;
@@ -181,6 +183,11 @@ namespace DuelDeGateaux
             config.SenderEmail = txtSender.Text.Trim();
             config.IsTest = chkTest.Checked;
             config.TesterEmail = txtTestMail.Text.Trim();
+            config.SubjectMailChallenger = txtSubjectChallenger.Text.Trim();
+            config.SubjectMailEater = txtSubjectEater.Text.Trim();
+            // 👥 GROUPE PARTICIPANTS
+            dgvParticipants.EndEdit();
+            participantBindingSource.EndEdit();
 
             ConfigService.Save(config);
         }
@@ -242,6 +249,21 @@ namespace DuelDeGateaux
             else SetError(txtParticipation, false);
 
             // =============================
+            // VALIDATION AFFICHAGE
+            // =============================
+            if (!string.IsNullOrWhiteSpace(txtImageHeader.Text) && !File.Exists(txtImageHeader.Text))
+            {
+                SetError(txtImageHeader, true);
+                isValid = false;
+            }
+            else SetError(txtImageHeader, false);
+            if (!string.IsNullOrWhiteSpace(txtImageFooter.Text) && !File.Exists(txtImageFooter.Text))
+            {
+                SetError(txtImageFooter, true);
+                isValid = false;
+            } else SetError(txtImageFooter, false);
+
+            // =============================
             // VALIDATION EMAIL
             // =============================
 
@@ -259,6 +281,20 @@ namespace DuelDeGateaux
             }
             else SetError(txtTestMail, false);
 
+            if (string.IsNullOrWhiteSpace(txtSubjectChallenger.Text))
+            {
+                SetError(txtSubjectChallenger, true);
+                isValid = false;
+            }
+            else SetError(txtSubjectChallenger, false);
+
+            if (string.IsNullOrWhiteSpace(txtSubjectEater.Text))
+            {
+                SetError(txtSubjectEater, true);
+                isValid = false;
+            }
+            else SetError(txtSubjectEater, false);           
+
             // =============================
             // RESULTAT GLOBAL
             // =============================
@@ -275,9 +311,23 @@ namespace DuelDeGateaux
                 // Petit son d'erreur système pour marquer le coup
                 System.Media.SystemSounds.Hand.Play();
                 MessageBox.Show(randomMessage, "Formulaire incomplet", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return false;
             }
 
-            return isValid;
+             // =============================
+            // VALIDATION PARTCIPANTS
+            // =============================
+            int requiredChallengers = rb2Challengers.Checked ? 2 : 3;
+            int eligibleCount = config.Participants.Count(p => p.IsEligible);
+
+            if (eligibleCount < requiredChallengers)
+            {
+                System.Media.SystemSounds.Exclamation.Play();
+                MessageBox.Show($"Impossible de lancer le tirage !\nIl te faut au moins {requiredChallengers} participants cochés comme 'Challenger' dans la liste. Actuellement, tu n'en as que {eligibleCount}.", 
+                    "Où sont les cuisiniers ?", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
         }
         /// <summary>
         /// vérification de l'adresse mail
@@ -583,6 +633,11 @@ namespace DuelDeGateaux
 
             toolTip.SetToolTip(txtTestMail,
                 "Adresse qui recevra tous les mails en mode test.");
+            toolTip.SetToolTip(txtSubjectChallenger, 
+                "Sujet du mail pour les challengers.\nAstuce : Laissez le mot {{Date}} pour que le programme insère la date automatiquement !");
+
+            toolTip.SetToolTip(txtSubjectEater, 
+                "Sujet du mail pour le jury.\nAstuce : Laissez le mot {{Date}} pour que le programme insère la date automatiquement !");
 
 
             // =============================

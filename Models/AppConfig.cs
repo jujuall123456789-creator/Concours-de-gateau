@@ -11,6 +11,8 @@ namespace DuelDeGateaux.Models
         public string SenderEmail { get; set; } = string.Empty;
         public string TesterEmail { get; set; } = string.Empty;
         public bool IsTest { get; set; }
+        public string SubjectMailChallenger { get; set; } = string.Empty;
+        public string SubjectMailEater { get; set; } = string.Empty;
 
         //CONCOURS
         public string ChallengeDate { get; set; } = string.Empty;

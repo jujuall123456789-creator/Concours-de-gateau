@@ -132,6 +132,16 @@ namespace DuelDeGateaux
         private TextBox txtTestMail;
 
         /// <summary>
+        /// Sujet du mail pour les challengers
+        /// </summary>
+        private TextBox txtSubjectChallenger;
+
+        /// <summary>
+        /// Sujet du mail pour les mangeurs (jury)
+        /// </summary>
+        private TextBox txtSubjectEater;
+
+        /// <summary>
         /// Zone contenant le DataGrid participant
         /// </summary>
         private GroupBox grpParticipants;
@@ -439,7 +449,7 @@ namespace DuelDeGateaux
                 Left = 200,
                 Top = 180,
                 Width = 80,
-                Minimum = 0,
+                Minimum = 100,
                 Maximum = 1000,
 
             };
@@ -494,7 +504,7 @@ namespace DuelDeGateaux
             // =============================
             grpSmtp = new GroupBox();
             grpSmtp.Text = "📧 Mail";
-            grpSmtp.SetBounds(10, 350, 450, 250);
+            grpSmtp.SetBounds(10, 350, 450, 250); // Hauteur ajustée si besoin, 200 est parfait
 
             //Adresse mail de l'expéditeur
             Label lblSender = new Label()
@@ -508,8 +518,9 @@ namespace DuelDeGateaux
             {
                 Left = 180,
                 Top = 30,
-                Width = 200
+                Width = 250
             };
+            
             //Checkbox du test
             chkTest = new CheckBox() 
             { 
@@ -530,14 +541,47 @@ namespace DuelDeGateaux
             {
                 Left = 180,
                 Top = 90,
-                Width = 200
+                Width = 250
+            };
+
+            //Sujet mail Challenger
+            Label lblSubjectChallenger = new Label()
+            {
+                Text = "Sujet Challenger :",
+                Left = 20,
+                Top = 120,
+                Width = 150
+            };
+            txtSubjectChallenger = new TextBox()
+            {
+                Left = 180,
+                Top = 120,
+                Width = 250
+            };
+
+            //Sujet mail Mangeur
+            Label lblSubjectEater = new Label()
+            {
+                Text = "Sujet Mangeur :",
+                Left = 20,
+                Top = 150,
+                Width = 150
+            };
+            txtSubjectEater = new TextBox()
+            {
+                Left = 180,
+                Top = 150,
+                Width = 250
             };
            
+            // Ajout de tous les contrôles au groupe
             grpSmtp.Controls.AddRange(new Control[]
             {
-                lblSender,txtSender,
+                lblSender, txtSender,
                 chkTest, 
-                lblTestMail, txtTestMail
+                lblTestMail, txtTestMail,
+                lblSubjectChallenger, txtSubjectChallenger,
+                lblSubjectEater, txtSubjectEater
             });
 
 
