@@ -28,6 +28,11 @@ namespace DuelDeGateaux
         /// </summary>
         private ToolTip toolTip;
         
+        /// <summary>
+        /// Random utilisé pour randomiser la sélection de certaines string
+        /// </summary>
+        private static readonly Random rng = new();
+        
 
         /// <summary>
         /// Constructeur du formulaire principal.
@@ -95,10 +100,12 @@ namespace DuelDeGateaux
                 // 🎨 GROUPE AFFICHAGE
                 numFontSize.Value = config.FontSize;
                 txtImageHeader.Text = config.PathImageHeading;
-                pictureHeaderImage.Image = LoadImage(config.PathImageHeading);
+                pictureHeaderImage.Image?.Dispose();
+                pictureHeaderImage.Image = LoadImageFromConfig(config.PathImageHeading);
                 numImageHeight.Value = config.ImageHeadingHeight;
                 txtImageFooter.Text = config.PathImageFooter;
-                pictureFooterImage.Image = LoadImage(config.PathImageFooter);
+                pictureFooterImage.Image?.Dispose();
+                pictureFooterImage.Image = LoadImageFromConfig(config.PathImageFooter);
                 // 📧 GROUPE MAIL
                 txtSender.Text = config.SenderEmail;
                 chkTest.Checked = config.IsTest;
@@ -125,29 +132,66 @@ namespace DuelDeGateaux
         /// </summary>
         /// <param name="path">Le chemin de fichier de l'image à charger.</param>
         /// <returns>Une miniature de l'image chargée, ou null si l'image ne peut pas être chargée.</returns>
-        private Image LoadImage(string path)
+        private void LoadImageUserInput(string path, TextBox textBox, PictureBox pictureBox)
         {
             try
-            {
-                if (string.IsNullOrWhiteSpace(path))
-                {
-                    return null;
-                }
+            {                
                 if (!File.Exists(path))
                 {
                     MessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
                     return null;
                 }
-                using (Image image = Image.FromFile(path))
+                var preview = CreateThumbnailImage(path)
+                if (preview != null)
                 {
-                    Image.GetThumbnailImageAbort myCallback = new Image.GetThumbnailImageAbort(ThumbnailCallBack);
-                    return image.GetThumbnailImage(55, 55, myCallback, IntPtr.Zero);
+                    textBox.Text = path;
+                    // On libère la mémoire de l'image précédente avant d'afficher la nouvelle
+                    pictureBox.Image?.Dispose();
+                    pictureBox.Image = preview;
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Une erreur est survenue lors du chargement de l'image : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return null;
+            }
+        }
+        /// <summary>
+        /// Charge une image depuis un chemin de fichier spécifié au lancement du programme.
+        /// Cette méthode tente de charger une image depuis le chemin de fichier donné,
+        /// et retourne une miniature de l'image si elle est chargée avec succès.
+        /// </summary>
+        /// <param name="path">Le chemin de fichier de l'image à charger.</param>
+        /// <returns>Une miniature de l'image chargée, ou null si l'image ne peut pas être chargée.</returns>
+        private Image? LoadImageFromConfig(string path)
+        {
+            try
+            {
+                if (!File.Exists(path))
+                    return null;
+                
+                return CreateThumbnailImage(path);
+            }
+            catch
+            {
+                return null;
+            }
+
+        }
+        /// <summary>
+        /// Méthode commune de chargement de miniature
+        /// </summary>
+        /// <param name="path">Le chemin de fichier de l'image à charger.</param>
+        /// <returns>Une miniature de l'image chargée, ou null si l'image ne peut pas être chargée.</returns>
+        private Image? CreateThumbnailImage(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return null;
+            }
+            using (Image image = Image.FromFile(path))
+            {
+                return image.GetThumbnailImage(55, 55, () => false, IntPtr.Zero);
             }
 
         }
@@ -186,8 +230,7 @@ namespace DuelDeGateaux
             config.SubjectMailChallenger = txtSubjectChallenger.Text.Trim();
             config.SubjectMailEater = txtSubjectEater.Text.Trim();
             // 👥 GROUPE PARTICIPANTS
-            dgvParticipants.EndEdit();
-            participantBindingSource.EndEdit();
+            EndEditParticipants();
 
             ConfigService.Save(config);
         }
@@ -307,7 +350,7 @@ namespace DuelDeGateaux
                     "⚠️ Un gâteau sans farine, ça ne marche pas. Un formulaire vide non plus 🍰",
                     "⚠️ Allez, on se concentre et on corrige les cases rouges 🎯"
                 };
-                string randomMessage = funInsults[new Random().Next(funInsults.Length)]
+                string randomMessage = funInsults[rng.Next(funInsults.Length)];
                 // Petit son d'erreur système pour marquer le coup
                 System.Media.SystemSounds.Hand.Play();
                 MessageBox.Show(randomMessage, "Formulaire incomplet", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -315,9 +358,11 @@ namespace DuelDeGateaux
             }
 
              // =============================
-            // VALIDATION PARTCIPANTS
+            // VALIDATION PARTICIPANTS
             // =============================
             int requiredChallengers = rb2Challengers.Checked ? 2 : 3;
+            EndEditParticipants();
+            participantBindingSource.EndEdit();
             int eligibleCount = config.Participants.Count(p => p.IsEligible);
 
             if (eligibleCount < requiredChallengers)
@@ -329,6 +374,15 @@ namespace DuelDeGateaux
             }
             return true;
         }
+        /// <summary>
+        /// Force la fin d'édition de l'utilisateur afin de récupérer sa dernière saisie
+        /// </summary>
+        private void EndEditParticipants()
+        {
+            dgvParticipants.EndEdit();
+            participantBindingSource.EndEdit();
+        }
+
         /// <summary>
         /// vérification de l'adresse mail
         /// </summary>
@@ -431,7 +485,7 @@ namespace DuelDeGateaux
         /// Modification conservée en mémoire uniquement.
         /// L'utilisateur doit cliquer sur "Sauvegarder" pour l'enregistrer dans le fichier JSON.
         /// </summary>
-        private void btnAddParticipantsList_Click(object sender, EventArgs e)
+        private void BtnAddParticipantsList_Click(object sender, EventArgs e)
         {
             // Ajoute une ligne exemple que l'utilisateur pourra modifier dans la grille
             config.Participants.Add(
@@ -471,25 +525,21 @@ namespace DuelDeGateaux
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnBrowseHeader_Click(object sender, EventArgs e)
+        private void BtnBrowseHeader_Click(object sender, EventArgs e)
         {
             BrowseImage_Click(sender, e, txtImageHeader, pictureHeaderImage);
         }
         
         /// <summary>
-        /// /// Événement permettant de sélectionner une image pour le header.
+        /// Événement permettant de sélectionner une image pour le header.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void btnBrowseFooter_Click(object sender, EventArgs e)
+        private void BtnBrowseFooter_Click(object sender, EventArgs e)
         {
             BrowseImage_Click(sender, e, txtImageFooter, pictureFooterImage);
         }
 
-        private bool ThumbnailCallBack()
-        {
-            return false;
-        }
         /// <summary>
         /// Méthode commune pour sélectionner une image
         /// </summary>
@@ -500,42 +550,35 @@ namespace DuelDeGateaux
         private void BrowseImage_Click(object sender, EventArgs e, TextBox textBox, PictureBox pictureBox)
         {
             string path = FileHelper.SelectImage(textBox.Text);
-            if (!String.IsNullOrEmpty(path))
+            if (!string.IsNullOrEmpty(path))
             {
-                textBox.Text = path;
-                // On libère la mémoire de l'image précédente avant d'afficher la nouvelle
-                pictureBox.Image?.Dispose();
-                pictureBox.Image = LoadImage(path);
+                LoadImageUserInput(path, pictureBox, textBox);
             }
         }
 
         private void PictureBox_DragEnter(object sender, DragEventArgs e)
         {
             // On vérifie si ce qu'on survole est bien un fichier
-            if (e.Data.GetDataPresent(DataFormats.FileDrop)) 
+            if (e.Data?.GetDataPresent(DataFormats.FileDrop) == true)
                 e.Effect = DragDropEffects.Copy;
         }
 
         private void PictureBox_DragDrop(object sender, DragEventArgs e, TextBox associatedTextBox)
         {
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (files.Length > 0)
-            {
-                string path = files[0]; // On prend le premier fichier
-                string ext = Path.GetExtension(path).ToLower();
+            if (e.Data?.GetData(DataFormats.FileDrop) is not string[] files || files.Length == 0)
+                return;
+
+            string path = files[0]; // On prend le premier fichier
+            string ext = Path.GetExtension(path).ToLower();
                 
-                if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
-                {
-                    PictureBox pb = (PictureBox)sender;
-                    associatedTextBox.Text = path;
-                    
-                    pb.Image?.Dispose(); // Nettoyage !
-                    pb.Image = LoadImage(path);
-                }
-                else
-                {
-                    MessageBox.Show("Hé ! On a dit une image, pas un PDF ! 😤", "Erreur de cuisine");
-                }
+            if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
+            {
+                PictureBox pb = (PictureBox)sender;
+                LoadImageUserInput(path, associatedTextBox, pb);
+            }
+            else
+            {
+                MessageBox.Show("Hé ! On a dit une image, pas un PDF ! 😤", "Erreur de cuisine");
             }
         }
 

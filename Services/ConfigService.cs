@@ -53,6 +53,7 @@ namespace DuelDeGateaux.Services
                 // Si le fichier est vide, on retourne une nouvelle instance
                 if (string.IsNullOrWhiteSpace(json)) return new AppConfig();
                 var config = JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+                config.Participants ??= new List<Participant>();
                 return config;
             }
             catch (JsonException ex)
@@ -66,7 +67,7 @@ namespace DuelDeGateaux.Services
                 throw new Exception($"Impossible d'accéder au fichier : {ex.Message}");
             }
         }
-       // <summary>
+        /// <summary>
         /// Sauvegarde la configuration actuelle dans le fichier JSON.
         /// </summary>
         /// <param name="config">L'objet de configuration à sérialiser.</param>
@@ -95,7 +96,12 @@ namespace DuelDeGateaux.Services
                 return;
             }
 
-            Process.Start("notepad.exe", ConfigPath);
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "notepad.exe",
+                Arguments = ConfigPath,
+                UseShellExecute = true
+            });
         }
 
     }

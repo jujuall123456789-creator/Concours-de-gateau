@@ -419,7 +419,7 @@ namespace DuelDeGateaux
                 Text = "Cherche des photos",
                 Cursor = Cursors.SizeAll
             };
-            btnBrowseHeader.Click += btnBrowseHeader_Click;
+            btnBrowseHeader.Click += BtnBrowseHeader_Click;
 
 
             pictureHeaderImage = new PictureBox()
@@ -480,7 +480,7 @@ namespace DuelDeGateaux
                 MouseEnter += PictureBox_MouseEnter,
                 MouseLeave += PictureBox_MouseLeave
             };
-            btnBrowseFooter.Click += btnBrowseFooter_Click;
+            btnBrowseFooter.Click += BtnBrowseFooter_Click;
 
             pictureFooterImage = new PictureBox()
             {
@@ -634,7 +634,7 @@ namespace DuelDeGateaux
             btnAddParticipants = new Button();
             btnAddParticipants.Text = "➕ Ajouter un participant";
             btnAddParticipants.SetBounds(5, 222, 120, 22);
-            btnAddParticipants.Click += btnAddParticipantsList_Click;
+            btnAddParticipants.Click += BtnAddParticipantsList_Click;
             btnAddParticipants.BackColor = Color.Transparent;
             btnAddParticipants.Font = new Font("Segoe UI Emoji", 6, FontStyle.Bold);
 
