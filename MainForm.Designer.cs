@@ -153,10 +153,6 @@ namespace DuelDeGateaux
         private Button btnOpenJson;
         private Button btnHistory;
 
-        /// <summary>
-        /// Composant permettant d'afficher des bulles d'aide quand l'utilisateur survole un champ avec la souris
-        /// </summary>
-        private ToolTip toolTip;
         
         /// <summary>
         /// Required designer variable.

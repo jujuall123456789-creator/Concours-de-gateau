@@ -44,7 +44,11 @@ namespace DuelDeGateaux.Services
                 }
 
                 var json = File.ReadAllText(path);
-                return JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+                var config = JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+                // Sécurisation des collections
+                config.Participants ??= new List<Participant>();
+                config.ChallengersTitles ??= new List<string>();
+                return config;
             }
             catch (Exception ex)
             {

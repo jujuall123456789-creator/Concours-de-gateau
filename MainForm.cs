@@ -15,7 +15,19 @@ namespace DuelDeGateaux
         /// Cette propriété contient toutes les informations nécessaires pour configurer
         /// et lancer un concours de gâteaux.
         /// </summary>
-        private AppConfig config;        
+        private AppConfig config = new();        
+        /// <summary>
+        /// Source de données intermédiaire entre la liste des participants
+        /// et l'affichage dans la grille.
+        /// Permet de rafraîchir facilement l'interface sans rebinder manuellement.
+        /// </summary>
+        private BindingSource participantBindingSource = new();
+
+        /// <summary>
+        /// Composant permettant d'afficher des bulles d'aide quand l'utilisateur survole un champ avec la souris
+        /// </summary>
+        private ToolTip toolTip;
+        
 
         /// <summary>
         /// Constructeur du formulaire principal.
@@ -57,12 +69,11 @@ namespace DuelDeGateaux
             try
             {
                 //🧾 GROUPE CONCOURS
-                config = ConfigService.Load();
                 if (DateTime.TryParse(config.ChallengeDate, out DateTime date))
                 {
                     datePicker.Value = date;
                 }
-                if (DateTime.TryParseExact(config.ChallengeHour, "HH:mm", null, System.Globalization.DateTimeStyles.None, out DateTime time));
+                if (DateTime.TryParseExact(config.ChallengeHour, "HH:mm", null, System.Globalization.DateTimeStyles.None, out DateTime time))
                 {
                     timePicker.Value = time;
                 }
@@ -92,8 +103,10 @@ namespace DuelDeGateaux
                 txtSender.Text = config.SenderEmail;
                 chkTest.Checked = config.IsTest;
                 txtTestMail.Text = config.TesterEmail;
-                // 👥 PARTICIPANTS
-                RefeshParticipantDataGrid();
+                // 👥 PARTICIPANTS                
+                participantBindingSource.DataSource = config.Participants;
+                dgvParticipants.DataSource = participantBindingSource;
+                RefreshParticipantDataGrid();
             }
             catch (Exception ex)
             {
@@ -114,9 +127,13 @@ namespace DuelDeGateaux
         {
             try
             {
-                if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                if (string.IsNullOrWhiteSpace(path))
                 {
-                    MessageBox.Show("Le fichier image est introuvable ou le chemin est invalide.", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
+                if (!File.Exists(path))
+                {
+                    MessageBox.Show("Le fichier image est introuvable.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
                     return null;
                 }
                 using (Image image = Image.FromFile(path))
@@ -133,28 +150,27 @@ namespace DuelDeGateaux
 
         }
         /// <summary>
-        /// Charge la liste des participants dans l'IHM
+        /// Recharge la liste des participants dans l'IHM
         /// </summary>
-        private void RefeshParticipantDataGrid()
+        private void RefreshParticipantDataGrid()
         {
-            dgvParticipants.DataSource = null;
-            dgvParticipants.DataSource = config.Participants;
+            participantBindingSource.ResetBindings(false);
         }
 
         /// <summary>
-        /// Sauvegarde les entrées de l'utilisateurs dans le fichier de config
+        /// Sauvegarde les entrées de l'utilisateur dans le fichier de config
         /// </summary>
         private void SaveConfig()
         {
             //🧾 GROUPE CONCOURS
-            config.ChallengeDate = datePicker.Value.ToShortDateString();
-            config.ChallengeHour = timePicker.Value.ToShortTimeString();
+            config.ChallengeDate = datePicker.Value.ToString("dd-MM-yyyy");
+            config.ChallengeHour = timePicker.Value.ToString("HH:mm");
             config.ChallengeRoom = txtRoom.Text.Trim();
             config.ChallengeTheme = txtTheme.Text.Trim();
             config.ChallengeRules = txtRules.Text.Trim();
             config.ChallengePrice = txtPrice.Text.Trim();
             config.ChallengeParticipationMessage = txtParticipation.Text.Trim();
-            config.ChallengersTitles = txtTitles.Text.Split(',').ToList();
+            config.ChallengersTitles = txtTitles.Text.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
             config.ChallengerNumber = rb2Challengers.Checked ? 2 : 3;
             // 🎨 GROUPE AFFICHAGE
             config.FontSize = (int) numFontSize.Value;
@@ -259,7 +275,7 @@ namespace DuelDeGateaux
         /// </summary>
         /// <param name="email"></param>
         /// <returns></returns>
-        private bool IsValidEmail( string email)
+        private bool IsValidEmail(string email)
         {
             try
             {
@@ -277,16 +293,18 @@ namespace DuelDeGateaux
         /// </summary>
         /// <param name="action">Action à exécuter</param>
         /// <param name="successMessage">Message de succès</param>
-        private void ExecuteWithErrorHandling(Action action, string successMessage)
+        private bool ExecuteWithErrorHandling(Action action, string successMessage)
         {
-            try
+             try
             {
                 action();
                 MessageBox.Show(successMessage);
+                return true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Une erreur est survenue : {ex.Message}", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Une erreur est survenue : {ex.Message}", "Erreur",MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
             }
         }
 
@@ -299,31 +317,24 @@ namespace DuelDeGateaux
         {
             if (!ValidateFields())
             {
-                MessageBox.Show("Erreur de validation");
                 return;
             }
             ExecuteWithErrorHandling(() =>
             {
-                SaveConfig();
-                try 
+                SaveConfig();                
+                List<Participant> assignments = DrawService.AssignChallengers(config);
+                // TODO: remplacer par l'envoi réel des emails
+                EmailService.TestSend();
+                // TODO : enregistre les tests dans l'historique pour validation à changer lors de la mise en prod
+                if (config.IsTest)
                 {
-                    List<Participant> gagnants = DrawService.AssignChallengers(maConfig);
-                    EmailService.toto();
-                    if (config.IsTest)
-                    {
-                        HistoryService.Add(config, assignments);
-                    }
-                }
-                catch (InvalidOperationException ex)
-                {
-                    // Si la vérification échoue, on affiche l'erreur à l'utilisateur sans faire crasher l'app !
-                    MessageBox.Show(ex.Message, "Attention", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    HistoryService.Add(config, assignments);
                 }
                 
-            },"Emails envoyées! ");
+            },"Emails envoyés! ");
         }
         /// <summary>
-        /// Action utilsiateur de sauvgarde de l'historique
+        /// Action utilisateur de sauvegarde de l'historique
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -355,12 +366,18 @@ namespace DuelDeGateaux
             ConfigService.OpenConfigFile();
         }
         /// <summary>
-        /// Ajoute un partcipant dans la liste 
+        /// Ajoute un participant dans la liste 
+        /// Modification conservée en mémoire uniquement.
+        /// L'utilisateur doit cliquer sur "Sauvegarder" pour l'enregistrer dans le fichier JSON.
         /// </summary>
         private void btnAddParticipantsList_Click(object sender, EventArgs e)
         {
-            config.Participants.Add(new Participant("👴PNJ👴", txtSender.Text));
-            RefeshParticipantDataGrid();
+            // Ajoute une ligne exemple que l'utilisateur pourra modifier dans la grille
+            config.Participants.Add(
+                new Participant("👴PNJ👴", txtSender.Text.Trim())
+            );
+            RefreshParticipantDataGrid();
+            MessageBox.Show("Participant ajouté. Pensez à sauvegarder pour enregistrer les modifications.");
         }
 
         /// <summary>
@@ -376,21 +393,20 @@ namespace DuelDeGateaux
             {
                 //Demande une confirmation de l'utilisateur 
                 var result = MessageBox.Show("Êtes-vous sûr de vouloir supprimer ce gentil participant ?",
-                    "Confimer",
+                    "Confirmer",
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2,
-                    MessageBoxOptions.ServiceNotification
+                    MessageBoxDefaultButton.Button2
                  );
                 if(result == DialogResult.Yes)
                 {
                     config.Participants.RemoveAt(e.RowIndex);
-                    RefeshParticipantDataGrid();
+                    RefreshParticipantDataGrid();
                 }
             }
         }
         /// <summary>
-        /// Evénement de chercher un fichier image pour le header
+        /// Événement permettant de sélectionner une image pour l'en-tête.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -400,7 +416,7 @@ namespace DuelDeGateaux
         }
         
         /// <summary>
-        /// Evénement de chercher un fichier image pour le header
+        /// /// Événement permettant de sélectionner une image pour le header.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -419,26 +435,23 @@ namespace DuelDeGateaux
         /// <param name="sender"></param>
         /// <param name="e"></param>
         /// <param name="textBox"></param>
-        /// <param name="pictureBox"></param
+        /// <param name="pictureBox"></param>
         private void BrowseImage_Click(object sender, EventArgs e, TextBox textBox, PictureBox pictureBox)
         {
             string path = FileHelper.SelectImage(textBox.Text);
             if (!String.IsNullOrEmpty(path))
             {
                 textBox.Text = path;
-                Image image = Image.FromFile(path);
-                Image.GetThumbnailImageAbort myCallback = new Image.GetThumbnailImageAbort(ThumbnailCallBack);
-                pictureBox.Image = image.GetThumbnailImage(55, 55, ThumbnailCallBack, IntPtr.Zero);
+                pictureBox.Image?.Dispose();
+                pictureBox.Image = LoadImage(path);
             }
         }
         #endregion Bouton
 
         #region Tooltip
         /// <summary>
-        /// Initilisation des tooltips
+        /// Initialisation des tooltips
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void InitTooltips()
         {
             toolTip = new ToolTip();

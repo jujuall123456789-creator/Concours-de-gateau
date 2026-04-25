@@ -8,7 +8,7 @@ namespace DuelDeGateaux.Services
 {
     internal class EmailService
     {
-        public static void toto()
+        public static void TestSend()
         {
 
         }
