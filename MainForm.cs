@@ -43,7 +43,8 @@ namespace DuelDeGateaux
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, "Erreur de configuration", MessageBoxButtons.OK, MessageBoxIcon.Stop);
+                // Gestion de l'erreur si le fichier JSON est introuvable ou mal formé
+                MessageBox.Show($"Erreur lors du chargement de la configuration :\n{ex.Message}", "Erreur au démarrage", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         /// <summary>
@@ -148,22 +149,22 @@ namespace DuelDeGateaux
             //🧾 GROUPE CONCOURS
             config.ChallengeDate = datePicker.Value.ToShortDateString();
             config.ChallengeHour = timePicker.Value.ToShortTimeString();
-            config.ChallengeRoom = txtRoom.Text;
-            config.ChallengeTheme = txtTheme.Text;
-            config.ChallengeRules = txtRules.Text;
-            config.ChallengePrice = txtPrice.Text;
-            config.ChallengeParticipationMessage = txtParticipation.Text;
+            config.ChallengeRoom = txtRoom.Text.Trim();
+            config.ChallengeTheme = txtTheme.Text.Trim();
+            config.ChallengeRules = txtRules.Text.Trim();
+            config.ChallengePrice = txtPrice.Text.Trim();
+            config.ChallengeParticipationMessage = txtParticipation.Text.Trim();
             config.ChallengersTitles = txtTitles.Text.Split(',').ToList();
             config.ChallengerNumber = rb2Challengers.Checked ? 2 : 3;
             // 🎨 GROUPE AFFICHAGE
             config.FontSize = (int) numFontSize.Value;
-            config.PathImageHeading = txtImageHeader.Text;
+            config.PathImageHeading = txtImageHeader.Text.Trim();
             config.ImageHeadingHeight = (int)numImageHeight.Value;
-            config.PathImageFooter = txtImageFooter.Text;
+            config.PathImageFooter = txtImageFooter.Text.Trim();
             // 📧 GROUPE MAIL
-            config.SenderEmail = txtSender.Text;
+            config.SenderEmail = txtSender.Text.Trim();
             config.IsTest = chkTest.Checked;
-            config.TesterEmail = txtTestMail.Text;
+            config.TesterEmail = txtTestMail.Text.Trim();
 
             ConfigService.Save(config);
         }
