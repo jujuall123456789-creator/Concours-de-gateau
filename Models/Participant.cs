@@ -1,7 +1,7 @@
 ﻿namespace DuelDeGateaux.Models
 {
     /// <summary>
-    /// Réprésente un particpant du concours de gâteau
+    /// Représente un participant du concours de gâteau
     /// </summary>
     internal class Participant
     {
@@ -16,7 +16,7 @@
         public string Email { get; set; }
 
         /// <summary>
-        /// Indique si le particpant est éligible pour être challanger
+        /// Indique si le participant est éligible pour être challenger
         /// </summary>
         public bool IsEligible { get; set; }
 
