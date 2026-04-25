@@ -418,7 +418,12 @@ namespace DuelDeGateaux
                 Left = 200,
                 Top = 90,
                 Height = 60,
-                Cursor = Cursors.No
+                Cursor = Cursors.No,
+                AllowDrop = true,
+                DragEnter += PictureBox_DragEnter,
+                DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageHeader),
+                MouseEnter += PictureBox_MouseEnter,
+                MouseLeave += PictureBox_MouseLeave
             };
 
             //Hauteur du header du mail
@@ -459,7 +464,11 @@ namespace DuelDeGateaux
                 Top = 240,
                 Width = 150,
                 Text = "Cherche des photos",
-                Cursor = Cursors.AppStarting
+                Cursor = Cursors.AppStarting,
+                DragEnter += PictureBox_DragEnter,
+                DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageFooter),
+                MouseEnter += PictureBox_MouseEnter,
+                MouseLeave += PictureBox_MouseLeave
             };
             btnBrowseFooter.Click += btnBrowseFooter_Click;
 

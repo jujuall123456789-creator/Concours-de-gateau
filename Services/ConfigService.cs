@@ -22,37 +22,48 @@ namespace DuelDeGateaux.Services
         /// Chemin du fichier de configuration JSON
         /// Gère le décalage de dossier en mode Debug pour Visual Studio.
         /// </summary>
+        private static string ConfigPath
+        {
+            get
+            {
 #if DEBUG
-        private static readonly string path = Path.Combine("../../../", FileName);
+                return Path.Combine("../../../", FileName);
 #else
-        private static readonly string path=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,FileName);
+                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FileName);
 #endif
+            }
+        }
         /// <summary>
-        /// Charge la configuration depuis le fichier JSON.
+        /// Charge la configuration. 
+        /// Retourne une config par défaut si le fichier n'existe pas.
         /// </summary>
-        /// <returns>Un objet AppConfig rempli ou une nouvelle instance si échec.</returns>
         public static AppConfig Load()
         {
             try
             {
-                if (!File.Exists(path))
+                if (!File.Exists(ConfigPath))
                 {
                     // Si le fichier est absent, on informe l'utilisateur
-                    MessageBox.Show($"Fichier de configuration introuvable à l'emplacement : {path}\nUne configuration par défaut sera utilisée.", 
+                    MessageBox.Show($"Fichier de configuration introuvable à l'emplacement : {ConfigPath}\nUne configuration par défaut sera utilisée.", 
                         "Avertissement", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return new AppConfig();
                 }
 
-                var json = File.ReadAllText(path);
+                var json = File.ReadAllText(ConfigPath);
+                // Si le fichier est vide, on retourne une nouvelle instance
+                if (string.IsNullOrWhiteSpace(json)) return new AppConfig();
                 var config = JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
-                // Sécurisation des collections
-                config.Participants ??= new List<Participant>();
-                config.ChallengersTitles ??= new List<string>();
                 return config;
             }
-            catch (Exception ex)
+            catch (JsonException ex)
             {
-                throw new Exception($"Erreur lors de la lecture du fichier JSON : {ex.Message}");
+                // Erreur de formatage JSON
+                throw new Exception($"Le fichier de configuration est corrompu : {ex.Message}");
+            }
+            catch (IOException ex)
+            {
+                // Erreur d'accès au fichier (fichier ouvert par un autre processus, etc.)
+                throw new Exception($"Impossible d'accéder au fichier : {ex.Message}");
             }
         }
        // <summary>
@@ -65,7 +76,7 @@ namespace DuelDeGateaux.Services
             {
                 var options = new JsonSerializerOptions { WriteIndented = true };
                 var json = JsonSerializer.Serialize(config, options);
-                File.WriteAllText(path, json);
+                File.WriteAllText(ConfigPath, json);
             }
             catch (Exception ex)
             {
@@ -78,13 +89,13 @@ namespace DuelDeGateaux.Services
         /// </summary>
         public static void OpenConfigFile()
         {
-            if (!File.Exists(path))
+            if (!File.Exists(ConfigPath))
             {
                 MessageBox.Show("Le fichier JSON n'existe pas encore sur le disque.", "Erreur", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            Process.Start("notepad.exe", path);
+            Process.Start("notepad.exe", ConfigPath);
         }
 
     }

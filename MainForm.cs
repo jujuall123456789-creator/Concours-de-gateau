@@ -133,7 +133,7 @@ namespace DuelDeGateaux
                 }
                 if (!File.Exists(path))
                 {
-                    MessageBox.Show("Le fichier image est introuvable.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                    MessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
                     return null;
                 }
                 using (Image image = Image.FromFile(path))
@@ -170,7 +170,7 @@ namespace DuelDeGateaux
             config.ChallengeRules = txtRules.Text.Trim();
             config.ChallengePrice = txtPrice.Text.Trim();
             config.ChallengeParticipationMessage = txtParticipation.Text.Trim();
-            config.ChallengersTitles = txtTitles.Text.Split(',').Select(t => t.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
+            config.ChallengersTitles = txtTitles.Text.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(t => t.Trim()).Where(t => !string.IsNullOrWhiteSpace(t)).ToList();
             config.ChallengerNumber = rb2Challengers.Checked ? 2 : 3;
             // 🎨 GROUPE AFFICHAGE
             config.FontSize = (int) numFontSize.Value;
@@ -265,7 +265,16 @@ namespace DuelDeGateaux
 
             if (!isValid)
             {
-                MessageBox.Show("⚠️ Merci de corriger les champs en rouge ! NEUNEU 😤");
+                string[] funInsults = {
+                    "⚠️ Oups, il manque des infos ! On se réveille ☕",
+                    "⚠️ Faut remplir les cases en rouge, NEUNEU 😤",
+                    "⚠️ Un gâteau sans farine, ça ne marche pas. Un formulaire vide non plus 🍰",
+                    "⚠️ Allez, on se concentre et on corrige les cases rouges 🎯"
+                };
+                string randomMessage = funInsults[new Random().Next(funInsults.Length)]
+                // Petit son d'erreur système pour marquer le coup
+                System.Media.SystemSounds.Hand.Play();
+                MessageBox.Show(randomMessage, "Formulaire incomplet", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
             return isValid;
@@ -329,9 +338,11 @@ namespace DuelDeGateaux
                 if (config.IsTest)
                 {
                     HistoryService.Add(config, assignments);
-                }
+                }                
+                 // Son de succès 
+                System.Media.SystemSounds.Asterisk.Play();
                 
-            },"Emails envoyés! ");
+            }, "🎉 Emails envoyés et challengers désignés ! Préparez les fourchettes 🍴");
         }
         /// <summary>
         /// Action utilisateur de sauvegarde de l'historique
@@ -442,9 +453,56 @@ namespace DuelDeGateaux
             if (!String.IsNullOrEmpty(path))
             {
                 textBox.Text = path;
+                // On libère la mémoire de l'image précédente avant d'afficher la nouvelle
                 pictureBox.Image?.Dispose();
                 pictureBox.Image = LoadImage(path);
             }
+        }
+
+        private void PictureBox_DragEnter(object sender, DragEventArgs e)
+        {
+            // On vérifie si ce qu'on survole est bien un fichier
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) 
+                e.Effect = DragDropEffects.Copy;
+        }
+
+        private void PictureBox_DragDrop(object sender, DragEventArgs e, TextBox associatedTextBox)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (files.Length > 0)
+            {
+                string path = files[0]; // On prend le premier fichier
+                string ext = Path.GetExtension(path).ToLower();
+                
+                if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
+                {
+                    PictureBox pb = (PictureBox)sender;
+                    associatedTextBox.Text = path;
+                    
+                    pb.Image?.Dispose(); // Nettoyage !
+                    pb.Image = LoadImage(path);
+                }
+                else
+                {
+                    MessageBox.Show("Hé ! On a dit une image, pas un PDF ! 😤", "Erreur de cuisine");
+                }
+            }
+        }
+
+        private void PictureBox_MouseEnter(object sender, EventArgs e)
+        {
+            PictureBox pb = (PictureBox)sender;
+            pb.Cursor = Cursors.Hand;
+            pb.BackColor = Color.LightYellow; // Petit flash au survol
+            // Optionnel : tu peux aussi changer la BorderStyle
+            pb.BorderStyle = BorderStyle.FixedSingle;
+        }
+
+        private void PictureBox_MouseLeave(object sender, EventArgs e)
+        {
+            PictureBox pb = (PictureBox)sender;
+            pb.BackColor = Color.Transparent;
+            pb.BorderStyle = BorderStyle.None;
         }
         #endregion Bouton
 

@@ -22,14 +22,14 @@ namespace DuelDeGateaux.Services
         /// </summary>
         /// <param name="config"></param>
         /// <param name="assignments"></param>
-        public static void Add(AppConfig config, Dictionary<string, string> assignments) 
+        public static void Add(AppConfig config, List<Participant> challengers) 
         {
             var list = Load();
             list.Add(new ChallengeHistoryEntry
             {
                 Date = config.ChallengeDate,
                 Theme = config.ChallengeTheme,
-                ChallengersList = assignments.Keys.ToList()
+                ChallengersList = challengers.Select(c => c.Name).ToList()
             });
             Save(list);
         }
