@@ -649,38 +649,44 @@ namespace DuelDeGateaux
             dgvParticipants.AllowUserToAddRows = false;
             dgvParticipants.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 
-            // =============================
+                        // =============================
             // 🚀 BOUTONS PRINCIPAUX
             // =============================
             btnSend = new Button();
             btnSend.Text = "🚀 Envoyer";
-            btnSend.SetBounds(10, 600, 200, 50);
+            btnSend.SetBounds(10, 600, 160, 50); // Largeur réduite à 160
             btnSend.Click += BtnRun_Click;
             btnSend.BackColor = Color.LightSeaGreen;
             btnSend.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
 
             btnSave = new Button();
             btnSave.Text = "💾 Sauvegarder";
-            btnSave.SetBounds(220, 600, 200, 50);
+            btnSave.SetBounds(180, 600, 160, 50); // Ajusté
             btnSave.Click += BtnSave_Click;
             btnSave.BackColor = Color.LightGreen;
             btnSave.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
 
+            // 🖨️ NOUVEAU BOUTON : BULLETINS
+            btnPrintBallot = new Button();
+            btnPrintBallot.Text = "🖨️ Bulletins";
+            btnPrintBallot.SetBounds(350, 600, 160, 50);
+            btnPrintBallot.Click += BtnPrintBallot_Click;
+            btnPrintBallot.BackColor = Color.LightYellow;
+            btnPrintBallot.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
+
             btnOpenJson = new Button();
             btnOpenJson.Text = "📂 Ouvrir JSON";
-            btnOpenJson.SetBounds(430, 600, 200, 50);
+            btnOpenJson.SetBounds(520, 600, 160, 50); // Ajusté
             btnOpenJson.Click += BtnOpenjson_Click;
             btnOpenJson.BackColor = Color.LightBlue;
             btnOpenJson.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
 
-
             btnHistory = new Button();
             btnHistory.Text = "📖 Historique";
-            btnHistory.SetBounds(640, 600, 200, 50);
+            btnHistory.SetBounds(690, 600, 160, 50); // Ajusté
             btnHistory.Click  += BtnHistory_Click;
             btnHistory.BackColor = Color.LightGray;
             btnHistory.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
-
 
             // =============================
             // AJOUT FINAL
@@ -689,7 +695,7 @@ namespace DuelDeGateaux
             {
                 grpContest, grpDisplay, grpSmtp,
                 grpParticipants,
-                btnSend, btnSave, btnOpenJson, btnHistory
+                btnSend, btnSave, btnPrintBallot, btnOpenJson, btnHistory // Ne pas oublier btnPrintBallot ici !
             });
             //Initlisation des tooltips
             InitTooltips();
