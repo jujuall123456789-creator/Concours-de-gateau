@@ -429,12 +429,12 @@ namespace DuelDeGateaux
                 Top = 90,
                 Height = 60,
                 Cursor = Cursors.No,
-                AllowDrop = true,
-                DragEnter += PictureBox_DragEnter,
-                DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageHeader),
-                MouseEnter += PictureBox_MouseEnter,
-                MouseLeave += PictureBox_MouseLeave
+                AllowDrop = true
             };
+            pictureHeaderImage.DragEnter += PictureBox_DragEnter;
+            pictureHeaderImage.DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageHeader);
+            pictureHeaderImage.MouseEnter += PictureBox_MouseEnter;
+            pictureHeaderImage.MouseLeave += PictureBox_MouseLeave;
 
             //Hauteur du header du mail
             Label lblImageHeight = new Label()
@@ -474,11 +474,7 @@ namespace DuelDeGateaux
                 Top = 240,
                 Width = 150,
                 Text = "Cherche des photos",
-                Cursor = Cursors.AppStarting,
-                DragEnter += PictureBox_DragEnter,
-                DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageFooter),
-                MouseEnter += PictureBox_MouseEnter,
-                MouseLeave += PictureBox_MouseLeave
+                Cursor = Cursors.AppStarting
             };
             btnBrowseFooter.Click += BtnBrowseFooter_Click;
 
@@ -488,10 +484,15 @@ namespace DuelDeGateaux
                 Left = 200,
                 Top = 240,
                 Height = 60,
-                Cursor = Cursors.No
+                Cursor = Cursors.No,
+                AllowDrop =true
             };
+            pictureFooterImage.DragEnter += PictureBox_DragEnter;
+            pictureFooterImage.DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageFooter);
+            pictureFooterImage.MouseEnter += PictureBox_MouseEnter;
+            pictureFooterImage.MouseLeave += PictureBox_MouseLeave;
 
-        grpDisplay.Controls.AddRange(new Control[]
+            grpDisplay.Controls.AddRange(new Control[]
             {
                 lblFontSize,numFontSize, 
                 lblheader, txtImageHeader, btnBrowseHeader,pictureHeaderImage,

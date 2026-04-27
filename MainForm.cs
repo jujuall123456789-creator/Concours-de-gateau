@@ -139,6 +139,7 @@ namespace DuelDeGateaux
                 if (!File.Exists(path))
                 {
                     MessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                    return;
                 }
                 var preview = CreateThumbnailImage(path);
                 if (preview != null)
