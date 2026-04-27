@@ -1,4 +1,4 @@
-﻿using DuelDeGateaux.Models;
+using DuelDeGateaux.Models;
 using DuelDeGateaux.Services;
 using DuelDeGateaux.Tools;
 using System.Net.Mail;
@@ -139,9 +139,8 @@ namespace DuelDeGateaux
                 if (!File.Exists(path))
                 {
                     MessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
-                    return null;
                 }
-                var preview = CreateThumbnailImage(path)
+                var preview = CreateThumbnailImage(path);
                 if (preview != null)
                 {
                     textBox.Text = path;
@@ -153,7 +152,6 @@ namespace DuelDeGateaux
             catch (Exception ex)
             {
                 MessageBox.Show($"Une erreur est survenue lors du chargement de l'image : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
             }
         }
         /// <summary>
@@ -552,7 +550,7 @@ namespace DuelDeGateaux
             string path = FileHelper.SelectImage(textBox.Text);
             if (!string.IsNullOrEmpty(path))
             {
-                LoadImageUserInput(path, pictureBox, textBox);
+                LoadImageUserInput(path, textBox, pictureBox);
             }
         }
 
