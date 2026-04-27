@@ -479,6 +479,24 @@ namespace DuelDeGateaux
         {
             ConfigService.OpenConfigFile();
         }
+
+        /// <summary>
+        /// Action utilisateur pour générer et imprimer les bulletins de vote
+        /// </summary>
+        private void BtnPrintBallot_Click(object sender, EventArgs e)
+        {
+            ExecuteWithErrorHandling(() =>
+            {
+                // On sauvegarde d'abord pour être sûr d'avoir la bonne date et le bon nombre de gâteaux (2 ou 3)
+                SaveConfig(); 
+                
+                // On lance la génération HTML et l'impression !
+                BallotService.GenerateAndPrintBallots(config);
+                
+            }, null); // Pas de message de succès, l'ouverture du navigateur suffit
+        }
+
+        
         /// <summary>
         /// Ajoute un participant dans la liste 
         /// Modification conservée en mémoire uniquement.
