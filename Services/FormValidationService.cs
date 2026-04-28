@@ -1,4 +1,3 @@
-using DuelDeGateaux.Models;
 using System.Net.Mail;
 
 namespace DuelDeGateaux.Services
@@ -8,6 +7,11 @@ namespace DuelDeGateaux.Services
     /// </summary>
     public static class FormValidationService
     {
+        /// <summary>
+        /// vérification de l'adresse mail
+        /// </summary>
+        /// <param name="email"></param>
+        /// <returns></returns>
         public static bool IsValidEmail(string email)
         {
             try

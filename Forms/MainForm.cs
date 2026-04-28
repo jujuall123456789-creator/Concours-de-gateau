@@ -3,7 +3,7 @@ using DuelDeGateaux.Services;
 using DuelDeGateaux.Tools;
 using System.Net.Mail;
 
-namespace DuelDeGateaux
+namespace DuelDeGateaux.Forms
 {
     /// <summary>
     /// Fenêtre principale de l'application de gestion du concours.
@@ -107,11 +107,11 @@ namespace DuelDeGateaux
                 }
 
                 // 🎨 GROUPE AFFICHAGE
-                numFontSize.Value = ClampNumeric(config.FontSize, numFontSize.Minimum, numFontSize.Maximum);
+                numFontSize.Value = UiHelperService.ClampNumeric(config.FontSize, numFontSize.Minimum, numFontSize.Maximum);
                 txtImageHeader.Text = config.PathImageHeading;
                 pictureHeaderImage.Image?.Dispose();
                 pictureHeaderImage.Image = LoadImageFromConfig(config.PathImageHeading);
-                numImageHeight.Value = ClampNumeric(config.ImageHeadingHeight, numImageHeight.Minimum, numImageHeight.Maximum);
+                numImageHeight.Value = UiHelperService.ClampNumeric(config.ImageHeadingHeight, numImageHeight.Minimum, numImageHeight.Maximum);
                 txtImageFooter.Text = config.PathImageFooter;
                 pictureFooterImage.Image?.Dispose();
                 pictureFooterImage.Image = LoadImageFromConfig(config.PathImageFooter);
@@ -131,13 +131,7 @@ namespace DuelDeGateaux
                 MessageBox.Show($"Une erreur est survenue lors du chargement de la configuration : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        /// <summary>
-        /// Retourne une valeur bornée entre un minimum et un maximum.
-        /// </summary>
-        private decimal ClampNumeric(decimal value, decimal min, decimal max)
-        {
-            return Math.Max(min, Math.Min(max, value));
-        }
+        
         /// <summary>
         /// Charge une image depuis un chemin de fichier spécifié.
         /// Cette méthode tente de charger une image depuis le chemin de fichier donné,
@@ -156,7 +150,7 @@ namespace DuelDeGateaux
                     MessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
                     return;
                 }
-                var preview = CreateThumbnailImage(path);
+                var preview = ImagePreviewService.LoadPreview(path, ThumbnailSize);
                 if (preview != null)
                 {
                     textBox.Text = path;
@@ -184,7 +178,7 @@ namespace DuelDeGateaux
                 if (!File.Exists(path))
                     return null;
                 
-                return CreateThumbnailImage(path);
+                return ImagePreviewService.LoadPreview(path, ThumbnailSize);
             }
             catch
             {
@@ -192,23 +186,7 @@ namespace DuelDeGateaux
             }
 
         }
-        /// <summary>
-        /// Méthode commune de chargement de miniature
-        /// </summary>
-        /// <param name="path">Le chemin de fichier de l'image à charger.</param>
-        /// <returns>Une miniature de l'image chargée, ou null si l'image ne peut pas être chargée.</returns>
-        private Image? CreateThumbnailImage(string path)
-        {
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                return null;
-            }
-            using (Image image = Image.FromFile(path))
-            {
-                return new Bitmap(image, new Size(ThumbnailSize, ThumbnailSize));
-            }
-
-        }
+        
         /// <summary>
         /// Recharge la liste des participants dans l'IHM
         /// </summary>
@@ -324,14 +302,14 @@ namespace DuelDeGateaux
             // VALIDATION EMAIL
             // =============================
 
-            if (!IsValidEmail(txtSender.Text))
+            if (!FormValidationService.IsValidEmail(txtSender.Text))
             {
                 SetError(txtSender, true);
                 isValid = false;
             }
             else SetError(txtSender, false);
 
-            if (chkTest.Checked && !IsValidEmail(txtTestMail.Text))
+            if (chkTest.Checked && !FormValidationService.IsValidEmail(txtTestMail.Text))
             {
                 SetError(txtTestMail, true);
                 isValid = false;
@@ -377,12 +355,11 @@ namespace DuelDeGateaux
             int requiredChallengers = rb2Challengers.Checked ? 2 : 3;
             EndEditParticipants();
             participantBindingSource.EndEdit();
-            int eligibleCount = config.Participants.Count(p => p.IsEligible);
-
-            if (eligibleCount < requiredChallengers)
+            if (ParticipantService.HasEnoughEligible(config.Participants, requiredChallengers))
             {
+                int eligibleCount = config.Participants.Count(p => p.IsEligible);
                 System.Media.SystemSounds.Exclamation.Play();
-                MessageBox.Show($"Impossible de lancer le tirage !\nIl te faut au moins {requiredChallengers} participants cochés comme 'Challenger' dans la liste. Actuellement, tu n'en as que {eligibleCount}.", 
+                MessageBox.Show($"Impossible de lancer le tirage !\nIl te faut au moins {requiredChallengers} participants cochés comme 'Challenger' dans la liste. Actuellement, tu n'en as que {config.Participants}.", 
                     "Où sont les cuisiniers ?", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
@@ -397,47 +374,8 @@ namespace DuelDeGateaux
             participantBindingSource.EndEdit();
         }
 
-        /// <summary>
-        /// vérification de l'adresse mail
-        /// </summary>
-        /// <param name="email"></param>
-        /// <returns></returns>
-        private bool IsValidEmail(string email)
-        {
-            try
-            {
-                return new MailAddress(email).Address == email;
-            }
-            catch 
-            {
-                return false;
-            }
-        }
         #region Bouton
-
-        /// <summary>
-        /// Méthode commune pour gérer les erreurs lors de l'exécution des actions
-        /// </summary>
-        /// <param name="action">Action à exécuter</param>
-        /// <param name="successMessage">Message de succès</param>
-        private bool ExecuteWithErrorHandling(Action action, string? successMessage = null)
-        {
-             try
-            {
-                action();
-                if (!string.IsNullOrWhiteSpace(successMessage))
-                {
-                    MessageBox.Show(successMessage);
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Une erreur est survenue : {ex.Message}", "Erreur",MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-        }
-
+         
         /// <summary>
         /// Action de lancement du mailling du concours
         /// </summary>
@@ -452,7 +390,7 @@ namespace DuelDeGateaux
             this.Cursor = Cursors.WaitCursor;
             try
             {
-                ExecuteWithErrorHandling(() =>
+                UiHelperService.ExecuteWithErrorHandling(() =>
                 {
                     SaveConfig();                
                     List<Participant> assignments = DrawService.AssignChallengers(config);
@@ -480,7 +418,7 @@ namespace DuelDeGateaux
         /// <param name="e"></param>
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            ExecuteWithErrorHandling(() =>
+            UiHelperService.ExecuteWithErrorHandling(() =>
             {
                 SaveConfig();
             },"Configuration sauvegardée! ");
@@ -511,7 +449,7 @@ namespace DuelDeGateaux
         /// </summary>
         private void BtnPrintBallot_Click(object sender, EventArgs e)
         {
-            ExecuteWithErrorHandling(() =>
+            UiHelperService.ExecuteWithErrorHandling(() =>
             {
                 // On sauvegarde d'abord pour être sûr d'avoir la bonne date et le bon nombre de gâteaux (2 ou 3)
                 SaveConfig(); 
@@ -531,10 +469,8 @@ namespace DuelDeGateaux
         private void BtnAddParticipantsList_Click(object sender, EventArgs e)
         {
             // Ajoute une ligne exemple que l'utilisateur pourra modifier dans la grille
-            config.Participants.Add(
-                new Participant("👴PNJ👴", txtSender.Text.Trim())
-            );
-            RefreshParticipantDataGrid();
+            ParticipantService.AddDefaultParticipant(config.Participants, txtSender.Text.Trim());
+            //RefreshParticipantDataGrid();
             MessageBox.Show("Participant ajouté. Pensez à sauvegarder pour enregistrer les modifications.");
         }
 
@@ -648,11 +584,7 @@ namespace DuelDeGateaux
         /// </summary>
         private void InitTooltips()
         {
-            toolTip = new ToolTip();
-            toolTip.AutoPopDelay = 50000; // durée d'affichage
-            toolTip.InitialDelay = 500; // délai avant affichage
-            toolTip.ReshowDelay = 200; // délai entre deux affichages
-            toolTip.ShowAlways = true; // s'affiche même si la fenêtre n'est pas active
+            toolTip = TooltipService.BuildDefault();
 
             // =============================
             // 🧾 INFOS CONCOURS

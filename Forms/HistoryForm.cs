@@ -1,16 +1,7 @@
 ﻿using DuelDeGateaux.Models;
 using DuelDeGateaux.Services;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
-namespace DuelDeGateaux
+namespace DuelDeGateaux.Forms
 {
     /// <summary>
     /// Formulaire permettant d'afficher l'historique des concours sous la forme d'un tableau lisible.

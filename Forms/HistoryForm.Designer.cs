@@ -1,7 +1,7 @@
 ﻿using DuelDeGateaux.Models;
 using DuelDeGateaux.Services;
 
-namespace DuelDeGateaux
+namespace DuelDeGateaux.Forms
 {
     partial class HistoryForm
     {

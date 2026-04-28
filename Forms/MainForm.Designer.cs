@@ -1,6 +1,6 @@
 ﻿using DuelDeGateaux.Services;
 
-namespace DuelDeGateaux
+namespace DuelDeGateaux.Forms
 {
     partial class MainForm
     {
@@ -162,8 +162,9 @@ namespace DuelDeGateaux
         private Button btnSave;
         private Button btnOpenJson;
         private Button btnHistory;
+        private Button btnPrintBallot;
 
-        
+
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -695,7 +696,7 @@ namespace DuelDeGateaux
             {
                 grpContest, grpDisplay, grpSmtp,
                 grpParticipants,
-                btnSend, btnSave, btnPrintBallot, btnOpenJson, btnHistory // Ne pas oublier btnPrintBallot ici !
+                btnSend, btnSave, btnPrintBallot, btnOpenJson, btnHistory
             });
             //Initlisation des tooltips
             InitTooltips();

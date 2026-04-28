@@ -1,12 +1,6 @@
 ﻿using DuelDeGateaux.Models;
-using DuelDeGateaux.Tools;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace DuelDeGateaux.Services
 {
@@ -27,7 +21,7 @@ namespace DuelDeGateaux.Services
             get
             {
 #if DEBUG
-                return Path.Combine("../../../", FileName);
+                return Path.Combine("../../../Data", FileName);
 #else
                 return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FileName);
 #endif
