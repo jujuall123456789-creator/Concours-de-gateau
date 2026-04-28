@@ -33,6 +33,15 @@ namespace DuelDeGateaux
         /// </summary>
         private static readonly Random rng = new();
         
+        /// <summary>
+        /// Taille fixe utilisée pour les miniatures affichées dans l'interface.
+        /// </summary>
+        private const int ThumbnailSize = 55;
+
+        /// <summary>
+        /// Extensions de fichiers autorisées pour les images importées.
+        /// </summary>
+        private readonly string[] allowedExtensions = [".jpg", ".jpeg", ".png"];
 
         /// <summary>
         /// Constructeur du formulaire principal.
@@ -87,7 +96,7 @@ namespace DuelDeGateaux
                 txtRules.Text = config.ChallengeRules;
                 txtPrice.Text = config.ChallengePrice;
                 txtParticipation.Text = config.ChallengeParticipationMessage;
-                txtTitles.Text = string.Join(",", config.ChallengersTitles);
+                txtTitles.Text = string.Join(",", config.ChallengersTitles ?? new());
                 if (config.ChallengerNumber == 3)
                 {
                     rb3Challengers.Checked = true;
@@ -98,11 +107,11 @@ namespace DuelDeGateaux
                 }
 
                 // 🎨 GROUPE AFFICHAGE
-                numFontSize.Value = config.FontSize;
+                numFontSize.Value = ClampNumeric(config.FontSize, numFontSize.Minimum, numFontSize.Maximum);
                 txtImageHeader.Text = config.PathImageHeading;
                 pictureHeaderImage.Image?.Dispose();
                 pictureHeaderImage.Image = LoadImageFromConfig(config.PathImageHeading);
-                numImageHeight.Value = config.ImageHeadingHeight;
+                numImageHeight.Value = ClampNumeric(config.ImageHeadingHeight, numImageHeight.Minimum, numImageHeight.Maximum);
                 txtImageFooter.Text = config.PathImageFooter;
                 pictureFooterImage.Image?.Dispose();
                 pictureFooterImage.Image = LoadImageFromConfig(config.PathImageFooter);
@@ -122,7 +131,13 @@ namespace DuelDeGateaux
                 MessageBox.Show($"Une erreur est survenue lors du chargement de la configuration : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
+        /// <summary>
+        /// Retourne une valeur bornée entre un minimum et un maximum.
+        /// </summary>
+        private decimal ClampNumeric(decimal value, decimal min, decimal max)
+        {
+            return Math.Max(min, Math.Min(max, value));
+        }
         /// <summary>
         /// Charge une image depuis un chemin de fichier spécifié.
         /// Cette méthode tente de charger une image depuis le chemin de fichier donné,
@@ -190,7 +205,7 @@ namespace DuelDeGateaux
             }
             using (Image image = Image.FromFile(path))
             {
-                return new Bitmap(image, new Size(55, 55));
+                return new Bitmap(image, new Size(ThumbnailSize, ThumbnailSize));
             }
 
         }
@@ -435,25 +450,31 @@ namespace DuelDeGateaux
                 return;
             }
             this.Cursor = Cursors.WaitCursor;
-            ExecuteWithErrorHandling(() =>
+            try
             {
-                SaveConfig();                
-                List<Participant> assignments = DrawService.AssignChallengers(config);
-                // TODO: remplacer par l'envoi réel des emails
-                EmailService.TestSend();
-                // TODO : enregistre les tests dans l'historique pour validation à changer lors de la mise en prod
-                if (config.IsTest)
+                ExecuteWithErrorHandling(() =>
                 {
-                    HistoryService.Add(config, assignments);
-                }                
-                 // Son de succès 
-                System.Media.SystemSounds.Asterisk.Play();
-                
-            }, "🎉 Emails envoyés et challengers désignés ! Préparez les fourchettes 🍴");
-            this.Cursor = Cursors.Default;
+                    SaveConfig();                
+                    List<Participant> assignments = DrawService.AssignChallengers(config);
+                    // TODO: remplacer par l'envoi réel des emails
+                    EmailService.TestSend();
+                    // TODO : enregistre les tests dans l'historique pour validation à changer lors de la mise en prod
+                    if (config.IsTest)
+                    {
+                        HistoryService.Add(config, assignments);
+                    }                
+                    // Son de succès 
+                    System.Media.SystemSounds.Asterisk.Play();
+                    
+                }, "🎉 Emails envoyés et challengers désignés ! Préparez les fourchettes 🍴");
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
         }
         /// <summary>
-        /// Action utilisateur de sauvegarde de l'historique
+        /// Action utilisateur pour sauvegarder la configuration.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -593,7 +614,7 @@ namespace DuelDeGateaux
             string path = files[0]; // On prend le premier fichier
             string ext = Path.GetExtension(path).ToLower();
                 
-            if (ext == ".jpg" || ext == ".png" || ext == ".jpeg")
+            if (allowedExtensions.Contains(ext))
             {
                 PictureBox pb = (PictureBox)sender;
                 LoadImageUserInput(path, associatedTextBox, pb);
