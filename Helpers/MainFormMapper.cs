@@ -1,140 +1,160 @@
-using DuelDeGateaux.Forms;
-using DuelDeGateaux.Models;
+using DuelDeGateaux.Contracts;
+using DuelDeGateaux.ViewModels;
 
-namespace DuelDeGateaux.Helpers
+namespace DuelDeGateaux.Mappers
 {
     /// <summary>
-    /// Gère le mapping entre l'interface utilisateur et la configuration métier.
+    /// Cette classe fait le lien entre :
+    /// - la vue (le formulaire affiché à l'utilisateur)
+    /// - le ViewModel (les données manipulées par l'application)
+    ///
+    /// Son rôle est de copier les données dans les deux sens.
+    ///
+    /// Pourquoi ?
+    /// Pour éviter que le formulaire gère lui-même toute la logique.
+    /// Cela rend le code plus propre, plus lisible et plus facile à maintenir.
     /// </summary>
-    public static class MainFormMapper
+    internal static class MainFormMapper
     {
-        #region Public API
+        #region Méthodes publiques
 
-        public static void FillForm(MainForm form, AppConfig config)
+        /// <summary>
+        /// Remplit l'interface utilisateur avec les données du ViewModel.
+        ///
+        /// Exemple :
+        /// vm.ChallengeTheme → champ texte du formulaire
+        /// </summary>
+        public static void PopulateView(IMainFormView view, MainFormViewModel vm)
         {
-            FillContestSection(form, config);
-            FillDisplaySection(form, config);
-            FillMailSection(form, config);
-            FillParticipantsSection(form, config);
+            MapContestToView(view, vm);
+            MapDisplayToView(view, vm);
+            MapMailToView(view, vm);
+            MapParticipantsToView(view, vm);
         }
 
-        public static void FillConfig(MainForm form, AppConfig config)
+        /// <summary>
+        /// Récupère les valeurs saisies dans l'interface
+        /// pour mettre à jour le ViewModel.
+        ///
+        /// Exemple :
+        /// champ texte du formulaire → vm.ChallengeTheme
+        /// </summary>
+        public static void UpdateViewModel(IMainFormView view, MainFormViewModel vm)
         {
-            FillContestConfig(form, config);
-            FillDisplayConfig(form, config);
-            FillMailConfig(form, config);
-            FillParticipantsConfig(form, config);
-        }
-
-        #endregion
-
-        #region Contest
-
-        private static void FillContestSection(MainForm form, AppConfig config)
-        {
-            if (DateTime.TryParse(config.ChallengeDate, out DateTime date))
-                form.datePicker.Value = date;
-
-            if (DateTime.TryParseExact(config.ChallengeHour, "HH:mm", null,
-                System.Globalization.DateTimeStyles.None, out DateTime time))
-                form.timePicker.Value = time;
-
-            form.txtRoom.Text = config.ChallengeRoom;
-            form.txtTheme.Text = config.ChallengeTheme;
-            form.txtRules.Text = config.ChallengeRules;
-            form.txtPrice.Text = config.ChallengePrice;
-            form.txtParticipation.Text = config.ChallengeParticipationMessage;
-            form.txtTitles.Text = string.Join(",", config.ChallengersTitles ?? new());
-
-            form.rb2Challengers.Checked = config.ChallengerNumber == 2;
-            form.rb3Challengers.Checked = config.ChallengerNumber == 3;
-        }
-
-        private static void FillContestConfig(MainForm form, AppConfig config)
-        {
-            config.ChallengeDate = form.datePicker.Value.ToString("dd-MM-yyyy");
-            config.ChallengeHour = form.timePicker.Value.ToString("HH:mm");
-
-            config.ChallengeRoom = form.txtRoom.Text.Trim();
-            config.ChallengeTheme = form.txtTheme.Text.Trim();
-            config.ChallengeRules = form.txtRules.Text.Trim();
-            config.ChallengePrice = form.txtPrice.Text.Trim();
-            config.ChallengeParticipationMessage = form.txtParticipation.Text.Trim();
-
-            config.ChallengersTitles = form.txtTitles.Text
-                .Split(',', StringSplitOptions.RemoveEmptyEntries)
-                .Select(t => t.Trim())
-                .Where(t => !string.IsNullOrWhiteSpace(t))
-                .ToList();
-
-            config.ChallengerNumber = form.rb2Challengers.Checked ? 2 : 3;
+            MapContestFromView(view, vm);
+            MapDisplayFromView(view, vm);
+            MapMailFromView(view, vm);
+            MapParticipantsFromView(view, vm);
         }
 
         #endregion
 
-        #region Display
+        #region Partie concours
 
-        private static void FillDisplaySection(MainForm form, AppConfig config)
+        /// <summary>
+        /// Copie les données du concours du ViewModel vers la vue.
+        /// </summary>
+        private static void MapContestToView(IMainFormView view, MainFormViewModel vm)
         {
-            form.numFontSize.Value = UiHelper.ClampNumeric(
-                config.FontSize,
-                form.numFontSize.Minimum,
-                form.numFontSize.Maximum);
-
-            form.txtImageHeader.Text = config.PathImageHeading;
-            form.numImageHeight.Value = UiHelper.ClampNumeric(
-                config.ImageHeadingHeight,
-                form.numImageHeight.Minimum,
-                form.numImageHeight.Maximum);
-
-            form.txtImageFooter.Text = config.PathImageFooter;
+            view.ChallengeDate = vm.ChallengeDate;
+            view.ChallengeHour = vm.ChallengeHour;
+            view.ChallengeRoom = vm.ChallengeRoom;
+            view.ChallengeTheme = vm.ChallengeTheme;
+            view.ChallengeRules = vm.ChallengeRules;
+            view.ChallengePrice = vm.ChallengePrice;
+            view.ChallengeParticipationMessage = vm.ChallengeParticipationMessage;
+            view.ChallengersTitlesRaw = vm.ChallengersTitlesRaw;
+            view.ChallengerNumber = vm.ChallengerNumber;
         }
 
-        private static void FillDisplayConfig(MainForm form, AppConfig config)
+        /// <summary>
+        /// Copie les données du formulaire vers le ViewModel.
+        /// </summary>
+        private static void MapContestFromView(IMainFormView view, MainFormViewModel vm)
         {
-            config.FontSize = (int)form.numFontSize.Value;
-            config.PathImageHeading = form.txtImageHeader.Text.Trim();
-            config.ImageHeadingHeight = (int)form.numImageHeight.Value;
-            config.PathImageFooter = form.txtImageFooter.Text.Trim();
-        }
-
-        #endregion
-
-        #region Mail
-
-        private static void FillMailSection(MainForm form, AppConfig config)
-        {
-            form.txtSender.Text = config.SenderEmail;
-            form.chkTest.Checked = config.IsTest;
-            form.txtTestMail.Text = config.TesterEmail;
-            form.txtSubjectChallenger.Text = config.SubjectMailChallenger;
-            form.txtSubjectEater.Text = config.SubjectMailEater;
-        }
-
-        private static void FillMailConfig(MainForm form, AppConfig config)
-        {
-            config.SenderEmail = form.txtSender.Text.Trim();
-            config.IsTest = form.chkTest.Checked;
-            config.TesterEmail = form.txtTestMail.Text.Trim();
-            config.SubjectMailChallenger = form.txtSubjectChallenger.Text.Trim();
-            config.SubjectMailEater = form.txtSubjectEater.Text.Trim();
+            vm.ChallengeDate = view.ChallengeDate;
+            vm.ChallengeHour = view.ChallengeHour;
+            vm.ChallengeRoom = view.ChallengeRoom;
+            vm.ChallengeTheme = view.ChallengeTheme;
+            vm.ChallengeRules = view.ChallengeRules;
+            vm.ChallengePrice = view.ChallengePrice;
+            vm.ChallengeParticipationMessage = view.ChallengeParticipationMessage;
+            vm.ChallengersTitlesRaw = view.ChallengersTitlesRaw;
+            vm.ChallengerNumber = view.ChallengerNumber;
         }
 
         #endregion
 
-        #region Participants
+        #region Partie affichage
 
-        private static void FillParticipantsSection(MainForm form, AppConfig config)
+        /// <summary>
+        /// Copie les paramètres visuels du ViewModel vers la vue.
+        /// </summary>
+        private static void MapDisplayToView(IMainFormView view, MainFormViewModel vm)
         {
-            form.participantBindingSource.DataSource = config.Participants;
-            form.dgvParticipants.DataSource = form.participantBindingSource;
-            form.participantBindingSource.ResetBindings(false);
+            view.FontSize = vm.FontSize;
+            view.PathImageHeading = vm.PathImageHeading;
+            view.ImageHeadingHeight = vm.ImageHeadingHeight;
+            view.PathImageFooter = vm.PathImageFooter;
         }
 
-        private static void FillParticipantsConfig(MainForm form, AppConfig config)
+        /// <summary>
+        /// Copie les paramètres visuels de la vue vers le ViewModel.
+        /// </summary>
+        private static void MapDisplayFromView(IMainFormView view, MainFormViewModel vm)
         {
-            form.dgvParticipants.EndEdit();
-            form.participantBindingSource.EndEdit();
+            vm.FontSize = view.FontSize;
+            vm.PathImageHeading = view.PathImageHeading;
+            vm.ImageHeadingHeight = view.ImageHeadingHeight;
+            vm.PathImageFooter = view.PathImageFooter;
+        }
+
+        #endregion
+
+        #region Partie email
+
+        /// <summary>
+        /// Copie les paramètres email du ViewModel vers la vue.
+        /// </summary>
+        private static void MapMailToView(IMainFormView view, MainFormViewModel vm)
+        {
+            view.SenderEmail = vm.SenderEmail;
+            view.IsTest = vm.IsTest;
+            view.TesterEmail = vm.TesterEmail;
+            view.SubjectMailChallenger = vm.SubjectMailChallenger;
+            view.SubjectMailEater = vm.SubjectMailEater;
+        }
+
+        /// <summary>
+        /// Copie les paramètres email de la vue vers le ViewModel.
+        /// </summary>
+        private static void MapMailFromView(IMainFormView view, MainFormViewModel vm)
+        {
+            vm.SenderEmail = view.SenderEmail;
+            vm.IsTest = view.IsTest;
+            vm.TesterEmail = view.TesterEmail;
+            vm.SubjectMailChallenger = view.SubjectMailChallenger;
+            vm.SubjectMailEater = view.SubjectMailEater;
+        }
+
+        #endregion
+
+        #region Partie participants
+
+        /// <summary>
+        /// Charge la liste des participants dans la vue.
+        /// </summary>
+        private static void MapParticipantsToView(IMainFormView view, MainFormViewModel vm)
+        {
+            view.Participants = vm.Participants;
+        }
+
+        /// <summary>
+        /// Récupère la liste des participants depuis la vue.
+        /// </summary>
+        private static void MapParticipantsFromView(IMainFormView view, MainFormViewModel vm)
+        {
+            vm.Participants = view.Participants;
         }
 
         #endregion
