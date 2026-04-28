@@ -1,9 +1,9 @@
-namespace DuelDeGateaux.Services
+namespace DuelDeGateaux.Helpers
 {
     /// <summary>
     /// Outils utilitaires pour l'interface utilisateur.
     /// </summary>
-    public static class UiHelperService
+    public static class UiHelper
     {
         /// <summary>
         /// Retourne une valeur bornée entre un minimum et un maximum.

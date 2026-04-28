@@ -1,3 +1,4 @@
+using DuelDeGateaux.Helpers;
 using DuelDeGateaux.Models;
 using DuelDeGateaux.Services;
 using DuelDeGateaux.Tools;
@@ -107,11 +108,11 @@ namespace DuelDeGateaux.Forms
                 }
 
                 // 🎨 GROUPE AFFICHAGE
-                numFontSize.Value = UiHelperService.ClampNumeric(config.FontSize, numFontSize.Minimum, numFontSize.Maximum);
+                numFontSize.Value = UiHelper.ClampNumeric(config.FontSize, numFontSize.Minimum, numFontSize.Maximum);
                 txtImageHeader.Text = config.PathImageHeading;
                 pictureHeaderImage.Image?.Dispose();
                 pictureHeaderImage.Image = LoadImageFromConfig(config.PathImageHeading);
-                numImageHeight.Value = UiHelperService.ClampNumeric(config.ImageHeadingHeight, numImageHeight.Minimum, numImageHeight.Maximum);
+                numImageHeight.Value = UiHelper.ClampNumeric(config.ImageHeadingHeight, numImageHeight.Minimum, numImageHeight.Maximum);
                 txtImageFooter.Text = config.PathImageFooter;
                 pictureFooterImage.Image?.Dispose();
                 pictureFooterImage.Image = LoadImageFromConfig(config.PathImageFooter);
@@ -355,11 +356,11 @@ namespace DuelDeGateaux.Forms
             int requiredChallengers = rb2Challengers.Checked ? 2 : 3;
             EndEditParticipants();
             participantBindingSource.EndEdit();
-            if (ParticipantService.HasEnoughEligible(config.Participants, requiredChallengers))
+            if (!ParticipantService.HasEnoughEligible(config.Participants, requiredChallengers))
             {
                 int eligibleCount = config.Participants.Count(p => p.IsEligible);
                 System.Media.SystemSounds.Exclamation.Play();
-                MessageBox.Show($"Impossible de lancer le tirage !\nIl te faut au moins {requiredChallengers} participants cochés comme 'Challenger' dans la liste. Actuellement, tu n'en as que {config.Participants}.", 
+                MessageBox.Show($"Impossible de lancer le tirage !\nIl te faut au moins {requiredChallengers} participants cochés comme 'Challenger' dans la liste. Actuellement, tu n'en as que {eligibleCount}.", 
                     "Où sont les cuisiniers ?", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
@@ -390,7 +391,7 @@ namespace DuelDeGateaux.Forms
             this.Cursor = Cursors.WaitCursor;
             try
             {
-                UiHelperService.ExecuteWithErrorHandling(() =>
+                UiHelper.ExecuteWithErrorHandling(() =>
                 {
                     SaveConfig();                
                     List<Participant> assignments = DrawService.AssignChallengers(config);
@@ -418,7 +419,7 @@ namespace DuelDeGateaux.Forms
         /// <param name="e"></param>
         private void BtnSave_Click(object sender, EventArgs e)
         {
-            UiHelperService.ExecuteWithErrorHandling(() =>
+            UiHelper.ExecuteWithErrorHandling(() =>
             {
                 SaveConfig();
             },"Configuration sauvegardée! ");
@@ -449,7 +450,7 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void BtnPrintBallot_Click(object sender, EventArgs e)
         {
-            UiHelperService.ExecuteWithErrorHandling(() =>
+            UiHelper.ExecuteWithErrorHandling(() =>
             {
                 // On sauvegarde d'abord pour être sûr d'avoir la bonne date et le bon nombre de gâteaux (2 ou 3)
                 SaveConfig(); 
