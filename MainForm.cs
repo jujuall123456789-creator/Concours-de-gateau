@@ -190,7 +190,7 @@ namespace DuelDeGateaux
             }
             using (Image image = Image.FromFile(path))
             {
-                return image.GetThumbnailImage(55, 55, () => false, IntPtr.Zero);
+                return new Bitmap(image, new Size(55, 55));
             }
 
         }
@@ -405,12 +405,15 @@ namespace DuelDeGateaux
         /// </summary>
         /// <param name="action">Action à exécuter</param>
         /// <param name="successMessage">Message de succès</param>
-        private bool ExecuteWithErrorHandling(Action action, string successMessage)
+        private bool ExecuteWithErrorHandling(Action action, string? successMessage = null)
         {
              try
             {
                 action();
-                MessageBox.Show(successMessage);
+                if (!string.IsNullOrWhiteSpace(successMessage))
+                {
+                    MessageBox.Show(successMessage);
+                }
                 return true;
             }
             catch (Exception ex)
@@ -431,6 +434,7 @@ namespace DuelDeGateaux
             {
                 return;
             }
+            this.Cursor = Cursors.WaitCursor;
             ExecuteWithErrorHandling(() =>
             {
                 SaveConfig();                
@@ -446,6 +450,7 @@ namespace DuelDeGateaux
                 System.Media.SystemSounds.Asterisk.Play();
                 
             }, "🎉 Emails envoyés et challengers désignés ! Préparez les fourchettes 🍴");
+            this.Cursor = Cursors.Default;
         }
         /// <summary>
         /// Action utilisateur de sauvegarde de l'historique

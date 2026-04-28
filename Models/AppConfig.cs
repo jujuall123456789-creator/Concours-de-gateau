@@ -34,9 +34,21 @@ namespace DuelDeGateaux.Models
         public string PathImageFooter { get; set; } = string.Empty;
 
         //TITRE DES CHALLENGERS
-        public List<string> ChallengersTitles { get; set; } = new();
+        private List<string> _challengersTitles = new();
+        public List<string> ChallengersTitles
+        {
+            get => _challengersTitles;
+            // Si le JSON essaie d'injecter "null", on le rejette et on met une liste vide à la place !
+            set => _challengersTitles = value ?? new List<string>(); 
+        }
 
         //LISTE DES PARTICIPANTS
-        public List<Participant> Participants { get; set; } = new();
+        private List<Participant> _participants = new();
+        public List<Participant> Participants
+        {
+            get => _participants;
+            // Si le JSON essaie d'injecter "null", on le rejette et on met une liste vide à la place !
+            set => _participants = value ?? new List<Participant>(); 
+        }
     }
 }
