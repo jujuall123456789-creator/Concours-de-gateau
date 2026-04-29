@@ -249,5 +249,27 @@ namespace DuelDeGateaux.Services
                 return string.Empty;
             }
         }
+                // ==========================================
+        // 6. OUTIL : PRÉVISUALISATION
+        // ==========================================
+        public static string GetPreviewHtml(AppConfig config, bool isChallengerTemplate)
+        {
+            // On simule des données fictives pour l'aperçu
+            string dummyName = "Jean Dupont";
+            string dummyMatch = "<strong>L'incroyable Jean</strong> et <strong>le redoutable Michel</strong>";
+            
+            string headerBase64 = ConvertImageToBase64(config.PathImageHeading);
+            string footerBase64 = ConvertImageToBase64(config.PathImageFooter);
+
+            if (isChallengerTemplate)
+            {
+                return GenerateChallengerHtml(config, dummyName, "<strong>le redoutable Michel</strong>", headerBase64, footerBase64);
+            }
+            else
+            {
+                return GenerateEaterHtml(config, dummyName, dummyMatch, headerBase64, footerBase64);
+            }
+        }
+
     }
 }
