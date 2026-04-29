@@ -9,7 +9,7 @@ namespace DuelDeGateaux.Services
 {
     internal static class EmailService
     {
-                // ==========================================
+        // ==========================================
         // 1. MÉTHODE D'ENVOI PRINCIPALE
         // ==========================================
         public static void SendDuelEmails(AppConfig config, List<Participant> challengers)
@@ -40,9 +40,9 @@ namespace DuelDeGateaux.Services
                 smtpTestChallenger.From(config.SenderEmail);
                 smtpTestChallenger.To(config.TesterEmail);
                 smtpTestChallenger.Subject("[TEST] " + finalSubjectChallenger);
-                
+
                 // Pour le test, on montre tous les adversaires
-                string opponentsPhrase = GetFormattedChallengers(config, challengers); 
+                string opponentsPhrase = GetFormattedChallengers(config, challengers);
                 smtpTestChallenger.AddHtmlBody(GenerateChallengerHtml(config, "Testeur", opponentsPhrase, headerBase64, footerBase64));
                 smtpTestChallenger.Send();
 
@@ -55,7 +55,7 @@ namespace DuelDeGateaux.Services
                 smtpTestEater.Send();
 
                 // On sort de la méthode pour ne surtout pas envoyer aux vrais participants !
-                return; 
+                return;
             }
 
             // ==========================================
@@ -145,7 +145,7 @@ namespace DuelDeGateaux.Services
                     {headerImageHtml}
                     <tr>
                       <td bgcolor='#D35400' align='center' style='padding: 20px; color: #ffffff;'>
-                        <h1 style='margin: 0; font-size: 24px; letter-spacing: 2px;'>⚔️ LE DESTIN T'A CHOISI ⚔️</h1>
+                        <h1 style='margin: 0; font-size: 24px; letter-spacing: 2px;'>🧑‍🍳 LE DESTIN T'A CHOISI 🧑‍🍳</h1>
                       </td>
                     </tr>
                     <tr>
@@ -172,7 +172,7 @@ namespace DuelDeGateaux.Services
                         {footerImageHtml}
                         
                         <p style='font-size: 12px; color: #7f8c8d; text-align: center; margin-top: 30px;'>
-                          Cet email a été envoyé automatiquement par le Maître des Gâteaux.
+                          You received this email because you suck.
                         </p>
                       </td>
                     </tr>
