@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DuelDeGateaux.Tools
+namespace DuelDeGateaux.Services
 {
     internal static class FileHelper
     {
@@ -21,11 +21,11 @@ namespace DuelDeGateaux.Tools
             {
                 dialog.InitialDirectory = Path.GetDirectoryName(existingPath);
             }
-            string fileNmae = dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : "";
-            return fileNmae;
+            string fileName = dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : "";
+            return fileName;
         }
 
-        public static bool FileExist(string path)
+        public static bool FileExists(string path)
         {
             return File.Exists(path);
         }

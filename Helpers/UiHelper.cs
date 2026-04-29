@@ -6,14 +6,6 @@ namespace DuelDeGateaux.Helpers
     public static class UiHelper
     {
         /// <summary>
-        /// Retourne une valeur bornée entre un minimum et un maximum.
-        /// </summary
-        public static decimal ClampNumeric(decimal value, decimal min, decimal max)
-        {
-            return Math.Max(min, Math.Min(max, value));
-        }
-
-        /// <summary>
         /// Méthode commune pour gérer les erreurs lors de l'exécution des actions
         /// </summary>
         /// <param name="action">Action à exécuter</param>
