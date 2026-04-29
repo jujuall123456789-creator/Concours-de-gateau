@@ -27,7 +27,7 @@ namespace DuelDeGateaux.Services
             if (string.IsNullOrWhiteSpace(config.ChallengeParticipationMessage))
                 result.Errors["Participation"] = "Le message de participation est obligatoire.";
 
-            if (string.IsNullOrWhiteSpace(config.ChallengersTitlesRaw))
+            if (config.ChallengersTitles.Count ==0)
                 result.Errors["Titles"] = "Les titres challengers sont obligatoires.";
 
             // =============================

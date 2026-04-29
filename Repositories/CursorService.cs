@@ -23,7 +23,7 @@ namespace DuelDeGateaux.Repositories
         /// </summary>
         /// <param name="cursorFileName">Le nom du fichier curseur (ex: "rouleau.cur")</param>
         /// <returns>Le Cursor personnalisé, ou null si introuvable/erreur.</returns>
-        public static Cursor? LoadCustomCursor(string cursorFileName)
+        public static Cursor? LoadCustomCursor()
         {
             try
             {
