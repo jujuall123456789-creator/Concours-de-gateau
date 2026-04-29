@@ -9,21 +9,21 @@ namespace DuelDeGateaux.Repositories
 {
     internal static class AudioService
     {
-        / ==========================================
+        // ==========================================
         // 📁 CONSTANTES : NOMS DES FICHIERS
         // ==========================================
-        private const string SendSoundFileName = "OvenSound.mp3";
+        private const string SendSoundFileName = "ovenSound.mp3";
         private const string SaveSoundFileName = "success.mp3";
-        private const string OpenJsonSoundFileName = "open-door.mp3";
-        private const string HistorySoundFileName = "SlurpLick.mp3";
-        private const string PrintBallotSoundFileName = "CartoonPoof.mp3";
+        private const string OpenJsonSoundFileName = "openDoor.mp3";
+        private const string HistorySoundFileName = "slurpLick.mp3";
+        private const string PrintBallotSoundFileName = "cartoonPoof.mp3";
         private const string PreviewSoundFileName = "bubble.mp3";
-        private const string MusicName = "ShortChillMusic.mp3";
+        private const string MusicName = "shortChillMusic.mp3";
 
 
         // Importation de la fonction magique de Windows pour lire les MP3
-        [DllImport("winmm.dll")]
-        private static extern long mciSendString(string command, StringBuilder returnValue, int returnLength, nint winHandle);
+        [DllImport("winmm.dll", CharSet = CharSet.Unicode)]
+        private static extern long mciSendString(string command, StringBuilder? returnValue, int returnLength, nint winHandle);
 
         // ==========================================
         // 🛠️ MÉTHODE CENTRALE

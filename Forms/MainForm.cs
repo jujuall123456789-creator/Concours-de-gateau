@@ -27,7 +27,7 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Composant permettant d'afficher des bulles d'aide quand l'utilisateur survole un champ avec la souris
         /// </summary>
-        private ToolTip toolTip;
+        private ToolTip toolTip = new();
         
         /// <summary>
         /// Random utilisé pour randomiser la sélection de certaines string
@@ -229,7 +229,7 @@ namespace DuelDeGateaux.Forms
             try
             {
                 // On construit le chemin vers le fichier .cur dans le dossier Assets
-                string cursorPath = FileSelectionService.FilePathAssets("rouleau.cur");
+                string cursorPath = FileSelectionService.FilePathAssets("rollingPin.cur");
 
                 if (File.Exists(cursorPath))
                 {
@@ -274,7 +274,7 @@ namespace DuelDeGateaux.Forms
             bool isValid = true;
 
             // Fonction locale pour marquer un champ en erreur
-            void SetError(Control ctrl, bool error)
+            static void SetError(Control ctrl, bool error)
             {
                 ctrl.BackColor = error ? Color.LightPink : Color.White;
             }
@@ -495,8 +495,8 @@ namespace DuelDeGateaux.Forms
                 // 👥 GROUPE PARTICIPANTS
                 EndEditParticipants();
                 SaveConfig();
+                AudioService.PlaySaveSound();
             },"Configuration sauvegardée! ");
-            AudioService.PlaySaveSound();
         }
 
         /// <summary>
@@ -549,6 +549,7 @@ namespace DuelDeGateaux.Forms
             // Ajoute une ligne exemple que l'utilisateur pourra modifier dans la grille
             ParticipantService.AddDefaultParticipant(viewModel.Participants, txtSender.Text.Trim());
             RefreshParticipantDataGrid();
+            AudioService.PlayPreviewSound();
             MessageBox.Show("Participant ajouté. Pensez à sauvegarder pour enregistrer les modifications.");
         }
 
@@ -574,6 +575,7 @@ namespace DuelDeGateaux.Forms
                 {
                     viewModel.Participants.RemoveAt(e.RowIndex);
                     RefreshParticipantDataGrid();
+                    AudioService.PlayPreviewSound();
                 }
             }
         }
