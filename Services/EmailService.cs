@@ -9,18 +9,13 @@ namespace DuelDeGateaux.Services
 {
     internal static class EmailService
     {
-        // ==========================================
+                // ==========================================
         // 1. MÉTHODE D'ENVOI PRINCIPALE
         // ==========================================
         public static void SendDuelEmails(AppConfig config, List<Participant> challengers)
         {
-            // On extrait les emails des challengers pour la comparaison
+            // On extrait les emails des challengers pour la comparaison (en mode réel)
             var challengerEmails = challengers.Select(c => c.Email.ToLower()).ToList();
-
-            // On gère le mode Test
-            var recipients = config.IsTest
-                ? new List<Participant> { new Participant("Testeur", config.TesterEmail) }
-                : config.Participants;
 
             // Remplacement de la balise {{Date}} pour les sujets
             string finalSubjectChallenger = config.SubjectMailChallenger.Replace("{{Date}}", config.ChallengeDate);
@@ -33,13 +28,45 @@ namespace DuelDeGateaux.Services
             // On prépare la phrase "L'incroyable X et le redoutable Y" une seule fois pour tout le monde
             string challengersAnnouncement = GetFormattedChallengers(config, challengers);
 
-            foreach (var p in recipients)
+            // ==========================================
+            // 🚀 MODE TEST : On envoie les 2 mails au testeur
+            // ==========================================
+            if (config.IsTest)
+            {
+                if (string.IsNullOrWhiteSpace(config.TesterEmail)) return;
+
+                // 1. Envoi du mail type "Challenger"
+                IUTIL_SMTPClient smtpTestChallenger = new UTIL_SMTPClient();
+                smtpTestChallenger.From(config.SenderEmail);
+                smtpTestChallenger.To(config.TesterEmail);
+                smtpTestChallenger.Subject("[TEST] " + finalSubjectChallenger);
+                
+                // Pour le test, on montre tous les adversaires
+                string opponentsPhrase = GetFormattedChallengers(config, challengers); 
+                smtpTestChallenger.AddHtmlBody(GenerateChallengerHtml(config, "Testeur", opponentsPhrase, headerBase64, footerBase64));
+                smtpTestChallenger.Send();
+
+                // 2. Envoi du mail type "Mangeur"
+                IUTIL_SMTPClient smtpTestEater = new UTIL_SMTPClient();
+                smtpTestEater.From(config.SenderEmail);
+                smtpTestEater.To(config.TesterEmail);
+                smtpTestEater.Subject("[TEST] " + finalSubjectEater);
+                smtpTestEater.AddHtmlBody(GenerateEaterHtml(config, "Testeur", challengersAnnouncement, headerBase64, footerBase64));
+                smtpTestEater.Send();
+
+                // On sort de la méthode pour ne surtout pas envoyer aux vrais participants !
+                return; 
+            }
+
+            // ==========================================
+            // 🚀 MODE RÉEL : On boucle sur tous les participants
+            // ==========================================
+            foreach (var p in config.Participants)
             {
                 if (string.IsNullOrWhiteSpace(p.Email)) continue;
 
                 bool isChallenger = challengerEmails.Contains(p.Email.ToLower());
 
-                // Note: Assure-toi que cette classe correspond à ton client SMTP réel (ex: SmtpClient)
                 IUTIL_SMTPClient oSmtp = new UTIL_SMTPClient();
                 oSmtp.From(config.SenderEmail);
                 oSmtp.To(p.Email);
@@ -50,9 +77,9 @@ namespace DuelDeGateaux.Services
 
                     // Pour le challenger, on veut lui dire contre qui il se bat (on l'exclut de la liste)
                     var opponents = challengers.Where(c => !c.Email.Equals(p.Email, StringComparison.OrdinalIgnoreCase)).ToList();
-                    string opponentsPhrase = GetFormattedChallengers(config, opponents);
+                    string realOpponentsPhrase = GetFormattedChallengers(config, opponents);
 
-                    oSmtp.AddHtmlBody(GenerateChallengerHtml(config, p.Name, opponentsPhrase, headerBase64, footerBase64));
+                    oSmtp.AddHtmlBody(GenerateChallengerHtml(config, p.Name, realOpponentsPhrase, headerBase64, footerBase64));
                 }
                 else
                 {
@@ -65,6 +92,7 @@ namespace DuelDeGateaux.Services
                 oSmtp.Send();
             }
         }
+
 
         // ==========================================
         // 2. LOGIQUE DES TITRES ALÉATOIRES
