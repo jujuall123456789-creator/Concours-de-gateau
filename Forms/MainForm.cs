@@ -226,21 +226,10 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void SetCustomCursor()
         {
-            try
+            Cursor? mycustomCursor = CursorService.LoadCustomCursor();
+            if (mycustomCursor != null)
             {
-                // On construit le chemin vers le fichier .cur dans le dossier Assets
-                string cursorPath = FileSelectionService.FilePathAssets("rollingPin.cur");
-
-                if (File.Exists(cursorPath))
-                {
-                    // Applique le curseur à tout le formulaire
-                    this.Cursor = new Cursor(cursorPath);
-                }
-            }
-            catch
-            {
-                // Si le fichier est introuvable ou corrompu, on l'ignore silencieusement.
-                // L'application gardera la flèche Windows par défaut, ce n'est pas bloquant.
+                Cursor = mycustomCursor;
             }
         }
         

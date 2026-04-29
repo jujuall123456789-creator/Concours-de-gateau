@@ -395,27 +395,45 @@ namespace DuelDeGateaux.Forms
                 
             };
 
+            //Hauteur du header du mail
+            Label lblImageHeight = new Label()
+            {
+                Text = "Hauteur du header en PX :",
+                Left = 20,
+                Top = 60,
+                Width = 150
+            };
+            numImageHeight = new NumericUpDown()
+            {
+                Left = 200,
+                Top = 60,
+                Width = 80,
+                Minimum = 100,
+                Maximum = 1000,
+
+            };
+
             //Image du header du mail
             Label lblheader = new Label()
             {
                 Text = "Image du Header :",
                 Left = 20,
-                Top = 60,
+                Top = 90,
                 Width = 150
             };
             txtImageHeader = new TextBox()
             {
                 Left = 200,
-                Top = 60,
-                Width = 200
+                Top = 90,
+                Width = 230
             };
             btnBrowseHeader = new Button()
             {
                 Left = 20,
-                Top = 90,
+                Top = 120,
                 Width = 150,
                 Text = "Cherche des photos",
-                Cursor = Cursors.SizeAll
+                Cursor = Cursors.Hand
             };
             btnBrowseHeader.Click += BtnBrowseHeader_Click;
 
@@ -424,33 +442,15 @@ namespace DuelDeGateaux.Forms
             {
                 MaximumSize = new Size(150, 60),
                 Left = 200,
-                Top = 90,
+                Top = 120,
                 Height = 60,
-                Cursor = Cursors.No,
+                Cursor = Cursors.Default,
                 AllowDrop = true
             };
             pictureHeaderImage.DragEnter += PictureBox_DragEnter;
             pictureHeaderImage.DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageHeader);
             pictureHeaderImage.MouseEnter += PictureBox_MouseEnter;
-            pictureHeaderImage.MouseLeave += PictureBox_MouseLeave;
-
-            //Hauteur du header du mail
-            Label lblImageHeight = new Label()
-            {
-                Text = "Hauteur du header en PX :",
-                Left = 20,
-                Top = 180,
-                Width = 150
-            };
-            numImageHeight = new NumericUpDown()
-            {
-                Left = 200,
-                Top = 180,
-                Width = 80,
-                Minimum = 100,
-                Maximum = 1000,
-
-            };
+            pictureHeaderImage.MouseLeave += PictureBox_MouseLeave;            
 
             //Image du footer du mail
             Label lblfooter = new Label()
@@ -464,7 +464,7 @@ namespace DuelDeGateaux.Forms
             {
                 Left = 200,
                 Top = 210,
-                Width = 200
+                Width = 230
             };
             btnBrowseFooter = new Button()
             {
@@ -472,7 +472,7 @@ namespace DuelDeGateaux.Forms
                 Top = 240,
                 Width = 150,
                 Text = "Cherche des photos",
-                Cursor = Cursors.AppStarting
+                Cursor = Cursors.Hand
             };
             btnBrowseFooter.Click += BtnBrowseFooter_Click;
 

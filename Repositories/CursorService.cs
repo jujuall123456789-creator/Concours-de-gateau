@@ -1,12 +1,19 @@
-using System;
-using System.IO;
+using DuelDeGateaux.Services;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 
-namespace DuelDeGateaux.Services
+namespace DuelDeGateaux.Repositories
 {
     internal static class CursorService
     {
+        // 📁 Chemin du fichier .cur (dans dossier exe)
+        private const string FileName = "rollingPin.cur";
+
+        /// <summary>
+        /// Chemin du fichier de configuration JSON
+        /// Gère le décalage de dossier en mode Debug pour Visual Studio.
+        /// </summary>
+        private static readonly string ConfigPath = FileSelectionService.FilePathAssets(FileName);
+
         // Importation de l'API Windows pour garder les couleurs d'origine du curseur
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern IntPtr LoadCursorFromFile(string path);
@@ -20,11 +27,10 @@ namespace DuelDeGateaux.Services
         {
             try
             {
-                string cursorPath = Path.Combine(Application.StartupPath, "Assets", cursorFileName);
 
-                if (File.Exists(cursorPath))
+                if (File.Exists(ConfigPath))
                 {
-                    IntPtr colorCursorHandle = LoadCursorFromFile(cursorPath);
+                    IntPtr colorCursorHandle = LoadCursorFromFile(ConfigPath);
 
                     if (colorCursorHandle != IntPtr.Zero)
                     {
