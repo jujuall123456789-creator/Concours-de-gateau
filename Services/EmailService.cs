@@ -215,7 +215,7 @@ namespace DuelDeGateaux.Services
                                 </h2>
                     
                                 <p style='color: #444BAD; font-weight: bold; font-size: {config.FontSize}px;'>
-                                  Grande nouvelle (et pas moyen d'y échapper) : {challengersAnnouncement} ont été sélectionnés comme Challengers à notre grand concours de gâteaux sur le thème « 🍫 {config.ChallengeTheme} 🍫 » !
+                                  Grande nouvelle (et pas moyen d'y échapper) : {challengersAnnouncement} ont été sélectionnés comme Challengers à notre grand concours de gâteaux sur le thème « {config.ChallengeTheme} » !
                                 </p>
                     
                                 <p style='color: #444BAD; font-size: {config.FontSize}px;'>
