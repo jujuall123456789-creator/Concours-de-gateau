@@ -125,6 +125,8 @@ namespace DuelDeGateaux.Forms
             InitializeComponent();
             // Configure les aides à la saisie (bulles d'aide)
             InitTooltips();
+            // 🪄 MAGIE DU CURSEUR PERSONNALISÉ
+            SetCustomCursor();
         }
 
         /// <summary>
@@ -141,6 +143,8 @@ namespace DuelDeGateaux.Forms
                 MainFormMapper.PopulateView(this, viewModel);
                 participantBindingSource.DataSource = viewModel.Participants;
                 dgvParticipants.DataSource = participantBindingSource;
+                // 🎵 Lancement de la musique de fond !
+                AudioService.PlayBackgroundMusic();
             }
             catch (Exception ex)
             {
@@ -214,6 +218,29 @@ namespace DuelDeGateaux.Forms
                 return null;
             }
 
+        }
+
+        /// <summary>
+        /// Remplace le curseur par défaut par un magnifique rouleau à pâtisserie.
+        /// </summary>
+        private void SetCustomCursor()
+        {
+            try
+            {
+                // On construit le chemin vers le fichier .cur dans le dossier Assets
+                string cursorPath = Path.Combine(Application.StartupPath, "Assets", "rouleau.cur");
+
+                if (File.Exists(cursorPath))
+                {
+                    // Applique le curseur à tout le formulaire
+                    this.Cursor = new Cursor(cursorPath);
+                }
+            }
+            catch
+            {
+                // Si le fichier est introuvable ou corrompu, on l'ignore silencieusement.
+                // L'application gardera la flèche Windows par défaut, ce n'est pas bloquant.
+            }
         }
         
         /// <summary>
@@ -407,9 +434,10 @@ namespace DuelDeGateaux.Forms
                     if (currentConfig.IsTest)
                     {
                         HistoryService.Add(currentConfig, assignments);
-                    }                
-                    // Son de succès 
-                    System.Media.SystemSounds.Asterisk.Play();
+                    }
+
+                    /// 💥 Joue le son d'effet spécial d'envoi !
+                    AudioService.PlaySendSound();
                     
                 }, "🎉 Emails envoyés et challengers désignés ! Préparez les fourchettes 🍴");
             }
