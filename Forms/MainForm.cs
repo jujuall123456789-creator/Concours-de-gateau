@@ -42,7 +42,12 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Extensions de fichiers autorisées pour les images importées.
         /// </summary>
-        private readonly string[] allowedExtensions = [".jpg", ".jpeg", ".png"];
+        private static readonly string[] allowedExtensions = [".jpg", ".jpeg", ".png"];
+
+        /// <summary>
+        /// Dictionnaire des champs contrôlés
+        /// </summary>
+        private readonly Dictionary<string, Control> validationControls = new();
 
         #region Implémentation IMainFormView
 
@@ -124,6 +129,8 @@ namespace DuelDeGateaux.Forms
         {
             // Initialise les composants du Designer
             InitializeComponent();
+            //On initialise les champs contrôlés
+            InitializeValidationControls();
             // Configure les aides à la saisie (bulles d'aide)
             InitTooltips();
             // 🪄 MAGIE DU CURSEUR PERSONNALISÉ
@@ -244,8 +251,11 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Sauvegarde les entrées de l'utilisateur dans le fichier de config
         /// </summary>
-        private void SaveConfig()
-        {            
+        private void SyncAndSaveConfig()
+        {
+            
+            // 👥 GROUPE PARTICIPANTS
+            EndEditParticipants();
             MainFormMapper.UpdateViewModel(this, viewModel);
             ConfigService.Save(viewModel.ToConfig());
         }
@@ -257,137 +267,83 @@ namespace DuelDeGateaux.Forms
         /// affiché si des erreurs sont trouvées.
         /// </summary>
         /// <returns>True si tous les champs sont valides, False sinon.</returns>
-
         private bool ValidateFields()
         {
-            bool isValid = true;
+            EndEditParticipants();
+            participantBindingSource.EndEdit();
 
-            // Fonction locale pour marquer un champ en erreur
-            static void SetError(Control ctrl, bool error)
+            MainFormMapper.UpdateViewModel(this, viewModel);
+            var config = viewModel.ToConfig();
+
+            var result = FormValidationService.Validate(config);
+
+            ResetFieldColors();
+
+            if (!result.IsValid)
             {
-                ctrl.BackColor = error ? Color.LightPink : Color.White;
+                ApplyFieldErrors(result);
+                ShowValidationMessage(result);
+                return false;
             }
-            // =============================
-            // VALIDATION TEXTE
-            // =============================
 
-            if (string.IsNullOrWhiteSpace(txtTheme.Text))
+            return true;
+        }
+
+        private void ApplyFieldErrors(ValidationResult result)
+        {
+            foreach (var key in result.Errors.Keys)
             {
-                SetError(txtTheme, true);
-                isValid = false;
+                if (validationControls.TryGetValue(key, out var ctrl))
+                    ctrl.BackColor = Color.LightPink;
             }
-            else SetError(txtTheme, false);
+        }
 
-            if (string.IsNullOrWhiteSpace(txtRoom.Text))
+        private void ShowValidationMessage(ValidationResult result)
+        {
+            // Petit son d'erreur système pour marquer le coup
+            System.Media.SystemSounds.Hand.Play();
+            string message = "Le formulaire contient des erreurs :\n\n";
+            foreach (var error in result.Errors.Values)
             {
-                SetError(txtRoom, true);
-                isValid = false;
+                message += "• " + error + "\n";
             }
-            else SetError(txtRoom, false);
-
-            if (string.IsNullOrWhiteSpace(txtRules.Text))
-            {
-                SetError(txtRules, true);
-                isValid = false;
-            }
-            else SetError(txtRules, false);
-
-            if (string.IsNullOrWhiteSpace(txtPrice.Text))
-            {
-                SetError(txtPrice, true);
-                isValid = false;
-            }
-            else SetError(txtPrice, false);
-
-            if (string.IsNullOrWhiteSpace(txtParticipation.Text))
-            {
-                SetError(txtParticipation, true);
-                isValid = false;
-            }
-            else SetError(txtParticipation, false);
-
-            // =============================
-            // VALIDATION AFFICHAGE
-            // =============================
-            if (!string.IsNullOrWhiteSpace(txtImageHeader.Text) && !File.Exists(txtImageHeader.Text))
-            {
-                SetError(txtImageHeader, true);
-                isValid = false;
-            }
-            else SetError(txtImageHeader, false);
-            if (!string.IsNullOrWhiteSpace(txtImageFooter.Text) && !File.Exists(txtImageFooter.Text))
-            {
-                SetError(txtImageFooter, true);
-                isValid = false;
-            } else SetError(txtImageFooter, false);
-
-            // =============================
-            // VALIDATION EMAIL
-            // =============================
-
-            if (!FormValidationService.IsValidEmail(txtSender.Text))
-            {
-                SetError(txtSender, true);
-                isValid = false;
-            }
-            else SetError(txtSender, false);
-
-            if (chkTest.Checked && !FormValidationService.IsValidEmail(txtTestMail.Text))
-            {
-                SetError(txtTestMail, true);
-                isValid = false;
-            }
-            else SetError(txtTestMail, false);
-
-            if (string.IsNullOrWhiteSpace(txtSubjectChallenger.Text))
-            {
-                SetError(txtSubjectChallenger, true);
-                isValid = false;
-            }
-            else SetError(txtSubjectChallenger, false);
-
-            if (string.IsNullOrWhiteSpace(txtSubjectEater.Text))
-            {
-                SetError(txtSubjectEater, true);
-                isValid = false;
-            }
-            else SetError(txtSubjectEater, false);           
-
-            // =============================
-            // RESULTAT GLOBAL
-            // =============================
-
-            if (!isValid)
-            {
-                string[] funInsults = {
+            string[] funInsults = {
                     "⚠️ Oups, il manque des infos ! On se réveille ☕",
                     "⚠️ Faut remplir les cases en rouge, NEUNEU 😤",
                     "⚠️ Un gâteau sans farine, ça ne marche pas. Un formulaire vide non plus 🍰",
                     "⚠️ Allez, on se concentre et on corrige les cases rouges 🎯"
                 };
-                string randomMessage = funInsults[rng.Next(funInsults.Length)];
-                // Petit son d'erreur système pour marquer le coup
-                System.Media.SystemSounds.Hand.Play();
-                MessageBox.Show(randomMessage, "Formulaire incomplet", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-
-             // =============================
-            // VALIDATION PARTICIPANTS
-            // =============================
-            int requiredChallengers = rb2Challengers.Checked ? 2 : 3;
-            EndEditParticipants();
-            participantBindingSource.EndEdit();
-            if (!ParticipantService.HasEnoughEligible(viewModel.Participants, requiredChallengers))
-            {
-                int eligibleCount = viewModel.Participants.Count(p => p.IsEligible);
-                System.Media.SystemSounds.Exclamation.Play();
-                MessageBox.Show($"Impossible de lancer le tirage !\nIl te faut au moins {requiredChallengers} participants cochés comme 'Challenger' dans la liste. Actuellement, tu n'en as que {eligibleCount}.", 
-                    "Où sont les cuisiniers ?", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-            return true;
+            string randomMessage = funInsults[rng.Next(funInsults.Length)];
+            message += randomMessage + "\n";
+            
+            MessageBox.Show(message, "Validation impossible", MessageBoxButtons.OK,MessageBoxIcon.Warning);
         }
+
+        private void ResetFieldColors()
+        {
+            foreach (var ctrl in validationControls.Values)
+                ctrl.BackColor = Color.White;
+        }
+
+        private void InitializeValidationControls()
+        {
+            validationControls["Theme"] = txtTheme;
+            validationControls["Room"] = txtRoom;
+            validationControls["Rules"] = txtRules;
+            validationControls["Price"] = txtPrice;
+            validationControls["Participation"] = txtParticipation;
+            validationControls["Titles"] = txtTitles;
+            validationControls["Date"] = datePicker;
+            validationControls["Hour"] = timePicker;
+            validationControls["ImageHeader"] = txtImageHeader;
+            validationControls["ImageFooter"] = txtImageFooter;
+            validationControls["Sender"] = txtSender;
+            validationControls["Tester"] = txtTestMail;
+            validationControls["SubjectChallenger"] = txtSubjectChallenger;
+            validationControls["SubjectEater"] = txtSubjectEater;
+        }
+
+
         /// <summary>
         /// Force la fin d'édition de l'utilisateur afin de récupérer sa dernière saisie
         /// </summary>
@@ -415,13 +371,11 @@ namespace DuelDeGateaux.Forms
             {
                 UiHelper.ExecuteWithErrorHandling(() =>
                 {
-                    SaveConfig();                
+                    SyncAndSaveConfig();                
                     var currentConfig = viewModel.ToConfig();
                     List<Participant> assignments = DrawService.AssignChallengers(currentConfig);
-                    // TODO: remplacer par l'envoi réel des emails
                     EmailService.SendDuelEmails(currentConfig, assignments);
-                    // TODO : enregistre les tests dans l'historique pour validation à changer lors de la mise en prod
-                    if (currentConfig.IsTest)
+                    if (!currentConfig.IsTest)
                     {
                         HistoryService.Add(currentConfig, assignments);
                     }
@@ -436,39 +390,60 @@ namespace DuelDeGateaux.Forms
                 this.Cursor = Cursors.Default;
             }
         }
-                /// <summary>
+        /// <summary>
         /// Action utilisateur pour prévisualiser les templates d'e-mail
         /// </summary>
         private void BtnPreview_Click(object sender, EventArgs e)
         {
-            AudioService.PlayPreviewSound();
+            // Création du menu déroulant
+            ContextMenuStrip previewMenu = new ContextMenuStrip();
+            previewMenu.Cursor = Cursors.Hand; // Pour garder un bel aspect au survol
+            previewMenu.Font = new Font("Segoe UI", 10, FontStyle.Regular);
+
+            // Option 1 : Les Challengers
+            ToolStripMenuItem itemChallenger = new ToolStripMenuItem("⚔️ Aperçu Mail Challengers");
+            itemChallenger.Click += (s, args) => LaunchPreviewWindow(true);
+            
+            // Option 2 : Le Jury (Mangeurs)
+            ToolStripMenuItem itemJury = new ToolStripMenuItem("🤤 Aperçu Mail Jury");
+            itemJury.Click += (s, args) => LaunchPreviewWindow(false);
+
+            // Ajout des options au menu
+            previewMenu.Items.Add(itemChallenger);
+            previewMenu.Items.Add(new ToolStripSeparator()); // Une jolie petite ligne de séparation
+            previewMenu.Items.Add(itemJury);
+
+            // On affiche le menu juste en dessous du bouton cliqué
+            Button btn = (Button)sender;
+            previewMenu.Show(btn, new Point(0, btn.Height));
+            
+        }
+
+        /// <summary>
+        /// Génère et affiche la fenêtre de prévisualisation du mail.
+        /// </summary>
+        /// <param name="isChallenger">True pour le mail Challenger, False pour le mail Jury.</param>
+        private void LaunchPreviewWindow(bool isChallenger)
+        {
             UiHelper.ExecuteWithErrorHandling(() =>
             {
-                // On met à jour la configuration en mémoire avec ce que l'utilisateur a tapé
+                // On joue le petit son de bulle qu'on a configuré !
+                AudioService.PlayPreviewSound();
+
+                // On met à jour la configuration en mémoire
                 MainFormMapper.UpdateViewModel(this, viewModel);
                 var currentConfig = viewModel.ToConfig();
 
-                // On demande quel mail prévisualiser
-                var result = MessageBox.Show(
-                    "Veux-tu prévisualiser l'email destiné aux Challengers ?\n\n(Clique sur 'Non' pour voir l'email du Jury / des Mangeurs)", 
-                    "Choix de l'aperçu", 
-                    MessageBoxButtons.YesNoCancel, 
-                    MessageBoxIcon.Question);
-
-                if (result == DialogResult.Cancel) return;
-
-                bool isChallenger = (result == DialogResult.Yes);
-                string title = isChallenger ? "Mail Challengers" : "Mail Jury (Mangeurs)";
+                string title = isChallenger ? "Mail Challengers ⚔️" : "Mail Jury (Mangeurs) 🤤";
                 
-                // On récupère le HTML généré
+                // On récupère le HTML
                 string html = EmailService.GetPreviewHtml(currentConfig, isChallenger);
 
-                // On ouvre notre belle fenêtre WebView2
+                // On ouvre la belle fenêtre WebView2
                 using (var previewWindow = new PreviewForm(html, title))
                 {
                     previewWindow.ShowDialog();
                 }
-
             }, null);
         }
 
@@ -481,9 +456,7 @@ namespace DuelDeGateaux.Forms
         {
             UiHelper.ExecuteWithErrorHandling(() =>
             {                
-                // 👥 GROUPE PARTICIPANTS
-                EndEditParticipants();
-                SaveConfig();
+                SyncAndSaveConfig();
                 AudioService.PlaySaveSound();
             },"Configuration sauvegardée! ");
         }
@@ -519,7 +492,7 @@ namespace DuelDeGateaux.Forms
             UiHelper.ExecuteWithErrorHandling(() =>
             {
                 // On sauvegarde d'abord pour être sûr d'avoir la bonne date et le bon nombre de gâteaux (2 ou 3)
-                SaveConfig(); 
+                SyncAndSaveConfig(); 
                 
                 // On lance la génération HTML et l'impression !
                 BallotService.GenerateAndPrintBallots(viewModel.ToConfig());

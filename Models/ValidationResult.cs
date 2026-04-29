@@ -5,7 +5,7 @@ namespace DuelDeGateaux.Models
     /// </summary>
     public class ValidationResult
     {
-        public bool IsValid { get; set; }
-        public string Message { get; set; } = string.Empty;
+        public bool IsValid => Errors.Count == 0;
+        public Dictionary<string, string> Errors { get; set; } = new();
     }
 }
