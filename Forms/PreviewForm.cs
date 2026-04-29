@@ -1,6 +1,6 @@
-using System;
-using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
+using System.IO;
+using System.Text;
 
 namespace DuelDeGateaux.Forms
 {
@@ -12,32 +12,27 @@ namespace DuelDeGateaux.Forms
         public PreviewForm(string html, string title)
         {
             htmlContent = html;
-            
-            // Configuration de base de la fenêtre
             Text = "👁️ Aperçu : " + title;
             Width = 850;
             Height = 900;
             StartPosition = FormStartPosition.CenterParent;
-            ShowIcon = false;
-
-            // Création dynamique du composant WebView2
-            webView = new WebView2
-            {
-                Dock = DockStyle.Fill
-            };
+            
+            webView = new WebView2 { Dock = DockStyle.Fill };
             Controls.Add(webView);
 
-            // Le composant WebView2 doit être initialisé de manière asynchrone
             InitializeWebView();
         }
 
         private async void InitializeWebView()
         {
-            // Attend que le moteur Edge soit prêt
             await webView.EnsureCoreWebView2Async(null);
-            
-            // Injecte notre code HTML directement dans le navigateur intégré
-            webView.NavigateToString(htmlContent);
+
+            // On crée un fichier temporaire pour éviter la limite de taille de string
+            string tempFile = Path.Combine(Path.GetTempPath(), "preview_mail.html");
+            File.WriteAllText(tempFile, htmlContent, Encoding.UTF8);
+
+            // On demande à la WebView de charger le fichier
+            webView.Source = new Uri(tempFile);
         }
     }
 }
