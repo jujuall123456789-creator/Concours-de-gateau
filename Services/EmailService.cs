@@ -14,23 +14,18 @@ namespace DuelDeGateaux.Services
         // ==========================================
         public static void SendDuelEmails(AppConfig config, List<Participant> challengers)
         {
-            // On extrait les emails des challengers pour la comparaison
             var challengerEmails = challengers.Select(c => c.Email.ToLower()).ToList();
 
-            // On gère le mode Test
             var recipients = config.IsTest
                 ? new List<Participant> { new Participant("Testeur", config.TesterEmail) }
                 : config.Participants;
 
-            // Remplacement de la balise {{Date}} pour les sujets
             string finalSubjectChallenger = config.SubjectMailChallenger.Replace("{{Date}}", config.ChallengeDate);
             string finalSubjectEater = config.SubjectMailEater.Replace("{{Date}}", config.ChallengeDate);
 
-            // Conversion des images en Base64
             string headerBase64 = ConvertImageToBase64(config.PathImageHeading);
             string footerBase64 = ConvertImageToBase64(config.PathImageFooter);
 
-            // On prépare la phrase "L'incroyable X et le redoutable Y" une seule fois pour tout le monde
             string challengersAnnouncement = GetFormattedChallengers(config, challengers);
 
             foreach (var p in recipients)
@@ -39,7 +34,6 @@ namespace DuelDeGateaux.Services
 
                 bool isChallenger = challengerEmails.Contains(p.Email.ToLower());
 
-                // Note: Assure-toi que cette classe correspond à ton client SMTP réel (ex: SmtpClient)
                 IUTIL_SMTPClient oSmtp = new UTIL_SMTPClient();
                 oSmtp.From(config.SenderEmail);
                 oSmtp.To(p.Email);
@@ -48,7 +42,6 @@ namespace DuelDeGateaux.Services
                 {
                     oSmtp.Subject(finalSubjectChallenger);
 
-                    // Pour le challenger, on veut lui dire contre qui il se bat (on l'exclut de la liste)
                     var opponents = challengers.Where(c => !c.Email.Equals(p.Email, StringComparison.OrdinalIgnoreCase)).ToList();
                     string opponentsPhrase = GetFormattedChallengers(config, opponents);
 
@@ -58,7 +51,6 @@ namespace DuelDeGateaux.Services
                 {
                     oSmtp.Subject(finalSubjectEater);
 
-                    // Pour les mangeurs, on affiche tout le monde avec les titres
                     oSmtp.AddHtmlBody(GenerateEaterHtml(config, p.Name, challengersAnnouncement, headerBase64, footerBase64));
                 }
 
@@ -84,7 +76,7 @@ namespace DuelDeGateaux.Services
                 {
                     int index = rng.Next(availableTitles.Count);
                     title = availableTitles[index].Trim() + " ";
-                    availableTitles.RemoveAt(index); // On l'enlève pour ne pas avoir 2 fois le même titre
+                    availableTitles.RemoveAt(index);
                 }
                 namedChallengers.Add($"<strong>{title}{c.Name}</strong>");
             }
@@ -105,8 +97,9 @@ namespace DuelDeGateaux.Services
             string headerImageHtml = string.IsNullOrEmpty(headerBase64) ? "" :
                 $@"<tr><td align='center' bgcolor='#FBEEE6'><img src='data:image/jpeg;base64,{headerBase64}' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:100%;' alt='Header'></td></tr>";
 
+            // FIX OUTLOOK : Ajout de l'attribut HTML width='250'
             string footerImageHtml = string.IsNullOrEmpty(footerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-top:20px;'><img src='data:image/jpeg;base64,{footerBase64}' style='display:block; border:none; max-width:150px;' alt='Footer'></td></tr>";
+                $@"<tr><td align='center' style='padding-top:20px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' style='display:block; border:none; width:250px; max-width:250px;' alt='Footer'></td></tr>";
 
             return $@"
             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#f4f4f4'>
@@ -124,14 +117,14 @@ namespace DuelDeGateaux.Services
                         <p style='margin-top: 0;'>Félicitations <strong>{participantName}</strong> !</p>
                         <p>Tu as été tiré(e) au sort pour notre grand concours de pâtisserie. Prépare ton meilleur fouet et fais chauffer le four, car la bataille s'annonce épique.</p>
                         
-                        <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='margin: 20px 0;'>
-                          <tr>
+                        <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
+                          <tr><td height='20' style='font-size:0px; line-height:0px;'>&nbsp;</td></tr> <tr>
                             <td bgcolor='#ffffff' style='padding: 15px; border-left: 4px solid #D35400;'>
                               <p style='margin: 0;'><strong>🎯 Thème :</strong> {config.ChallengeTheme}</p>
                               <p style='margin: 5px 0 0 0;'><strong>🥊 Tes adversaires :</strong> {opponents}</p>
                             </td>
                           </tr>
-                        </table>
+                          <tr><td height='20' style='font-size:0px; line-height:0px;'>&nbsp;</td></tr> </table>
 
                         <p><strong>📅 Rendez-vous le :</strong> {config.ChallengeDate} à {config.ChallengeHour}</p>
                         <p><strong>📍 Lieu du combat :</strong> {config.ChallengeRoom}</p>
@@ -161,8 +154,12 @@ namespace DuelDeGateaux.Services
             string headerRow = string.IsNullOrEmpty(headerBase64) ? "" :
                 $@"<tr><td align='center' style='padding-bottom:20px;'><img src='data:image/jpeg;base64,{headerBase64}' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:100%;'></td></tr>";
 
+            // FIX OUTLOOK : Ajout de l'attribut HTML width='250' sur l'image
             string footerRow = string.IsNullOrEmpty(footerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-top:40px;'><img src='data:image/jpeg;base64,{footerBase64}' style='display:block; border:none; max-width:250px;'></td></tr>";
+                $@"<tr><td align='center' style='padding-top:40px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' style='display:block; border:none; width:250px; max-width:250px;'></td></tr>";
+
+            // FIX OUTLOOK : Création d'un espaceur universel réutilisable (30px de haut)
+            string spacer30 = "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'><tr><td height='30' style='font-size:0px; line-height:0px;'>&nbsp;</td></tr></table>";
 
             return $@"
                 <!DOCTYPE html>
@@ -190,11 +187,11 @@ namespace DuelDeGateaux.Services
                                   🧑‍🍳 <strong>Ils ont la consigne suivante : {config.ChallengeRules}</strong>
                                 </p>
                     
-                                <p style='color: #DB1616; font-size: 20px; font-weight: bold; text-align: center; margin: 35px 0;'>
+                                <p style='color: #DB1616; font-size: 20px; font-weight: bold; text-align: center; margin-top: 35px;'>
                                   {config.ChallengeParticipationMessage}
                                 </p>
-                    
-                                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='margin: 30px 0;'>
+
+                                {spacer30} <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                   <tr>
                                     <td bgcolor='#FCE4EC' style='padding: 30px; border-radius: 15px; border: 1px solid #F8BBD0;'>
                                       <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
@@ -224,7 +221,7 @@ namespace DuelDeGateaux.Services
                                   </tr>
                                 </table>
 
-                                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#ffffff' style='border: 2px dashed #F8BBD0; border-radius: 15px; margin-bottom: 30px;'>
+                                {spacer30} <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#ffffff' style='border: 2px dashed #F8BBD0; border-radius: 15px;'>
                                   <tr>
                                     <td align='center' style='padding: 20px; font-size: 16px; color: #333333; font-weight: bold;'>
                                       Les règles sont simples : ils pâtissent, on déguste, et on élit le meilleur gâteau.<br>                                      
@@ -233,7 +230,7 @@ namespace DuelDeGateaux.Services
                                   </tr>
                                 </table>
                     
-                                <table role='presentation' width='100%' cellspacing='0' cellpadding='15' border='0' bgcolor='#1A1A1A' style='border-radius: 8px;'>
+                                {spacer30} <table role='presentation' width='100%' cellspacing='0' cellpadding='15' border='0' bgcolor='#1A1A1A' style='border-radius: 8px;'>
                                   <tr>
                                     <td align='center' style='color: #ffffff; font-weight: bold; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase;'>
                                       Préparez vos bavoirs, on a hâte ! 👅
@@ -259,8 +256,6 @@ namespace DuelDeGateaux.Services
                 </html>";
         }
 
-
-
         // ==========================================
         // 5. OUTIL : CONVERSION IMAGE EN BASE 64
         // ==========================================
@@ -279,12 +274,12 @@ namespace DuelDeGateaux.Services
                 return string.Empty;
             }
         }
+        
         // ==========================================
         // 6. OUTIL : PRÉVISUALISATION
         // ==========================================
         public static string GetPreviewHtml(AppConfig config, bool isChallengerTemplate)
         {
-            // On simule des données fictives pour l'aperçu
             string dummyName = "Jean Dupont";
             string dummyMatch = "<strong>L'incroyable Jean</strong> et <strong>le redoutable Michel</strong>";
 
@@ -300,6 +295,5 @@ namespace DuelDeGateaux.Services
                 return GenerateEaterHtml(config, dummyName, dummyMatch, headerBase64, footerBase64);
             }
         }
-
     }
 }
