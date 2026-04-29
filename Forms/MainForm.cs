@@ -402,7 +402,7 @@ namespace DuelDeGateaux.Forms
                     var currentConfig = viewModel.ToConfig();
                     List<Participant> assignments = DrawService.AssignChallengers(currentConfig);
                     // TODO: remplacer par l'envoi réel des emails
-                    EmailService.TestSend();
+                    EmailService.SendDuelEmails(currentConfig, assignments);
                     // TODO : enregistre les tests dans l'historique pour validation à changer lors de la mise en prod
                     if (currentConfig.IsTest)
                     {

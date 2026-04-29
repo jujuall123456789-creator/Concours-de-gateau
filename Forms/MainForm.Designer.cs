@@ -704,7 +704,7 @@ namespace DuelDeGateaux.Forms
             {
                 grpContest, grpDisplay, grpSmtp,
                 grpParticipants,
-                btnSend, btnSave, btnPrintBallot, btnOpenJson, btnHistory
+                btnSend, btnPreview, btnSave, btnPrintBallot, btnOpenJson, btnHistory
             });
             //Initlisation des tooltips
             InitTooltips();
