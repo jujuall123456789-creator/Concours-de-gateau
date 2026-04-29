@@ -92,10 +92,12 @@ namespace DuelDeGateaux.Mappers
         /// </summary>
         private static void MapDisplayToView(IMainFormView view, MainFormViewModel vm)
         {
-            view.FontSize = vm.FontSize;
             view.PathImageHeading = vm.PathImageHeading;
-            view.ImageHeadingHeight = vm.ImageHeadingHeight;
             view.PathImageFooter = vm.PathImageFooter;
+            view.FontSize = UiHelper.ClampNumeric(vm.FontSize, view.FontSizeMinimum, view.FontSizeMaximum);
+            view.ImageHeadingHeight = UiHelper.ClampNumeric(vm.ImageHeadingHeight,view.ImageHeightMinimum, view.ImageHeightMaximum);
+            view.SetHeaderPreview(vm.PathImageHeading);
+            view.SetFooterPreview(vm.PathImageFooter);
         }
 
         /// <summary>

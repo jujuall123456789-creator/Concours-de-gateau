@@ -168,7 +168,7 @@ namespace DuelDeGateaux.ViewModels
                 SubjectMailChallenger = config.SubjectMailChallenger,
                 SubjectMailEater = config.SubjectMailEater,
 
-                Participants = config.Participants ?? new()
+                Participants = config.Participants?.ToList() ?? new()
             };
         }
 
@@ -209,7 +209,7 @@ namespace DuelDeGateaux.ViewModels
                 SubjectMailChallenger = SubjectMailChallenger,
                 SubjectMailEater = SubjectMailEater,
 
-                Participants = Participants
+                Participants = Participants.ToList()
             };
         }
 
