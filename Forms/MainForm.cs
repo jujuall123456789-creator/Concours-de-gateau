@@ -418,6 +418,41 @@ namespace DuelDeGateaux.Forms
                 this.Cursor = Cursors.Default;
             }
         }
+                /// <summary>
+        /// Action utilisateur pour prévisualiser les templates d'e-mail
+        /// </summary>
+        private void BtnPreview_Click(object sender, EventArgs e)
+        {
+            UiHelper.ExecuteWithErrorHandling(() =>
+            {
+                // On met à jour la configuration en mémoire avec ce que l'utilisateur a tapé
+                MainFormMapper.UpdateViewModel(this, viewModel);
+                var currentConfig = viewModel.ToConfig();
+
+                // On demande quel mail prévisualiser
+                var result = MessageBox.Show(
+                    "Veux-tu prévisualiser l'email destiné aux Challengers ?\n\n(Clique sur 'Non' pour voir l'email du Jury / des Mangeurs)", 
+                    "Choix de l'aperçu", 
+                    MessageBoxButtons.YesNoCancel, 
+                    MessageBoxIcon.Question);
+
+                if (result == DialogResult.Cancel) return;
+
+                bool isChallenger = (result == DialogResult.Yes);
+                string title = isChallenger ? "Mail Challengers" : "Mail Jury (Mangeurs)";
+                
+                // On récupère le HTML généré
+                string html = EmailService.GetPreviewHtml(currentConfig, isChallenger);
+
+                // On ouvre notre belle fenêtre WebView2
+                using (var previewWindow = new PreviewForm(html, title))
+                {
+                    previewWindow.ShowDialog();
+                }
+
+            }, null);
+        }
+
         /// <summary>
         /// Action utilisateur pour sauvegarder la configuration.
         /// </summary>
