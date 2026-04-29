@@ -5,7 +5,7 @@ namespace DuelDeGateaux.Models
     /// <summary>
     /// Réprésente toute la configuration du concours
     /// </summary>
-    internal class AppConfig
+    public class AppConfig
     {
         //EMAIL
         public string SenderEmail { get; set; } = string.Empty;

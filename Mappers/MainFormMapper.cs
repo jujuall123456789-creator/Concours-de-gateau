@@ -1,4 +1,5 @@
 using DuelDeGateaux.Contracts;
+using DuelDeGateaux.Helpers;
 using DuelDeGateaux.ViewModels;
 
 namespace DuelDeGateaux.Mappers
@@ -94,8 +95,8 @@ namespace DuelDeGateaux.Mappers
         {
             view.PathImageHeading = vm.PathImageHeading;
             view.PathImageFooter = vm.PathImageFooter;
-            view.FontSize = UiHelper.ClampNumeric(vm.FontSize, view.FontSizeMinimum, view.FontSizeMaximum);
-            view.ImageHeadingHeight = UiHelper.ClampNumeric(vm.ImageHeadingHeight,view.ImageHeightMinimum, view.ImageHeightMaximum);
+            view.FontSize = (int)MathHelper.ClampNumeric(vm.FontSize, view.FontSizeMinimum, view.FontSizeMaximum);
+            view.ImageHeadingHeight = (int)MathHelper.ClampNumeric(vm.ImageHeadingHeight, view.ImageHeightMinimum, view.ImageHeightMaximum);
             view.SetHeaderPreview(vm.PathImageHeading);
             view.SetFooterPreview(vm.PathImageFooter);
         }

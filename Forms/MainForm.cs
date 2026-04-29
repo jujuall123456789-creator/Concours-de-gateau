@@ -1,8 +1,8 @@
+using DuelDeGateaux.Contracts;
 using DuelDeGateaux.Helpers;
+using DuelDeGateaux.Mappers;
 using DuelDeGateaux.Models;
 using DuelDeGateaux.Services;
-using DuelDeGateaux.Tools;
-using System.Net.Mail;
 using DuelDeGateaux.ViewModels;
 
 namespace DuelDeGateaux.Forms
@@ -50,10 +50,7 @@ namespace DuelDeGateaux.Forms
             get => datePicker.Value;
              set
             {
-                if (DateTime.TryParse(value, out DateTime date))
-                {
-                    datePicker.Value = date;
-                }
+                    datePicker.Value = value;
             }
         }
 
@@ -86,9 +83,9 @@ namespace DuelDeGateaux.Forms
             }
         }
 
-        public int FontSize { get => (int)numFontSize.Value; set => numFontSize.Value = UiHelper.ClampNumeric(value, numFontSize.Minimum, numFontSize.Maximum); }
+        public int FontSize { get => (int)numFontSize.Value; set => numFontSize.Value = MathHelper.ClampNumeric(value, numFontSize.Minimum, numFontSize.Maximum); }
         public string PathImageHeading { get => txtImageHeader.Text; set => txtImageHeader.Text = value; }
-        public int ImageHeadingHeight { get => (int)numImageHeight.Value; set => numImageHeight.Value = UiHelper.ClampNumeric(value, numImageHeight.Minimum, numImageHeight.Maximum); }
+        public int ImageHeadingHeight { get => (int)numImageHeight.Value; set => numImageHeight.Value = MathHelper.ClampNumeric(value, numImageHeight.Minimum, numImageHeight.Maximum); }
         public string PathImageFooter { get => txtImageFooter.Text; set => txtImageFooter.Text = value; }
         public decimal FontSizeMinimum => numFontSize.Minimum;
         public decimal FontSizeMaximum => numFontSize.Maximum;

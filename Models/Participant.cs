@@ -3,7 +3,7 @@
     /// <summary>
     /// Représente un participant du concours de gâteau
     /// </summary>
-    internal class Participant
+    public class Participant
     {
         /// <summary>
         /// Nom affiché du participant

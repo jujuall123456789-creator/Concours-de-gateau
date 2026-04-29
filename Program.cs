@@ -1,7 +1,4 @@
-﻿using System.Net.Mail;
-using DuelDeGateaux;
-using DuelDeGateaux.Models;
-using UTIL_SMTPLib;
+﻿using DuelDeGateaux.Forms;
 
 
 namespace DuelDeGateaux
