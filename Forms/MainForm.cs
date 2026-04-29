@@ -452,6 +452,7 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void BtnPreview_Click(object sender, EventArgs e)
         {
+            AudioService.PlayPreviewSound();
             UiHelper.ExecuteWithErrorHandling(() =>
             {
                 // On met à jour la configuration en mémoire avec ce que l'utilisateur a tapé
@@ -495,6 +496,7 @@ namespace DuelDeGateaux.Forms
                 EndEditParticipants();
                 SaveConfig();
             },"Configuration sauvegardée! ");
+            AudioService.PlaySaveSound();
         }
 
         /// <summary>
@@ -503,7 +505,8 @@ namespace DuelDeGateaux.Forms
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void BtnHistory_Click(object sender, EventArgs e)
-        {
+        {            
+           AudioService.PlayHistorySound();
            new HistoryForm().ShowDialog();
         }
 
@@ -514,6 +517,7 @@ namespace DuelDeGateaux.Forms
         /// <param name="e"></param>
         private void BtnOpenjson_Click(object sender, EventArgs e)
         {
+            AudioService.PlayOpenJsonSound();
             ConfigService.OpenConfigFile();
         }
 
@@ -522,6 +526,7 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void BtnPrintBallot_Click(object sender, EventArgs e)
         {
+            AudioService.PlayPrintBallotSound();
             UiHelper.ExecuteWithErrorHandling(() =>
             {
                 // On sauvegarde d'abord pour être sûr d'avoir la bonne date et le bon nombre de gâteaux (2 ou 3)
@@ -746,8 +751,14 @@ namespace DuelDeGateaux.Forms
             toolTip.SetToolTip(btnSend,
                 "Lance l'envoi des emails.\n⚠️ Vérifie les champs avant !");
 
+            toolTip.SetToolTip(btnPreview,
+                "Preview des mails avec un moteur de rendu HTML.");
+
             toolTip.SetToolTip(btnSave,
                 "Sauvegarde la configuration dans le fichier JSON.");
+
+            toolTip.SetToolTip(btnPrintBallot,
+                "Ouvre la page d'impression des bulletins de vote.");
 
             toolTip.SetToolTip(btnHistory,
                 "Ouvre la page d'historique des derniers concours.");

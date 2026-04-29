@@ -9,62 +9,93 @@ namespace DuelDeGateaux.Repositories
 {
     internal static class AudioService
     {
-        // 📁 Chemin du son SendSoundName 
+        / ==========================================
+        // 📁 CONSTANTES : NOMS DES FICHIERS
+        // ==========================================
         private const string SendSoundFileName = "OvenSound.mp3";
-
-        // 📁 Chemin du son d'ambiance 
+        private const string SaveSoundFileName = "success.mp3";
+        private const string OpenJsonSoundFileName = "open-door.mp3";
+        private const string HistorySoundFileName = "SlurpLick.mp3";
+        private const string PrintBallotSoundFileName = "CartoonPoof.mp3";
+        private const string PreviewSoundFileName = "bubble.mp3";
         private const string MusicName = "ShortChillMusic.mp3";
+
 
         // Importation de la fonction magique de Windows pour lire les MP3
         [DllImport("winmm.dll")]
         private static extern long mciSendString(string command, StringBuilder returnValue, int returnLength, nint winHandle);
 
+        // ==========================================
+        // 🛠️ MÉTHODE CENTRALE
+        // ==========================================
+
         /// <summary>
-        /// Lance la musique de fond en boucle.
+        /// Gère la lecture de n'importe quel fichier audio de manière sécurisée.
         /// </summary>
-        public static void PlayBackgroundMusic()
+        /// <param name="fileName">Le nom du fichier à jouer (ex: "bubble.mp3")</param>
+        /// <param name="alias">Le pseudo donné au lecteur Windows (ex: "sfx" ou "bgmusic")</param>
+        /// <param name="loop">Si true, la musique tourne en boucle</param>
+        private static void PlayAudio(string fileName, string alias, bool loop = false)
         {
             try
             {
-                string path = FileSelectionService.FilePathAssets(MusicName);
+                string path = FileSelectionService.FilePathAssets(fileName);
                 if (File.Exists(path))
                 {
-                    // Ouvre le fichier et lui donne le pseudo "bgmusic"
-                    mciSendString($"open \"{path}\" type mpegvideo alias bgmusic", null, 0, nint.Zero);
-                    // Joue la musique avec l'option "repeat" pour boucler Ã  l'infini
-                    mciSendString("play bgmusic repeat", null, 0, nint.Zero);
+                    // 1. Ferme le son s'il était déjà en cours de lecture sur cet alias
+                    mciSendString($"close {alias}", null, 0, nint.Zero);
+                    
+                    // 2. Ouvre le fichier avec l'alias spécifié
+                    mciSendString($"open \"{path}\" type mpegvideo alias {alias}", null, 0, nint.Zero);
+                    
+                    // 3. Joue le son (avec ou sans répétition)
+                    string playCommand = loop ? $"play {alias} repeat" : $"play {alias}";
+                    mciSendString(playCommand, null, 0, nint.Zero);
                 }
             }
-            catch { /* On ignore si pas de carte son ou fichier manquant */ }
-        }
-
-        /// <summary>
-        /// Joue un effet sonore ponctuel (se superpose Ã  la musique).
-        /// </summary>
-        public static void PlaySendSound()
-        {
-            try
-            {
-                string path = FileSelectionService.FilePathAssets(SendSoundFileName);
-                if (File.Exists(path))
-                {
-                    // Ferme le son s'il Ã©tait dÃ©jÃ  en train d'Ãªtre jouÃ©
-                    mciSendString("close sfx", null, 0, nint.Zero);
-                    // Ouvre le fichier
-                    mciSendString($"open \"{path}\" type mpegvideo alias sfx", null, 0, nint.Zero);
-                    // Joue le son une fois
-                    mciSendString("play sfx", null, 0, nint.Zero);
-                }
+            catch 
+            { 
+                // On ignore silencieusement si la carte son n'est pas dispo ou le fichier manquant
             }
-            catch { }
         }
 
+        // ==========================================
+        // 🎵 LECTURE DE LA MUSIQUE D'AMBIANCE
+        // ==========================================
+        
         /// <summary>
-        /// ArrÃªte la musique de fond (utile si tu veux un bouton Mute un jour).
+        /// Lance la musique de fond en boucle (utilise l'alias "bgmusic").
         /// </summary>
-        public static void StopBackgroundMusic()
-        {
-            mciSendString("close bgmusic", null, 0, nint.Zero);
-        }
+        public static void PlayBackgroundMusic() => PlayAudio(MusicName, "bgmusic", true);
+
+        /// <summary>
+        /// Arrête la musique de fond.
+        /// </summary>
+        public static void StopBackgroundMusic() => mciSendString("close bgmusic", null, 0, nint.Zero);
+
+
+        // ==========================================
+        // 💥 EFFETS SONORES (SFX)
+        // ==========================================
+        // Note : On utilise le même alias "sfx" pour tous les effets ponctuels.
+        // Cela permet de couper proprement un son en cours si l'utilisateur clique très vite.
+
+        /// <summary>Joue le son de l'envoi d'emails (four).</summary>
+        public static void PlaySendSound() => PlayAudio(SendSoundFileName, "sfx");
+
+        /// <summary>Joue le son de sauvegarde (succès).</summary>
+        public static void PlaySaveSound() => PlayAudio(SaveSoundFileName, "sfx");
+
+        /// <summary>Joue le son d'ouverture de fichier JSON (porte).</summary>
+        public static void PlayOpenJsonSound() => PlayAudio(OpenJsonSoundFileName, "sfx");
+
+        /// <summary>Joue le son d'ouverture de l'historique (slurp).</summary>
+        public static void PlayHistorySound() => PlayAudio(HistorySoundFileName, "sfx");
+
+        /// <summary>Joue le son de l'impression des bulletins (poof).</summary>
+        public static void PlayPrintBallotSound() => PlayAudio(PrintBallotSoundFileName, "sfx");
+
+        /// <summary>Joue le son de la prévisualisation (bulle).</summary>
+        public static void PlayPreviewSound() => PlayAudio(PreviewSoundFileName, "sfx");
     }
 }
