@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DuelDeGateaux.Services
+﻿namespace DuelDeGateaux.Services
 {
-    internal static class FileHelper
+    internal static class FileSelectionService
     {
         /// <summary>
         /// Ouvre un sélecteur de fichier Image au format PNG, JPG
@@ -28,6 +22,24 @@ namespace DuelDeGateaux.Services
         public static bool FileExists(string path)
         {
             return File.Exists(path);
+        }
+
+        public static string FilePathData(string fileName)
+        {
+#if DEBUG
+            return Path.Combine("../../../Data", fileName);
+#else
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+#endif
+        }
+
+        public static string FilePathAssets(string fileName)
+        {
+#if DEBUG
+            return Path.Combine("../../../Assets", fileName);
+#else
+            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileName);
+#endif
         }
     }
 }

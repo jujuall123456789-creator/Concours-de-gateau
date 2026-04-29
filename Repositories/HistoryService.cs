@@ -12,11 +12,7 @@ namespace DuelDeGateaux.Services
         /// <summary>
         /// Chemin du fichier utilsié pour l'historique au format JSON
         /// </summary>
-#if DEBUG
-        private static readonly string path = Path.Combine("../../../", FileName);
-#else
-        private static readonly string path=Path.Combine(AppDomain.CurrentDomain.BaseDirectory,FileName);
-#endif
+        private static readonly string Path =  FileSelectionService.FilePathData(FileName);
         /// <summary>
         /// Ajoute un concours dans l'historique
         /// </summary>
@@ -41,11 +37,11 @@ namespace DuelDeGateaux.Services
         public static List<ChallengeHistoryEntry> Load()
         {
             // Si le fichier n'exite pas, on retourne une liste vide
-            if (!File.Exists(path))
+            if (!File.Exists(Path))
             {
                 return new List<ChallengeHistoryEntry>();
             }
-            string json = File.ReadAllText(path);
+            string json = File.ReadAllText(Path);
             if(!String.IsNullOrEmpty(json.Trim()))
             {
                 List<ChallengeHistoryEntry> challengeHsitoryEntry = JsonSerializer.Deserialize<List<ChallengeHistoryEntry>>(json) ?? new List<ChallengeHistoryEntry>();
@@ -59,7 +55,7 @@ namespace DuelDeGateaux.Services
         /// <param name="config"></param>
         public static void Save(List<ChallengeHistoryEntry> list)
         {
-            File.WriteAllText(path, JsonSerializer.Serialize(list, new JsonSerializerOptions { WriteIndented = true, }));
+            File.WriteAllText(Path, JsonSerializer.Serialize(list, new JsonSerializerOptions { WriteIndented = true, }));
         }
 
     }

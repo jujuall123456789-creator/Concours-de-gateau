@@ -2,6 +2,7 @@ using DuelDeGateaux.Contracts;
 using DuelDeGateaux.Helpers;
 using DuelDeGateaux.Mappers;
 using DuelDeGateaux.Models;
+using DuelDeGateaux.Repositories;
 using DuelDeGateaux.Services;
 using DuelDeGateaux.ViewModels;
 
@@ -228,7 +229,7 @@ namespace DuelDeGateaux.Forms
             try
             {
                 // On construit le chemin vers le fichier .cur dans le dossier Assets
-                string cursorPath = Path.Combine(Application.StartupPath, "Assets", "rouleau.cur");
+                string cursorPath = FileSelectionService.FilePathAssets("rouleau.cur");
 
                 if (File.Exists(cursorPath))
                 {
@@ -600,7 +601,7 @@ namespace DuelDeGateaux.Forms
         /// <param name="pictureBox"></param>
         private void BrowseImage_Click(object sender, EventArgs e, TextBox textBox, PictureBox pictureBox)
         {
-            string path = FileHelper.SelectImage(textBox.Text);
+            string path = FileSelectionService.SelectImage(textBox.Text);
             if (!string.IsNullOrEmpty(path))
             {
                 LoadImageUserInput(path, textBox, pictureBox);

@@ -16,17 +16,7 @@ namespace DuelDeGateaux.Services
         /// Chemin du fichier de configuration JSON
         /// Gère le décalage de dossier en mode Debug pour Visual Studio.
         /// </summary>
-        private static string ConfigPath
-        {
-            get
-            {
-#if DEBUG
-                return Path.Combine("../../../Data", FileName);
-#else
-                return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, FileName);
-#endif
-            }
-        }
+        private static readonly string ConfigPath = FileSelectionService.FilePathData(FileName);
         /// <summary>
         /// Charge la configuration. 
         /// Retourne une config par défaut si le fichier n'existe pas.
