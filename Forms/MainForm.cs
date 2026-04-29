@@ -425,6 +425,11 @@ namespace DuelDeGateaux.Forms
         /// <param name="isChallenger">True pour le mail Challenger, False pour le mail Jury.</param>
         private void LaunchPreviewWindow(bool isChallenger)
         {
+            if (!ValidateFields())
+            {
+                return;
+            }
+
             UiHelper.ExecuteWithErrorHandling(() =>
             {
                 // On joue le petit son de bulle qu'on a configuré !
