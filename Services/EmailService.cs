@@ -102,12 +102,12 @@ namespace DuelDeGateaux.Services
         // ==========================================
         private static string GenerateChallengerHtml(AppConfig config, string participantName, string opponents, string headerBase64, string footerBase64)
         {
+            // FIX OUTLOOK : width="600" et height="{config.ImageHeadingHeight}" sans 'px' !
             string headerImageHtml = string.IsNullOrEmpty(headerBase64) ? "" :
-                $@"<tr><td align='center' bgcolor='#FBEEE6'><img src='data:image/jpeg;base64,{headerBase64}' height='{config.ImageHeadingHeight}' width='512px' style='display:block; width : 512px; border:none; max-width:512px;' alt='Header'></td></tr>";
+                $@"<tr><td align='center' bgcolor='#FBEEE6'><img src='data:image/jpeg;base64,{headerBase64}' width='600' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:600px; height:{config.ImageHeadingHeight}px;' alt='Header'></td></tr>";
 
-            // FIX OUTLOOK : Ajout de l'attribut HTML width='250'
             string footerImageHtml = string.IsNullOrEmpty(footerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-top:20px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' style='display:block; border:none; width:250px; max-width:250px;' alt='Footer'></td></tr>";
+                $@"<tr><td align='center' style='padding-top:20px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' style='display:block; border:none; max-width:250px;' alt='Footer'></td></tr>";
 
             return $@"
             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#f4f4f4'>
@@ -159,14 +159,13 @@ namespace DuelDeGateaux.Services
         // ==========================================
         private static string GenerateEaterHtml(AppConfig config, string eaterName, string challengersAnnouncement, string headerBase64, string footerBase64)
         {
+            // FIX OUTLOOK : width="600" et height="{config.ImageHeadingHeight}" sans 'px' !
             string headerRow = string.IsNullOrEmpty(headerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-bottom:20px;'><img src='data:image/jpeg;base64,{headerBase64}' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:100%;'></td></tr>";
+                $@"<tr><td align='center' style='padding-bottom:20px;'><img src='data:image/jpeg;base64,{headerBase64}' width='600' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:600px; height:{config.ImageHeadingHeight}px;'></td></tr>";
 
-            // FIX OUTLOOK : Ajout de l'attribut HTML width='250' sur l'image
             string footerRow = string.IsNullOrEmpty(footerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-top:40px;'><img src='data:image/jpeg;base64,{footerBase64}'  height='250' width='250' style='display:block; border:none; width:250px; max-width:250px;'></td></tr>";
+                $@"<tr><td align='center' style='padding-top:40px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' style='display:block; border:none; max-width:250px;'></td></tr>";
 
-            // FIX OUTLOOK : Création d'un espaceur universel réutilisable (30px de haut)
             string spacer30 = "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'><tr><td height='30' style='font-size:0px; line-height:0px;'>&nbsp;</td></tr></table>";
 
             return $@"
@@ -195,11 +194,13 @@ namespace DuelDeGateaux.Services
                                   🧑‍🍳 <strong>Ils ont la consigne suivante : {config.ChallengeRules}</strong>
                                 </p>
                     
-                                <p style='color: #DB1616; font-size: 20px; font-weight: bold; text-align: center; margin-top: 35px;'>
+                                <p style='color: #DB1616; font-size: 20px; font-weight: bold; text-align: center; margin: 35px 0;'>
                                   {config.ChallengeParticipationMessage}
                                 </p>
 
-                                {spacer30} <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
+                                {spacer30} 
+                                
+                                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                   <tr>
                                     <td bgcolor='#FCE4EC' style='padding: 30px; border-radius: 15px; border: 1px solid #F8BBD0;'>
                                       <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
@@ -229,7 +230,9 @@ namespace DuelDeGateaux.Services
                                   </tr>
                                 </table>
 
-                                {spacer30} <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#ffffff' style='border: 2px dashed #F8BBD0; border-radius: 15px;'>
+                                {spacer30} 
+                                
+                                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#ffffff' style='border: 2px dashed #F8BBD0; border-radius: 15px;'>
                                   <tr>
                                     <td align='center' style='padding: 20px; font-size: 16px; color: #333333; font-weight: bold;'>
                                       Les règles sont simples : ils pâtissent, on déguste, et on élit le meilleur gâteau.<br>                                      
@@ -238,7 +241,9 @@ namespace DuelDeGateaux.Services
                                   </tr>
                                 </table>
                     
-                                {spacer30} <table role='presentation' width='100%' cellspacing='0' cellpadding='15' border='0' bgcolor='#1A1A1A' style='border-radius: 8px;'>
+                                {spacer30} 
+                                
+                                <table role='presentation' width='100%' cellspacing='0' cellpadding='15' border='0' bgcolor='#1A1A1A' style='border-radius: 8px;'>
                                   <tr>
                                     <td align='center' style='color: #ffffff; font-weight: bold; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase;'>
                                       Préparez vos bavoirs, on a hâte ! 👅
