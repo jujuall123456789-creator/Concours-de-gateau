@@ -159,6 +159,7 @@ namespace DuelDeGateaux.Forms
         /// Boutons principaux
         /// </summary>
         private Button btnSend;
+        private Button btnPreview;
         private Button btnSave;
         private Button btnOpenJson;
         private Button btnHistory;
@@ -655,14 +656,21 @@ namespace DuelDeGateaux.Forms
             // =============================
             btnSend = new Button();
             btnSend.Text = "🚀 Envoyer";
-            btnSend.SetBounds(10, 600, 160, 50); // Largeur réduite à 160
+            btnSend.SetBounds(10, 600, 140, 50); // Largeur réduite à 160
             btnSend.Click += BtnRun_Click;
             btnSend.BackColor = Color.LightSeaGreen;
             btnSend.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
 
+            btnPreview = new Button();
+            btnPreview.Text = "👁️ Aperçu Mails";
+            btnPreview.SetBounds(150, 600, 140, 50); // Largeur réduite à 160
+            btnPreview.Click += BtnPreview_Click;
+            btnPreview.BackColor = Color.LightGoldenrodYellow;
+            btnPreview.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
+
             btnSave = new Button();
             btnSave.Text = "💾 Sauvegarder";
-            btnSave.SetBounds(180, 600, 160, 50); // Ajusté
+            btnSave.SetBounds(300, 600, 140, 50); // Ajusté
             btnSave.Click += BtnSave_Click;
             btnSave.BackColor = Color.LightGreen;
             btnSave.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
@@ -670,21 +678,21 @@ namespace DuelDeGateaux.Forms
             // 🖨️ NOUVEAU BOUTON : BULLETINS
             btnPrintBallot = new Button();
             btnPrintBallot.Text = "🖨️ Bulletins";
-            btnPrintBallot.SetBounds(350, 600, 160, 50);
+            btnPrintBallot.SetBounds(450, 600, 140, 50);
             btnPrintBallot.Click += BtnPrintBallot_Click;
             btnPrintBallot.BackColor = Color.LightYellow;
             btnPrintBallot.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
 
             btnOpenJson = new Button();
             btnOpenJson.Text = "📂 Ouvrir JSON";
-            btnOpenJson.SetBounds(520, 600, 160, 50); // Ajusté
+            btnOpenJson.SetBounds(600, 600, 140, 50); // Ajusté
             btnOpenJson.Click += BtnOpenjson_Click;
             btnOpenJson.BackColor = Color.LightBlue;
             btnOpenJson.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
 
             btnHistory = new Button();
             btnHistory.Text = "📖 Historique";
-            btnHistory.SetBounds(690, 600, 160, 50); // Ajusté
+            btnHistory.SetBounds(750, 600, 140, 50); // Ajusté
             btnHistory.Click  += BtnHistory_Click;
             btnHistory.BackColor = Color.LightGray;
             btnHistory.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
