@@ -54,7 +54,7 @@ namespace DuelDeGateaux.Forms
             ClientSize = new Size(800, 501);
             Controls.Add(dgvHistory);
             Name = "HistoryForm";
-            Text = "📜 HistoryForm";
+            Text = "📖 Historique des manches";
             Load += HistoryForm_Load;
             ((System.ComponentModel.ISupportInitialize)dgvHistory).EndInit();
             ResumeLayout(false);
