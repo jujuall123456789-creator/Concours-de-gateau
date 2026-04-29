@@ -107,7 +107,7 @@ namespace DuelDeGateaux.Services
                 $@"<tr><td align='center' bgcolor='#FBEEE6'><img src='data:image/jpeg;base64,{headerBase64}' width='600' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:600px; height:{config.ImageHeadingHeight}px;' alt='Header'></td></tr>";
 
             string footerImageHtml = string.IsNullOrEmpty(footerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-top:20px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' style='display:block; border:none; max-width:250px;' alt='Footer'></td></tr>";
+                $@"<tr><td align='center' style='padding-top:20px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' height='250' style='display:block; border:none; max-width:250px;' alt='Footer'></td></tr>";
 
             return $@"
             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#f4f4f4'>
@@ -164,7 +164,7 @@ namespace DuelDeGateaux.Services
                 $@"<tr><td align='center' style='padding-bottom:20px;'><img src='data:image/jpeg;base64,{headerBase64}' width='600' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:600px; height:{config.ImageHeadingHeight}px;'></td></tr>";
 
             string footerRow = string.IsNullOrEmpty(footerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-top:40px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' style='display:block; border:none; max-width:250px;'></td></tr>";
+                $@"<tr><td align='center' style='padding-top:40px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' height='250' style='display:block; border:none; max-width:250px;'></td></tr>";
 
             string spacer30 = "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'><tr><td height='30' style='font-size:0px; line-height:0px;'>&nbsp;</td></tr></table>";
 
