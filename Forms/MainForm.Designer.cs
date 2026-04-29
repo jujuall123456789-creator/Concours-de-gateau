@@ -63,10 +63,6 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private RadioButton rb3Challengers;
         /// <summary>
-        /// GroupeBox regroupant les radio boutons
-        /// </summary>
-        private GroupBox grpChallengersCount;
-        /// <summary>
         /// Groupe affichage
         /// </summary>
         private GroupBox grpDisplay;
@@ -292,7 +288,7 @@ namespace DuelDeGateaux.Forms
             //Prix
             Label lblPrice = new Label()
             {
-                Text = "Récompnse :",
+                Text = "Récompense :",
                 Left = 20,
                 Top = 180,
                 Width = 150
