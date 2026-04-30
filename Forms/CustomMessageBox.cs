@@ -1,4 +1,4 @@
-using DuelDeGateaux.Repositories;
+﻿using DuelDeGateaux.Repositories;
 using DuelDeGateaux.Services;
 using System;
 using System.Drawing;
@@ -18,11 +18,11 @@ namespace DuelDeGateaux.Forms
             InitializeComponent();
 
             this.Text = title;
-            lblMessage.Text = message;
+            rtbMessage.Text = message;
 
             // 🪄 Application du curseur Rouleau à pâtisserie sur le fond
             this.Cursor = CursorService.LoadCustomCursor() ?? Cursors.Default;
-
+            rtbMessage.Cursor = this.Cursor;
             LoadCustomIcon(icon);
             SetupButtons(buttons);
         }
@@ -35,11 +35,11 @@ namespace DuelDeGateaux.Forms
             if (icon == MessageBoxIcon.Warning)
             {
                 // 🎂 On tente de charger notre image de gâteau brûlé
-                string burntCakePath = FileSelectionService.FilePathAssets("burnt_cake.png");
-                
-                if (File.Exists(burntCakePath))
+                string forbiddenCakePath = FileSelectionService.FilePathAssets("forbiddenCake.png");
+
+                if (File.Exists(forbiddenCakePath))
                 {
-                    picIcon.Image = Image.FromFile(burntCakePath);
+                    picIcon.Image = Image.FromFile(forbiddenCakePath);
                 }
                 else
                 {
@@ -64,18 +64,18 @@ namespace DuelDeGateaux.Forms
             {
                 Button btnNo = CreateButton("Non", DialogResult.No, buttonCursor);
                 Button btnYes = CreateButton("Oui", DialogResult.Yes, buttonCursor);
-                
+
                 // L'ordre d'ajout est inversé car le FlowLayoutPanel est en "RightToLeft"
                 pnlButtons.Controls.Add(btnNo);
                 pnlButtons.Controls.Add(btnYes);
-                
+
                 this.CancelButton = btnNo;
             }
             else // Par défaut, on met juste un bouton OK
             {
                 Button btnOk = CreateButton("OK", DialogResult.OK, buttonCursor);
                 pnlButtons.Controls.Add(btnOk);
-                
+
                 this.AcceptButton = btnOk;
                 this.CancelButton = btnOk;
             }
@@ -85,15 +85,19 @@ namespace DuelDeGateaux.Forms
         {
             Button btn = new Button
             {
-                Text = text,
-                Width = 100,
-                Height = 35,
-                Margin = new Padding(10, 5, 0, 5),
+                Text = text.ToUpper(),
+                Width = 110,
+                Height = 20,
+                Margin = new Padding(0, 5, 0, 5),
                 Cursor = cursor, // 👆 Le fameux curseur Muffin !
                 FlatStyle = FlatStyle.Flat,
-                BackColor = Color.White
+                BackColor = Color.LightPink,
+                Font = new Font("Segoe UI Emoji", 10F, FontStyle.Bold)
+                
+                
             };
-            btn.FlatAppearance.BorderColor = Color.LightGray;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.FlatAppearance.MouseOverBackColor = Color.SeaGreen;
 
             btn.Click += (s, e) =>
             {
@@ -113,6 +117,21 @@ namespace DuelDeGateaux.Forms
                 customBox.ShowDialog();
                 return customBox._result;
             }
+        }
+
+        private void CustomMessageBox_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void lblMessage_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void rtbMessage_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

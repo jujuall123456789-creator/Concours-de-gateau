@@ -85,6 +85,8 @@ namespace DuelDeGateaux.Forms
                 viewModel.LoadFrom(loadedVm);
                 rb2Challengers.Checked = viewModel.ChallengerNumber == 2;
                 rb3Challengers.Checked = viewModel.ChallengerNumber == 3;
+                pictureHeaderImage.DragDrop += (s, e) => PictureBox_DragDrop(sender: s, e: e, associatedTextBox: txtImageHeader);
+                pictureFooterImage.DragDrop += (s, e) => PictureBox_DragDrop(sender: s, e: e, associatedTextBox: txtImageFooter);
                 // 4) Connecter la grille
                 SetupParticipantsGrid();
 
@@ -225,7 +227,7 @@ namespace DuelDeGateaux.Forms
             // Boutons principaux
             btnSend.Cursor = btnPreview.Cursor = btnSave.Cursor = btnPrintBallot.Cursor = btnHistory.Cursor = btnOpenJson.Cursor = actionCursor;
             // Boutons d'images et d'ajout
-            btnBrowseHeader.Cursor = btnBrowseFooter.Cursor = btnAddParticipantsList.Cursor = actionCursor;
+            btnBrowseHeader.Cursor = btnBrowseFooter.Cursor = btnAddParticipants.Cursor = actionCursor;
         }
 
         /// <summary>
@@ -595,7 +597,7 @@ namespace DuelDeGateaux.Forms
         private void dgvParticipants_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
         {
             // Si on survole la colonne de suppression (la dernière)
-            int deleteColumnindex = dgvParticipants.Columns.GetLastColumn(DataGridViewElementStates.None, DataGridViewElementStates.None).Index;
+            int deleteColumnIndex = dgvParticipants.Columns.GetLastColumn(DataGridViewElementStates.None, DataGridViewElementStates.None).Index;
             
             if (e.RowIndex >= 0 && e.ColumnIndex == deleteColumnIndex)
             {

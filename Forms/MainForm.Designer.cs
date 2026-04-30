@@ -446,8 +446,7 @@ namespace DuelDeGateaux.Forms
                 Cursor = Cursors.Default,
                 AllowDrop = true
             };
-            pictureHeaderImage.DragEnter += PictureBox_DragEnter;
-            pictureHeaderImage.DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageHeader);
+            pictureHeaderImage.DragEnter += PictureBox_DragEnter;            
             pictureHeaderImage.MouseEnter += PictureBox_MouseEnter;
             pictureHeaderImage.MouseLeave += PictureBox_MouseLeave;            
 
@@ -483,7 +482,6 @@ namespace DuelDeGateaux.Forms
                 AllowDrop =true
             };
             pictureFooterImage.DragEnter += PictureBox_DragEnter;
-            pictureFooterImage.DragDrop += (s, e) => PictureBox_DragDrop(s, e, txtImageFooter);
             pictureFooterImage.MouseEnter += PictureBox_MouseEnter;
             pictureFooterImage.MouseLeave += PictureBox_MouseLeave;
 
