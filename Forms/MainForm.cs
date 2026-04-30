@@ -381,7 +381,7 @@ namespace DuelDeGateaux.Forms
             // Création du menu déroulant
             ContextMenuStrip previewMenu = new ContextMenuStrip();
             previewMenu.Cursor = Cursors.Hand; // Pour garder un bel aspect au survol
-            previewMenu.Font = new Font("Segoe UI", 10, FontStyle.Regular);
+            previewMenu.Font = new Font("Segoe UI Emoji", 10, FontStyle.Regular);
 
             // Option 1 : Les Challengers
             ToolStripMenuItem itemChallenger = new ToolStripMenuItem("⚔️ Aperçu Mail Challengers");
@@ -456,21 +456,70 @@ namespace DuelDeGateaux.Forms
         private void BtnHistory_Click(object sender, EventArgs e)
         {            
            AudioService.PlayHistorySound();
-           new HistoryForm().ShowDialog();
+           // Création du menu déroulant (comme pour la preview !)
+           ContextMenuStrip historyMenu = new ContextMenuStrip();
+           historyMenu.Cursor = Cursors.Hand; 
+           historyMenu.Font = new Font("Segoe UI Emoji", 10, FontStyle.Regular);
+
+           // Option 1 : Le tableau brut
+           ToolStripMenuItem itemTable = new ToolStripMenuItem("📖 Tableau brut");
+           itemTable.Click += btnMenuHistoryTable_Click;
+           
+           // Option 2 : L'arbre du tournoi
+           ToolStripMenuItem itemTree = new ToolStripMenuItem("🏆 Arbre du Tournoi");
+           itemTree.Click += btnMenuHistoryTree_Click; 
+
+           // Ajout des options au menu
+           historyMenu.Items.Add(itemTable);
+           historyMenu.Items.Add(new ToolStripSeparator());
+           historyMenu.Items.Add(itemTree);
+
+           // On affiche le menu juste en dessous du bouton cliqué
+           Button btn = (Button)sender;
+           historyMenu.Show(btn, new Point(0, btn.Height));
         }
-        // Clic sur "Tableau brut"
-        private void btnMenuHistoryTable_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Ouvre l'historique brut (le tableau classique)
+        /// </summary>
+        private void btnMenuHistoryTable_Click(object sender?, EventArgs e)
         {
             var historyForm = new HistoryForm();
             historyForm.ShowDialog();
         }
 
-        // Clic sur "Arbre du Tournoi"
-        private void btnMenuHistoryTree_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Ouvre le nouvel arbre du tournoi WebView2 !
+        /// </summary>
+        private void btnMenuHistoryTree_Click(object sender?, EventArgs e)
         {
-            // On passe la configuration actuelle (qui contient "Saison 1")
-            var tournamentForm = new TournamentForm(_viewModel.ToConfig()); 
-            tournamentForm.ShowDialog();
+            // On récupère la config à jour (qui contient la Saison actuelle)
+            var currentConfig = viewModel.ToConfig();
+            
+            using (var tournamentForm = new TournamentForm(currentConfig))
+            {
+                /// <summary>
+        /// Ouvre l'historique brut (le tableau classique)
+        /// </summary>
+        private void btnMenuHistoryTable_Click(object sender?, EventArgs e)
+        {
+            var historyForm = new HistoryForm();
+            historyForm.ShowDialog();
+        }
+
+        /// <summary>
+        /// Ouvre le nouvel arbre du tournoi WebView2 !
+        /// </summary>
+        private void btnMenuHistoryTree_Click(object sender?, EventArgs e)
+        {
+            // On récupère la config à jour (qui contient la Saison actuelle)
+            var currentConfig = viewModel.ToConfig();
+            
+            using (var tournamentForm = new TournamentForm(currentConfig))
+            {
+                tournamentForm.ShowDialog();
+            }
+        }.ShowDialog();
+            }
         }
 
         /// <summary>
