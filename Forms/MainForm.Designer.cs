@@ -432,8 +432,7 @@ namespace DuelDeGateaux.Forms
                 Left = 20,
                 Top = 120,
                 Width = 150,
-                Text = "Cherche des photos",
-                Cursor = Cursors.Hand
+                Text = "Cherche des photos"
             };
             btnBrowseHeader.Click += BtnBrowseHeader_Click;
 
@@ -472,7 +471,6 @@ namespace DuelDeGateaux.Forms
                 Top = 240,
                 Width = 150,
                 Text = "Cherche des photos",
-                Cursor = Cursors.Hand
             };
             btnBrowseFooter.Click += BtnBrowseFooter_Click;
 
@@ -482,7 +480,6 @@ namespace DuelDeGateaux.Forms
                 Left = 200,
                 Top = 240,
                 Height = 60,
-                Cursor = Cursors.No,
                 AllowDrop =true
             };
             pictureFooterImage.DragEnter += PictureBox_DragEnter;

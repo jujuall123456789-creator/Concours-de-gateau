@@ -1,4 +1,5 @@
 using DuelDeGateaux.Models;
+using System.ComponentModel;
 
 namespace DuelDeGateaux.Services
 {
@@ -7,7 +8,7 @@ namespace DuelDeGateaux.Services
     /// </summary>
     public static class ParticipantService
     {
-        public static void AddDefaultParticipant(List<Participant> participants, string email)
+        public static void AddDefaultParticipant(BindingList<Participant> participants, string email)
         {
             participants.Add(new Participant("👴PNJ👴", email));
         }

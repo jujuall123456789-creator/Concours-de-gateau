@@ -221,7 +221,7 @@ namespace DuelDeGateaux.Forms
         private void SetButtonCursors()
         {            
              Cursor? mycustomCursor = CursorService.LoadCustomButtonCursor();
-            if (mycustomCursor != null) hoverCursor = mycustomCursor;
+            Cursor hoverCursor = mycustomCursor ?? Cursors.Default;
 
             // On applique le curseur de survol à tous tes boutons principaux
             btnSend.Cursor = hoverCursor;

@@ -1,3 +1,4 @@
+using DuelDeGateaux.Models;
 using DuelDeGateaux.ViewModels;
 
 namespace DuelDeGateaux.Services
