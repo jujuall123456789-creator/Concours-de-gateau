@@ -626,6 +626,7 @@ namespace DuelDeGateaux.Forms
             });
             dgvParticipants.CellClick += new DataGridViewCellEventHandler(this.dgvParticipants_CellClick);
             dgvParticipants.Columns[dgvParticipants.ColumnCount-1].DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            dgvParticipants.CellMouseEnter += dgvParticipants_CellMouseEnter;
             //➕ Bouton Ajouter
             btnAddParticipants = new Button();
             btnAddParticipants.Text = "➕ Ajouter un participant";

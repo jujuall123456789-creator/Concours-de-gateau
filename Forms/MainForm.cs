@@ -221,17 +221,11 @@ namespace DuelDeGateaux.Forms
         private void SetButtonCursors()
         {            
              Cursor? mycustomCursor = CursorService.LoadCustomButtonCursor();
-            Cursor hoverCursor = mycustomCursor ?? Cursors.Default;
-
-            // On applique le curseur de survol à tous tes boutons principaux
-            btnSend.Cursor = hoverCursor;
-            btnPreview.Cursor = hoverCursor;
-            btnSave.Cursor = hoverCursor;
-            btnPrintBallot.Cursor = hoverCursor;
-            btnHistory.Cursor = hoverCursor;
-            btnOpenJson.Cursor = hoverCursor;            
-            btnBrowseHeader.Cursor = hoverCursor;
-            btnBrowseFooter.Cursor = hoverCursor;
+            Cursor actionCursor = mycustomCursor ?? Cursors.Default;
+            // Boutons principaux
+            btnSend.Cursor = btnPreview.Cursor = btnSave.Cursor = btnPrintBallot.Cursor = btnHistory.Cursor = btnOpenJson.Cursor = actionCursor;
+            // Boutons d'images et d'ajout
+            btnBrowseHeader.Cursor = btnBrowseFooter.Cursor = btnAddParticipantsList.Cursor = actionCursor;
         }
 
         /// <summary>
@@ -246,7 +240,7 @@ namespace DuelDeGateaux.Forms
             if (textCursor != null)
             {
                 // On lance le scan de la fenêtre pour appliquer le curseur
-                ApplyCursorToTextBoxes(this, textCursor);
+                ApplyCustomCursors(this, textCursor);
             }
         }
 
@@ -254,7 +248,7 @@ namespace DuelDeGateaux.Forms
         /// Fonction récursive qui fouille dans tous les conteneurs pour trouver les TextBox
         /// et leur appliquer le curseur personnalisé.
         /// </summary>
-        private void ApplyCursorToTextBoxes(Control parent, Cursor customCursor)
+        private void ApplyCustomCursors(Control parent, Cursor customCursor)
         {
             foreach (Control ctrl in parent.Controls)
             {
@@ -263,10 +257,18 @@ namespace DuelDeGateaux.Forms
                 {
                     txt.Cursor = customCursor;
                 }
+                else if (ctrl is NumericUpDown || ctrl is DateTimePicker)
+                {
+                    ctrl.Cursor = customCursor;
+                    foreach (Control child in ctrl.Controls)
+                    {
+                        child.Cursor = customCursor;
+                    }
+                }
                 // Si le contrôle contient d'autres contrôles (ex: un GroupBox), on fouille dedans !
                 else if (ctrl.HasChildren)
                 {
-                    ApplyCursorToTextBoxes(ctrl, customCursor);
+                    ApplyCustomCursors(ctrl, customCursor);
                 }
             }
         }
@@ -569,6 +571,24 @@ namespace DuelDeGateaux.Forms
                     RefreshParticipantDataGrid();
                     AudioService.PlayPreviewSound();
                 }
+            }
+        }
+        /// <summary>
+        /// Change le curseur en Muffin quand on survole la colonne de suppression.
+        /// </summary>
+        private void dgvParticipants_CellMouseEnter(object sender, DataGridViewCellEventArgs e)
+        {
+            // Si on survole la colonne de suppression (la dernière)
+            int deleteColumnindex = dgvParticipants.Columns.GetLastColumn(DataGridViewElementStates.None, DataGridViewElementStates.None).Index;
+            
+            if (e.RowIndex >= 0 && e.ColumnIndex == deleteColumnIndex)
+            {
+                dgvParticipants.Cursor = CursorService.LoadCustomButtonCursor() ?? Cursors.Default;
+            }
+            else
+            {
+                // Sinon on remet le curseur par défaut (ton rouleau)
+                dgvParticipants.Cursor = this.Cursor; 
             }
         }
         /// <summary>
