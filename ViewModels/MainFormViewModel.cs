@@ -1,142 +1,213 @@
 using DuelDeGateaux.Models;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace DuelDeGateaux.ViewModels
 {
     /// <summary>
-    /// Représente toutes les données manipulées dans le formulaire principal.
+    /// ViewModel principal du formulaire.
     ///
-    /// Cette classe sert d'intermédiaire entre :
-    /// - l'interface utilisateur (MainForm)
-    /// - le modèle de configuration (AppConfig)
+    /// Il représente l'état complet de l'interface.
+    /// Toutes les données affichées ou modifiées dans le formulaire
+    /// passent par cette classe.
     ///
-    /// Pourquoi ?
-    /// Pour éviter que le formulaire manipule directement la configuration.
-    /// Cela permet d'avoir un code plus clair et plus structuré.
+    /// Cette version implémente INotifyPropertyChanged
+    /// afin que l'interface puisse se synchroniser automatiquement.
     /// </summary>
-    public class MainFormViewModel
+    public class MainFormViewModel : INotifyPropertyChanged
     {
+        #region Notification automatique UI
+
+        /// <summary>
+        /// Événement déclenché lorsqu'une propriété change.
+        /// Permet aux contrôles liés (DataBinding) de se mettre à jour.
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// Méthode utilitaire pour modifier une propriété
+        /// et notifier automatiquement l'interface.
+        /// </summary>
+        protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = "")
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value))
+                return false;
+
+            field = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            return true;
+        }
+
+        #endregion
+
         #region Partie concours
 
-        /// <summary>
-        /// Date du concours.
-        /// Utilise DateTime pour simplifier la manipulation dans l'interface.
-        /// </summary>
-        public DateTime ChallengeDate { get; set; }
+        private DateTime challengeDate = DateTime.Today;
+        public DateTime ChallengeDate
+        {
+            get => challengeDate;
+            set => SetProperty(ref challengeDate, value);
+        }
 
-        /// <summary>
-        /// Heure du concours au format texte (ex : 14:30).
-        /// </summary>
-        public string ChallengeHour { get; set; } = "";
+        private string challengeHour = "09:00";
+        public string ChallengeHour
+        {
+            get => challengeHour;
+            set => SetProperty(ref challengeHour, value);
+        }
 
-        /// <summary>
-        /// Salle du concours.
-        /// </summary>
-        public string ChallengeRoom { get; set; } = "";
+        public DateTime ChallengeTime
+        {
+            get
+            {
+                if (TimeSpan.TryParse(ChallengeHour, out var ts))
+                    return DateTime.Today.Add(ts);
 
-        /// <summary>
-        /// Thème du concours.
-        /// </summary>
-        public string ChallengeTheme { get; set; } = "";
+                return DateTime.Today;
+            }
+            set => ChallengeHour = value.ToString("HH:mm");
+        }
 
-        /// <summary>
-        /// Règles du concours.
-        /// </summary>
-        public string ChallengeRules { get; set; } = "";
+        private string challengeRoom = "";
+        public string ChallengeRoom
+        {
+            get => challengeRoom;
+            set => SetProperty(ref challengeRoom, value);
+        }
 
-        /// <summary>
-        /// Prix à gagner.
-        /// </summary>
-        public string ChallengePrice { get; set; } = "";
+        private string challengeTheme = "";
+        public string ChallengeTheme
+        {
+            get => challengeTheme;
+            set => SetProperty(ref challengeTheme, value);
+        }
 
-        /// <summary>
-        /// Message de participation envoyé aux participants.
-        /// </summary>
-        public string ChallengeParticipationMessage { get; set; } = "";
+        private string challengeRules = "";
+        public string ChallengeRules
+        {
+            get => challengeRules;
+            set => SetProperty(ref challengeRules, value);
+        }
 
-        /// <summary>
-        /// Liste brute des titres des challengers.
-        /// Exemple : "Chef Sucré, Roi du Gâteau"
-        /// </summary>
-        public string ChallengersTitlesRaw { get; set; } = "";
+        private string challengePrice = "";
+        public string ChallengePrice
+        {
+            get => challengePrice;
+            set => SetProperty(ref challengePrice, value);
+        }
 
-        /// <summary>
-        /// Nombre de challengers attendus.
-        /// </summary>
-        public int ChallengerNumber { get; set; }
+        private string challengeParticipationMessage = "";
+        public string ChallengeParticipationMessage
+        {
+            get => challengeParticipationMessage;
+            set => SetProperty(ref challengeParticipationMessage, value);
+        }
+
+        private string challengersTitlesRaw = "";
+        public string ChallengersTitlesRaw
+        {
+            get => challengersTitlesRaw;
+            set => SetProperty(ref challengersTitlesRaw, value);
+        }
+
+        private int challengerNumber = 2;
+        public int ChallengerNumber
+        {
+            get => challengerNumber;
+            set => SetProperty(ref challengerNumber, value);
+        }
 
         #endregion
 
         #region Partie affichage
 
-        /// <summary>
-        /// Taille de police utilisée dans les mails.
-        /// </summary>
-        public int FontSize { get; set; }
+        private int fontSize = 14;
+        public int FontSize
+        {
+            get => fontSize;
+            set => SetProperty(ref fontSize, value);
+        }
 
-        /// <summary>
-        /// Chemin vers l'image d'en-tête.
-        /// </summary>
-        public string PathImageHeading { get; set; } = "";
+        private string pathImageHeading = "";
+        public string PathImageHeading
+        {
+            get => pathImageHeading;
+            set => SetProperty(ref pathImageHeading, value);
+        }
 
-        /// <summary>
-        /// Hauteur de l'image d'en-tête.
-        /// </summary>
-        public int ImageHeadingHeight { get; set; }
+        private int imageHeadingHeight = 650;
+        public int ImageHeadingHeight
+        {
+            get => imageHeadingHeight;
+            set => SetProperty(ref imageHeadingHeight, value);
+        }
 
-        /// <summary>
-        /// Chemin vers l'image de pied de page.
-        /// </summary>
-        public string PathImageFooter { get; set; } = "";
+        private string pathImageFooter = "";
+        public string PathImageFooter
+        {
+            get => pathImageFooter;
+            set => SetProperty(ref pathImageFooter, value);
+        }
 
         #endregion
 
         #region Partie email
 
-        /// <summary>
-        /// Adresse email de l'expéditeur.
-        /// </summary>
-        public string SenderEmail { get; set; } = "";
+        private string senderEmail = "";
+        public string SenderEmail
+        {
+            get => senderEmail;
+            set => SetProperty(ref senderEmail, value);
+        }
 
-        /// <summary>
-        /// Active ou non le mode test.
-        /// </summary>
-        public bool IsTest { get; set; }
+        private bool isTest;
+        public bool IsTest
+        {
+            get => isTest;
+            set => SetProperty(ref isTest, value);
+        }
 
-        /// <summary>
-        /// Adresse email de test.
-        /// </summary>
-        public string TesterEmail { get; set; } = "";
+        private string testerEmail = "";
+        public string TesterEmail
+        {
+            get => testerEmail;
+            set => SetProperty(ref testerEmail, value);
+        }
 
-        /// <summary>
-        /// Sujet des emails envoyés aux challengers.
-        /// </summary>
-        public string SubjectMailChallenger { get; set; } = "";
+        private string subjectMailChallenger = "";
+        public string SubjectMailChallenger
+        {
+            get => subjectMailChallenger;
+            set => SetProperty(ref subjectMailChallenger, value);
+        }
 
-        /// <summary>
-        /// Sujet des emails envoyés aux dégustateurs.
-        /// </summary>
-        public string SubjectMailEater { get; set; } = "";
+        private string subjectMailEater = "";
+        public string SubjectMailEater
+        {
+            get => subjectMailEater;
+            set => SetProperty(ref subjectMailEater, value);
+        }
 
         #endregion
 
-        #region Partie participants
+        #region Participants
 
         /// <summary>
-        /// Liste des participants inscrits.
+        /// Liste observable des participants.
+        /// Le DataGridView peut s'y connecter directement.
         /// </summary>
-        public List<Participant> Participants { get; set; } = new();
+        private BindingList<Participant> participants = new();
+
+        public BindingList<Participant> Participants
+        {
+            get => participants;
+            set => SetProperty(ref participants, value);
+        }
 
         #endregion
 
-        #region Conversion AppConfig <-> ViewModel
+        #region Conversion Config
 
-        /// <summary>
-        /// Crée un ViewModel à partir d'un objet AppConfig.
-        ///
-        /// Cette méthode est utilisée au chargement du programme.
-        /// Elle transforme les données du fichier JSON
-        /// en données adaptées à l'interface.
-        /// </summary>
         public static MainFormViewModel FromConfig(AppConfig config)
         {
             return new MainFormViewModel
@@ -145,16 +216,13 @@ namespace DuelDeGateaux.ViewModels
                     ? date
                     : DateTime.Today,
 
-                ChallengeHour = config.ChallengeHour,
+                ChallengeHour = string.IsNullOrWhiteSpace(config.ChallengeHour)? "09:00": config.ChallengeHour,
                 ChallengeRoom = config.ChallengeRoom,
                 ChallengeTheme = config.ChallengeTheme,
                 ChallengeRules = config.ChallengeRules,
                 ChallengePrice = config.ChallengePrice,
                 ChallengeParticipationMessage = config.ChallengeParticipationMessage,
-
-                // Transforme la liste en texte séparé par des virgules
                 ChallengersTitlesRaw = string.Join(", ", config.ChallengersTitles ?? new()),
-
                 ChallengerNumber = config.ChallengerNumber,
 
                 FontSize = config.FontSize,
@@ -168,16 +236,10 @@ namespace DuelDeGateaux.ViewModels
                 SubjectMailChallenger = config.SubjectMailChallenger,
                 SubjectMailEater = config.SubjectMailEater,
 
-                Participants = config.Participants?.ToList() ?? new()
+                Participants = new BindingList<Participant>(config.Participants ?? new())
             };
         }
 
-        /// <summary>
-        /// Transforme le ViewModel en AppConfig.
-        ///
-        /// Cette méthode est utilisée lors de la sauvegarde.
-        /// Elle prépare les données pour l'écriture dans le JSON.
-        /// </summary>
         public AppConfig ToConfig()
         {
             return new AppConfig
@@ -190,7 +252,6 @@ namespace DuelDeGateaux.ViewModels
                 ChallengePrice = ChallengePrice,
                 ChallengeParticipationMessage = ChallengeParticipationMessage,
 
-                // Reconvertit le texte en liste
                 ChallengersTitles = ChallengersTitlesRaw
                     .Split(',', StringSplitOptions.RemoveEmptyEntries)
                     .Select(t => t.Trim())
@@ -214,5 +275,34 @@ namespace DuelDeGateaux.ViewModels
         }
 
         #endregion
+        public void LoadFrom(MainFormViewModel source)
+        {
+            ChallengeDate = source.ChallengeDate;
+            ChallengeHour = source.ChallengeHour;
+            ChallengeRoom = source.ChallengeRoom;
+            ChallengeTheme = source.ChallengeTheme;
+            ChallengeRules = source.ChallengeRules;
+            ChallengePrice = source.ChallengePrice;
+            ChallengeParticipationMessage = source.ChallengeParticipationMessage;
+            ChallengersTitlesRaw = source.ChallengersTitlesRaw;
+            ChallengerNumber = source.ChallengerNumber;
+
+            FontSize = source.FontSize;
+            PathImageHeading = source.PathImageHeading;
+            ImageHeadingHeight = source.ImageHeadingHeight;
+            PathImageFooter = source.PathImageFooter;
+
+            SenderEmail = source.SenderEmail;
+            IsTest = source.IsTest;
+            TesterEmail = source.TesterEmail;
+            SubjectMailChallenger = source.SubjectMailChallenger;
+            SubjectMailEater = source.SubjectMailEater;
+
+            Participants.Clear();
+            foreach (var p in source.Participants)
+            {
+                Participants.Add(p);
+            }
+        }
     }
 }

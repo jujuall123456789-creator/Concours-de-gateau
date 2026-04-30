@@ -1,36 +1,41 @@
 using DuelDeGateaux.Services;
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace DuelDeGateaux.Repositories
 {
     internal static class CursorService
     {
-        // 📁 Chemin du fichier .cur (dans dossier exe)
-        private const string FileName = "rollingPin.cur";
-
-        /// <summary>
-        /// Chemin du fichier de configuration JSON
-        /// Gère le décalage de dossier en mode Debug pour Visual Studio.
-        /// </summary>
-        private static readonly string ConfigPath = FileSelectionService.FilePathAssets(FileName);
+        // ==========================================
+        // 📁 CONSTANTES : NOMS DES FICHIERS
+        // ==========================================
+        private const string MainCursorFileName = "rollingPin.cur";
+        private const string ButtonCursorFileName = "muffin.cur";
+        private const string TextCursorFileName = "gousse.cur";
 
         // Importation de l'API Windows pour garder les couleurs d'origine du curseur
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
         private static extern IntPtr LoadCursorFromFile(string path);
 
+        // ==========================================
+        // 🛠️ MÉTHODE CENTRALE 
+        // ==========================================
+
         /// <summary>
-        /// Tente de charger un curseur personnalisé en couleurs depuis le dossier Assets.
+        /// Méthode interne pour charger un fichier curseur spécifique en qualité originale.
         /// </summary>
-        /// <param name="cursorFileName">Le nom du fichier curseur (ex: "rouleau.cur")</param>
+        /// <param name="fileName">Le nom du fichier .cur</param>
         /// <returns>Le Cursor personnalisé, ou null si introuvable/erreur.</returns>
-        public static Cursor? LoadCustomCursor()
+        private static Cursor? LoadCursor(string fileName)
         {
             try
             {
-
-                if (File.Exists(ConfigPath))
+                var path = FileSelectionService.FilePathAssets(fileName);
+                if (File.Exists(path))
                 {
-                    IntPtr colorCursorHandle = LoadCursorFromFile(ConfigPath);
+                    IntPtr colorCursorHandle = LoadCursorFromFile(path);
 
                     if (colorCursorHandle != IntPtr.Zero)
                     {
@@ -43,8 +48,27 @@ namespace DuelDeGateaux.Repositories
                 // Si ça plante, on attrape l'erreur silencieusement.
             }
 
-            // Si on arrive ici, c'est que quelque chose a échoué. On renvoie null.
+            // Si on arrive ici, c'est que le fichier manque ou est corrompu.
             return null;
         }
+
+        // ==========================================
+        // 🎨 ACCÈS PUBLICS
+        // ==========================================
+
+        /// <summary>
+        /// Charge le curseur principal de l'application (Le Rouleau à Pâtisserie).
+        /// </summary>
+        public static Cursor? LoadCustomCursor() => LoadCursor(MainCursorFileName);
+
+        /// <summary>
+        /// Charge le curseur de survol pour les boutons (Le Muffin).
+        /// </summary>
+        public static Cursor? LoadCustomButtonCursor() => LoadCursor(ButtonCursorFileName);
+
+        /// <summary>
+        /// Charge le curseur de survol pour l'édition de texte (La gousse de vanille).
+        /// </summary>
+        public static Cursor? LoadCustomTextCursor() => LoadCursor(TextCursorFileName);
     }
 }

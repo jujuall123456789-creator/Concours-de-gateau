@@ -1,6 +1,4 @@
-using DuelDeGateaux.Contracts;
 using DuelDeGateaux.Helpers;
-using DuelDeGateaux.Mappers;
 using DuelDeGateaux.Models;
 using DuelDeGateaux.Repositories;
 using DuelDeGateaux.Services;
@@ -11,12 +9,12 @@ namespace DuelDeGateaux.Forms
     /// <summary>
     /// Fenêtre principale de l'application de gestion du concours.
     /// </summary>
-    public partial class MainForm : Form, IMainFormView
+    public partial class MainForm : Form
     {
         /// <summary>
         /// ViewModel représentant l'état actuel du formulaire
         /// </summary>
-        private MainFormViewModel viewModel = new(); 
+        private readonly MainFormViewModel viewModel = new();
         /// <summary>
         /// Source de données intermédiaire entre la liste des participants
         /// et l'affichage dans la grille.
@@ -49,78 +47,6 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private readonly Dictionary<string, Control> validationControls = new();
 
-        #region Implémentation IMainFormView
-
-        public DateTime ChallengeDate
-        {
-            get => datePicker.Value;
-             set
-            {
-                    datePicker.Value = value;
-            }
-        }
-
-        public string ChallengeHour
-        {
-            get => timePicker.Value.ToString("HH:mm");
-            set
-            {
-                if (DateTime.TryParseExact(value, "HH:mm", null,
-                    System.Globalization.DateTimeStyles.None, out var time))
-                {
-                    timePicker.Value = time;
-                }
-            }
-        }
-
-        public string ChallengeRoom { get => txtRoom.Text; set => txtRoom.Text = value; }
-        public string ChallengeTheme { get => txtTheme.Text; set => txtTheme.Text = value; }
-        public string ChallengeRules { get => txtRules.Text; set => txtRules.Text = value; }
-        public string ChallengePrice { get => txtPrice.Text; set => txtPrice.Text = value; }
-        public string ChallengeParticipationMessage { get => txtParticipation.Text; set => txtParticipation.Text = value; }
-        public string ChallengersTitlesRaw { get => txtTitles.Text; set => txtTitles.Text = value; }
-        public int ChallengerNumber
-        {
-            get => rb2Challengers.Checked ? 2 : 3;
-            set
-            {
-                rb2Challengers.Checked = value == 2;
-                rb3Challengers.Checked = value == 3;
-            }
-        }
-
-        public int FontSize { get => (int)numFontSize.Value; set => numFontSize.Value = MathHelper.ClampNumeric(value, numFontSize.Minimum, numFontSize.Maximum); }
-        public string PathImageHeading { get => txtImageHeader.Text; set => txtImageHeader.Text = value; }
-        public int ImageHeadingHeight { get => (int)numImageHeight.Value; set => numImageHeight.Value = MathHelper.ClampNumeric(value, numImageHeight.Minimum, numImageHeight.Maximum); }
-        public string PathImageFooter { get => txtImageFooter.Text; set => txtImageFooter.Text = value; }
-        public decimal FontSizeMinimum => numFontSize.Minimum;
-        public decimal FontSizeMaximum => numFontSize.Maximum;
-        public decimal ImageHeightMinimum => numImageHeight.Minimum;
-        public decimal ImageHeightMaximum => numImageHeight.Maximum;
-
-        public string SenderEmail { get => txtSender.Text; set => txtSender.Text = value; }
-        public bool IsTest { get => chkTest.Checked; set => chkTest.Checked = value; }
-        public string TesterEmail { get => txtTestMail.Text; set => txtTestMail.Text = value; }
-        public string SubjectMailChallenger { get => txtSubjectChallenger.Text; set => txtSubjectChallenger.Text = value; }
-        public string SubjectMailEater { get => txtSubjectEater.Text; set => txtSubjectEater.Text = value; }
-
-        public List<Participant> Participants
-        {
-            get
-            {
-                if (participantBindingSource.DataSource is not List<Participant> list)
-                {
-                    list = new List<Participant>();
-                    participantBindingSource.DataSource = list;
-                }
-
-                return list;
-            }
-            set => participantBindingSource.DataSource = value;
-        }
-
-        #endregion
-
         /// <summary>
         /// Constructeur du formulaire principal.
         /// Initialise les composants du formulaire et charge la configuration.
@@ -135,6 +61,10 @@ namespace DuelDeGateaux.Forms
             InitTooltips();
             // 🪄 MAGIE DU CURSEUR PERSONNALISÉ
             SetCustomCursor();
+            // 👆 MAGIE DU SURVOL DES BOUTONS
+            SetButtonCursors();
+            // ✍️ MAGIE DU SURVOL DU TEXTE
+            SetTextBoxCursors();
         }
 
         /// <summary>
@@ -143,15 +73,24 @@ namespace DuelDeGateaux.Forms
         private void MainForm_Load(object sender, EventArgs e)
         {
             try
-            {
-                // Chargement des données JSON
+            {                
+                 // 1) Préparer les bindings une seule fois
+                SetupBindings();
+
+                // 2) Charger la configuration
                 var config = ConfigService.Load();
-                // Remplissage des champs de l'écran
-                viewModel = MainFormViewModel.FromConfig(config);
-                MainFormMapper.PopulateView(this, viewModel);
-                participantBindingSource.DataSource = viewModel.Participants;
-                dgvParticipants.DataSource = participantBindingSource;
-                // 🎵 Lancement de la musique de fond !
+                var loadedVm = MainFormViewModel.FromConfig(config);
+
+                // 3) Copier les données dans l'instance existante
+                viewModel.LoadFrom(loadedVm);
+                rb2Challengers.Checked = viewModel.ChallengerNumber == 2;
+                rb3Challengers.Checked = viewModel.ChallengerNumber == 3;
+                // 4) Connecter la grille
+                SetupParticipantsGrid();
+
+                // 5) Charger les aperçus images
+                RefreshImagePreviews();
+                // 6) 🎵 Lancement de la musique de fond !
                 AudioService.PlayBackgroundMusic();
             }
             catch (Exception ex)
@@ -159,6 +98,42 @@ namespace DuelDeGateaux.Forms
                 // Gestion de l'erreur si le fichier JSON est introuvable ou mal formé
                 MessageBox.Show($"Erreur lors du chargement de la configuration :\n{ex.Message}", "Erreur au démarrage", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        private void SetupBindings()
+        {
+            txtTheme.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeTheme));
+            txtRoom.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeRoom));
+            txtRules.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeRules));
+            txtPrice.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengePrice));
+            txtParticipation.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeParticipationMessage));
+            txtTitles.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengersTitlesRaw));
+
+            timePicker.DataBindings.Add("Value", viewModel, nameof(viewModel.ChallengeTime));
+            datePicker.DataBindings.Add("Value", viewModel, nameof(viewModel.ChallengeDate));
+
+            txtSender.DataBindings.Add("Text", viewModel, nameof(viewModel.SenderEmail));
+            txtTestMail.DataBindings.Add("Text", viewModel, nameof(viewModel.TesterEmail));
+
+            txtSubjectChallenger.DataBindings.Add("Text", viewModel, nameof(viewModel.SubjectMailChallenger));
+            txtSubjectEater.DataBindings.Add("Text", viewModel, nameof(viewModel.SubjectMailEater));
+
+            chkTest.DataBindings.Add("Checked", viewModel, nameof(viewModel.IsTest));
+
+            numFontSize.DataBindings.Add("Value", viewModel, nameof(viewModel.FontSize));
+            numImageHeight.DataBindings.Add("Value", viewModel, nameof(viewModel.ImageHeadingHeight));
+            txtImageHeader.DataBindings.Add("Text", viewModel, nameof(viewModel.PathImageHeading));
+            txtImageFooter.DataBindings.Add("Text", viewModel, nameof(viewModel.PathImageFooter));
+        }        
+        private void RefreshImagePreviews()
+        {
+            SetHeaderPreview(viewModel.PathImageHeading);
+            SetFooterPreview(viewModel.PathImageFooter);
+        }
+
+        private void SetupParticipantsGrid()
+        {
+            participantBindingSource.DataSource = viewModel.Participants;
+            dgvParticipants.DataSource = participantBindingSource;
         }
         
         public void SetHeaderPreview(string path)
@@ -241,6 +216,62 @@ namespace DuelDeGateaux.Forms
         }
         
         /// <summary>
+        /// Définit le curseur au survol pour les boutons principaux.
+        /// </summary>
+        private void SetButtonCursors()
+        {            
+             Cursor? mycustomCursor = CursorService.LoadCustomButtonCursor();
+            if (mycustomCursor != null) hoverCursor = mycustomCursor;
+
+            // On applique le curseur de survol à tous tes boutons principaux
+            btnSend.Cursor = hoverCursor;
+            btnPreview.Cursor = hoverCursor;
+            btnSave.Cursor = hoverCursor;
+            btnPrintBallot.Cursor = hoverCursor;
+            btnHistory.Cursor = hoverCursor;
+            btnOpenJson.Cursor = hoverCursor;            
+            btnBrowseHeader.Cursor = hoverCursor;
+            btnBrowseFooter.Cursor = hoverCursor;
+        }
+
+        /// <summary>
+        /// Définit le curseur personnalisé pour toutes les zones de texte.
+        /// </summary>
+        private void SetTextBoxCursors()
+        {
+            // Appelle la nouvelle méthode que tu as créée dans CursorService
+            // (Remplace "LoadCustomTextCursor" par le vrai nom de ta méthode si différent !)
+            Cursor? textCursor = CursorService.LoadCustomTextCursor(); 
+
+            if (textCursor != null)
+            {
+                // On lance le scan de la fenêtre pour appliquer le curseur
+                ApplyCursorToTextBoxes(this, textCursor);
+            }
+        }
+
+        /// <summary>
+        /// Fonction récursive qui fouille dans tous les conteneurs pour trouver les TextBox
+        /// et leur appliquer le curseur personnalisé.
+        /// </summary>
+        private void ApplyCursorToTextBoxes(Control parent, Cursor customCursor)
+        {
+            foreach (Control ctrl in parent.Controls)
+            {
+                // Si on trouve une zone de texte, on lui applique le curseur
+                if (ctrl is TextBox txt)
+                {
+                    txt.Cursor = customCursor;
+                }
+                // Si le contrôle contient d'autres contrôles (ex: un GroupBox), on fouille dedans !
+                else if (ctrl.HasChildren)
+                {
+                    ApplyCursorToTextBoxes(ctrl, customCursor);
+                }
+            }
+        }
+
+        /// <summary>
         /// Recharge la liste des participants dans l'IHM
         /// </summary>
         private void RefreshParticipantDataGrid()
@@ -256,7 +287,6 @@ namespace DuelDeGateaux.Forms
             
             // 👥 GROUPE PARTICIPANTS
             EndEditParticipants();
-            MainFormMapper.UpdateViewModel(this, viewModel);
             ConfigService.Save(viewModel.ToConfig());
         }
         /// <summary>
@@ -271,11 +301,7 @@ namespace DuelDeGateaux.Forms
         {
             EndEditParticipants();
             participantBindingSource.EndEdit();
-
-            MainFormMapper.UpdateViewModel(this, viewModel);
-            var config = viewModel.ToConfig();
-
-            var result = FormValidationService.Validate(config);
+            var result = FormValidationService.Validate(viewModel);
 
             ResetFieldColors();
 
@@ -436,7 +462,6 @@ namespace DuelDeGateaux.Forms
                 AudioService.PlayPreviewSound();
 
                 // On met à jour la configuration en mémoire
-                MainFormMapper.UpdateViewModel(this, viewModel);
                 var currentConfig = viewModel.ToConfig();
 
                 string title = isChallenger ? "Mail Challengers ⚔️" : "Mail Jury (Mangeurs) 🤤";
@@ -514,7 +539,7 @@ namespace DuelDeGateaux.Forms
         private void BtnAddParticipantsList_Click(object sender, EventArgs e)
         {
             // Ajoute une ligne exemple que l'utilisateur pourra modifier dans la grille
-            ParticipantService.AddDefaultParticipant(viewModel.Participants, txtSender.Text.Trim());
+            ParticipantService.AddDefaultParticipant(viewModel.Participants, viewModel.SenderEmail.Trim());
             RefreshParticipantDataGrid();
             AudioService.PlayPreviewSound();
             MessageBox.Show("Participant ajouté. Pensez à sauvegarder pour enregistrer les modifications.");
@@ -622,6 +647,18 @@ namespace DuelDeGateaux.Forms
             PictureBox pb = (PictureBox)sender;
             pb.BackColor = Color.Transparent;
             pb.BorderStyle = BorderStyle.None;
+        }
+
+        private void rb2Challengers_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rb2Challengers.Checked)
+                viewModel.ChallengerNumber = 2;
+        }
+
+        private void rb3Challengers_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rb3Challengers.Checked)
+                viewModel.ChallengerNumber = 3;
         }
         #endregion Bouton
 
