@@ -20,17 +20,17 @@ namespace DuelDeGateaux.Forms
         /// et l'affichage dans la grille.
         /// Permet de rafraîchir facilement l'interface sans rebinder manuellement.
         /// </summary>
-        private BindingSource participantBindingSource = new();
+        private readonly BindingSource participantBindingSource = new();
 
         /// <summary>
         /// Composant permettant d'afficher des bulles d'aide quand l'utilisateur survole un champ avec la souris
         /// </summary>
-        private ToolTip toolTip = new();
+        private readonly ToolTip toolTip;
         
         /// <summary>
         /// Random utilisé pour randomiser la sélection de certaines string
         /// </summary>
-        private static readonly Random rng = new();
+        private static readonly Random messageRandomizer = new();
         
         /// <summary>
         /// Taille fixe utilisée pour les miniatures affichées dans l'interface.
@@ -40,7 +40,7 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Extensions de fichiers autorisées pour les images importées.
         /// </summary>
-        private static readonly string[] allowedExtensions = [".jpg", ".jpeg", ".png"];
+        private static readonly string[] _allowedExtensions = [".jpg", ".jpeg", ".png"];
 
         /// <summary>
         /// Dictionnaire des champs contrôlés
@@ -58,6 +58,7 @@ namespace DuelDeGateaux.Forms
             //On initialise les champs contrôlés
             InitializeValidationControls();
             // Configure les aides à la saisie (bulles d'aide)
+            toolTip = TooltipService.BuildDefault();
             InitTooltips();
             // 🪄 MAGIE DU CURSEUR PERSONNALISÉ
             SetCustomCursor();
@@ -65,6 +66,11 @@ namespace DuelDeGateaux.Forms
             SetButtonCursors();
             // ✍️ MAGIE DU SURVOL DU TEXTE
             SetTextBoxCursors();
+            //Assignation des valeurs du viewmodel aux composants
+            rb2Challengers.Checked = viewModel.ChallengerNumber == 2;
+            rb3Challengers.Checked = viewModel.ChallengerNumber == 3;
+            pictureHeaderImage.DragDrop += (s, e) => PictureBox_DragDrop(sender: s, e: e, true);
+            pictureFooterImage.DragDrop += (s, e) => PictureBox_DragDrop(sender: s, e: e, false);
         }
 
         /// <summary>
@@ -80,15 +86,12 @@ namespace DuelDeGateaux.Forms
                 // 2) Charger la configuration
                 var config = ConfigService.Load();
                 var loadedVm = MainFormViewModel.FromConfig(config);
-
-                // 3) Copier les données dans l'instance existante
-                viewModel.LoadFrom(loadedVm);
-                rb2Challengers.Checked = viewModel.ChallengerNumber == 2;
-                rb3Challengers.Checked = viewModel.ChallengerNumber == 3;
-                pictureHeaderImage.DragDrop += (s, e) => PictureBox_DragDrop(sender: s, e: e, associatedTextBox: txtImageHeader);
-                pictureFooterImage.DragDrop += (s, e) => PictureBox_DragDrop(sender: s, e: e, associatedTextBox: txtImageFooter);
-                // 4) Connecter la grille
+                
+                // 3) Connecter la grille
                 SetupParticipantsGrid();
+                
+                // 4) Copier les données dans l'instance existante
+                viewModel.LoadFrom(loadedVm);
 
                 // 5) Charger les aperçus images
                 RefreshImagePreviews();
@@ -103,6 +106,8 @@ namespace DuelDeGateaux.Forms
         }
         private void SetupBindings()
         {
+            if (txtTheme.DataBindings.Count > 0)
+                return;
             txtTheme.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeTheme));
             txtRoom.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeRoom));
             txtRules.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeRules));
@@ -138,16 +143,16 @@ namespace DuelDeGateaux.Forms
             dgvParticipants.DataSource = participantBindingSource;
         }
         
-        public void SetHeaderPreview(string path)
+        private void SetHeaderPreview(string path)
         {
             pictureHeaderImage.Image?.Dispose();
-            pictureHeaderImage.Image = LoadImageFromConfig(path);
+            pictureHeaderImage.Image = ImageUiService.LoadPreviewFromConfig(path, ThumbnailSize);
         }
 
-        public void SetFooterPreview(string path)
+        private void SetFooterPreview(string path)
         {
             pictureFooterImage.Image?.Dispose();
-            pictureFooterImage.Image = LoadImageFromConfig(path);
+            pictureFooterImage.Image = ImageUiService.LoadPreviewFromConfig(path, ThumbnailSize);
         }
 
         /// <summary>
@@ -159,50 +164,26 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         /// <param name="path">Le chemin de fichier de l'image à charger.</param>
         /// <returns>Une miniature de l'image chargée, ou null si l'image ne peut pas être chargée.</returns>
-        private void LoadImageUserInput(string path, TextBox textBox, PictureBox pictureBox)
+        private void LoadImageUserInput(string path, Action<string> updatePath, Action<Image> updatePreview)
         {
             try
-            {                
-                if (!File.Exists(path))
-                {
-                    CustomMessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
-                    return;
-                }
-                var preview = ImagePreviewService.LoadPreview(path, ThumbnailSize);
+            {
+                var preview = ImageUiService.LoadPreviewFromUserInput(path, ThumbnailSize);
+
                 if (preview != null)
                 {
-                    textBox.Text = path;
-                    // On libère la mémoire de l'image précédente avant d'afficher la nouvelle
-                    pictureBox.Image?.Dispose();
-                    pictureBox.Image = preview;
+                    updatePath(path);
+                    updatePreview(preview);
                 }
+            }
+            catch (FileNotFoundException)
+            {
+                CustomMessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰","Erreur image", MessageBoxButtons.OK,MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
                 CustomMessageBox.Show($"Une erreur est survenue lors du chargement de l'image : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-        /// <summary>
-        /// Charge une image depuis un chemin de fichier spécifié au lancement du programme.
-        /// Cette méthode tente de charger une image depuis le chemin de fichier donné,
-        /// et retourne une miniature de l'image si elle est chargée avec succès.
-        /// </summary>
-        /// <param name="path">Le chemin de fichier de l'image à charger.</param>
-        /// <returns>Une miniature de l'image chargée, ou null si l'image ne peut pas être chargée.</returns>
-        private Image? LoadImageFromConfig(string path)
-        {
-            try
-            {
-                if (!File.Exists(path))
-                    return null;
-                
-                return ImagePreviewService.LoadPreview(path, ThumbnailSize);
-            }
-            catch
-            {
-                return null;
-            }
-
         }
 
         /// <summary>
@@ -293,19 +274,11 @@ namespace DuelDeGateaux.Forms
         }
 
         /// <summary>
-        /// Recharge la liste des participants dans l'IHM
-        /// </summary>
-        private void RefreshParticipantDataGrid()
-        {
-            participantBindingSource.ResetBindings(false);
-        }
-
-        /// <summary>
         /// Sauvegarde les entrées de l'utilisateur dans le fichier de config
         /// </summary>
         private void SyncAndSaveConfig()
         {
-            
+            Validate();
             // 👥 GROUPE PARTICIPANTS
             EndEditParticipants();
             ConfigService.Save(viewModel.ToConfig());
@@ -321,55 +294,18 @@ namespace DuelDeGateaux.Forms
         private bool ValidateFields()
         {
             EndEditParticipants();
-            participantBindingSource.EndEdit();
             var result = FormValidationService.Validate(viewModel);
 
-            ResetFieldColors();
+            ValidationUiService.ResetFieldColors(validationControls);
 
             if (!result.IsValid)
             {
-                ApplyFieldErrors(result);
-                ShowValidationMessage(result);
+                ValidationUiService.ApplyFieldErrors(result, validationControls);
+                 string message = ValidationUiService.BuildValidationMessage(result,messageRandomizer); 
+                CustomMessageBox.Show(message, "Validation impossible", MessageBoxButtons.OK,MessageBoxIcon.Warning);
                 return false;
             }
-
             return true;
-        }
-
-        private void ApplyFieldErrors(ValidationResult result)
-        {
-            foreach (var key in result.Errors.Keys)
-            {
-                if (validationControls.TryGetValue(key, out var ctrl))
-                    ctrl.BackColor = Color.LightPink;
-            }
-        }
-
-        private void ShowValidationMessage(ValidationResult result)
-        {
-            // Petit son d'erreur système pour marquer le coup
-            System.Media.SystemSounds.Hand.Play();
-            string message = "Le formulaire contient des erreurs :\n\n";
-            foreach (var error in result.Errors.Values)
-            {
-                message += "• " + error + "\n";
-            }
-            string[] funInsults = {
-                    "⚠️ Oups, il manque des infos ! On se réveille ☕",
-                    "⚠️ Faut remplir les cases en rouge, NEUNEU 😤",
-                    "⚠️ Un gâteau sans farine, ça ne marche pas. Un formulaire vide non plus 🍰",
-                    "⚠️ Allez, on se concentre et on corrige les cases rouges 🎯"
-                };
-            string randomMessage = funInsults[rng.Next(funInsults.Length)];
-            message += randomMessage + "\n";
-            
-            CustomMessageBox.Show(message, "Validation impossible", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        }
-
-        private void ResetFieldColors()
-        {
-            foreach (var ctrl in validationControls.Values)
-                ctrl.BackColor = Color.White;
         }
 
         private void InitializeValidationControls()
@@ -401,7 +337,7 @@ namespace DuelDeGateaux.Forms
         }
 
         #region Bouton
-         
+        #region Actions principales
         /// <summary>
         /// Action de lancement du mailling du concours
         /// </summary>
@@ -550,8 +486,8 @@ namespace DuelDeGateaux.Forms
                 
             }, null); // Pas de message de succès, l'ouverture du navigateur suffit
         }
-
-        
+        #endregion Actions principales
+        #region Participants
         /// <summary>
         /// Ajoute un participant dans la liste 
         /// Modification conservée en mémoire uniquement.
@@ -561,7 +497,6 @@ namespace DuelDeGateaux.Forms
         {
             // Ajoute une ligne exemple que l'utilisateur pourra modifier dans la grille
             ParticipantService.AddDefaultParticipant(viewModel.Participants, viewModel.SenderEmail.Trim());
-            RefreshParticipantDataGrid();
             AudioService.PlayPreviewSound();
             CustomMessageBox.Show("Participant ajouté. Pensez à sauvegarder pour enregistrer les modifications.");
         }
@@ -586,7 +521,6 @@ namespace DuelDeGateaux.Forms
                 if(result == DialogResult.Yes)
                 {
                     viewModel.Participants.RemoveAt(e.RowIndex);
-                    RefreshParticipantDataGrid();
                     AudioService.PlayPreviewSound();
                 }
             }
@@ -609,6 +543,8 @@ namespace DuelDeGateaux.Forms
                 dgvParticipants.Cursor = this.Cursor; 
             }
         }
+        #endregion Participants
+        #region Images
         /// <summary>
         /// Événement permettant de sélectionner une image pour l'en-tête.
         /// </summary>
@@ -616,7 +552,11 @@ namespace DuelDeGateaux.Forms
         /// <param name="e"></param>
         private void BtnBrowseHeader_Click(object sender, EventArgs e)
         {
-            BrowseImage_Click(sender, e, txtImageHeader, pictureHeaderImage);
+            string path = FileSelectionService.SelectImage(viewModel.PathImageHeading);
+            if (!string.IsNullOrEmpty(path))
+            {
+                UpdateHeaderImage(path);
+            }
         }
         
         /// <summary>
@@ -626,22 +566,10 @@ namespace DuelDeGateaux.Forms
         /// <param name="e"></param>
         private void BtnBrowseFooter_Click(object sender, EventArgs e)
         {
-            BrowseImage_Click(sender, e, txtImageFooter, pictureFooterImage);
-        }
-
-        /// <summary>
-        /// Méthode commune pour sélectionner une image
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        /// <param name="textBox"></param>
-        /// <param name="pictureBox"></param>
-        private void BrowseImage_Click(object sender, EventArgs e, TextBox textBox, PictureBox pictureBox)
-        {
-            string path = FileSelectionService.SelectImage(textBox.Text);
+            string path = FileSelectionService.SelectImage(viewModel.PathImageFooter);
             if (!string.IsNullOrEmpty(path))
             {
-                LoadImageUserInput(path, textBox, pictureBox);
+                UpdateFooterImage(path);
             }
         }
 
@@ -652,23 +580,50 @@ namespace DuelDeGateaux.Forms
                 e.Effect = DragDropEffects.Copy;
         }
 
-        private void PictureBox_DragDrop(object sender, DragEventArgs e, TextBox associatedTextBox)
+        private void PictureBox_DragDrop(object sender, DragEventArgs e, bool isHeader)
         {
             if (e.Data?.GetData(DataFormats.FileDrop) is not string[] files || files.Length == 0)
                 return;
 
-            string path = files[0]; // On prend le premier fichier
-            string ext = Path.GetExtension(path).ToLower();
-                
-            if (allowedExtensions.Contains(ext))
+            string path = files[0];
+            if (!ImageUiService.IsSupportedImage(path, _allowedExtensions))
             {
-                PictureBox pb = (PictureBox)sender;
-                LoadImageUserInput(path, associatedTextBox, pb);
+                CustomMessageBox.Show("Hé ! On a dit une image, pas un PDF ! 😤", "Erreur de cuisine");
+                return;
+            }
+
+            if (isHeader)
+            {
+                UpdateHeaderImage(path);
             }
             else
             {
-                CustomMessageBox.Show("Hé ! On a dit une image, pas un PDF ! 😤", "Erreur de cuisine");
+                UpdateFooterImage(path);
             }
+        }
+
+        private void UpdateHeaderImage(string path)
+        {
+            LoadImageUserInput(
+                path,
+                p => viewModel.PathImageHeading = p,
+                img =>
+                {
+                    pictureHeaderImage.Image?.Dispose();
+                    pictureHeaderImage.Image = img;
+                });
+        }
+
+        private void UpdateFooterImage(string path)
+        {
+            LoadImageUserInput(
+                path,
+                p => viewModel.PathImageFooter = p,
+                img =>
+                {
+                    pictureFooterImage.Image?.Dispose();
+                    pictureFooterImage.Image = img;
+                });
         }
 
         private void PictureBox_MouseEnter(object sender, EventArgs e)
@@ -686,7 +641,8 @@ namespace DuelDeGateaux.Forms
             pb.BackColor = Color.Transparent;
             pb.BorderStyle = BorderStyle.None;
         }
-
+        #endregion Images
+        #region Sélection challengers
         private void rb2Challengers_CheckedChanged(object sender, EventArgs e)
         {
             if (rb2Challengers.Checked)
@@ -698,6 +654,7 @@ namespace DuelDeGateaux.Forms
             if (rb3Challengers.Checked)
                 viewModel.ChallengerNumber = 3;
         }
+        #endregion Sélection challengers
         #endregion Bouton
 
         #region Tooltip
@@ -705,8 +662,7 @@ namespace DuelDeGateaux.Forms
         /// Initialisation des tooltips
         /// </summary>
         private void InitTooltips()
-        {
-            toolTip = TooltipService.BuildDefault();
+        {           
 
             // =============================
             // 🧾 INFOS CONCOURS
@@ -733,9 +689,14 @@ namespace DuelDeGateaux.Forms
             toolTip.SetToolTip(txtParticipation,
                 "Message important pour les participants.\nEx: participation obligatoire.");
 
-
             toolTip.SetToolTip(txtTitles,
-                "Liste des titres des challengers séparés par des virgules.\nEx: Incroyable, Légendaire, Redoutable");
+                "Liste des titres séparés par des virgules.\nEx: Incroyable, Légendaire.\nPrévoyez assez de titres pour le nombre de challengers.");
+
+            toolTip.SetToolTip(rb2Challengers,
+                "Sélectionnez un duel classique avec 2 challengers.");
+
+            toolTip.SetToolTip(rb3Challengers,
+                "Sélectionnez un affrontement royal avec 3 challengers.");
 
 
             // =============================
@@ -760,6 +721,12 @@ namespace DuelDeGateaux.Forms
             toolTip.SetToolTip(numImageHeight,
                 "Hauteur de l'image dans l'email.\nAjustez si elle est trop grande/petite.");
 
+            toolTip.SetToolTip(pictureHeaderImage,
+                "Glissez-déposez une image ici pour l'en-tête.");
+
+            toolTip.SetToolTip(pictureFooterImage,
+                "Glissez-déposez une image ici pour le pied de mail.");
+
 
             // =============================
             // 📧 SMTP
@@ -769,7 +736,7 @@ namespace DuelDeGateaux.Forms
                 "Adresse email utilisée pour envoyer les mails.");           
 
             toolTip.SetToolTip(chkTest,
-                "Mode test activé :\nTous les mails seront envoyés à une seule adresse.");
+                "Mode test activé :\nTous les mails seront envoyés à une seule adresse. L'historique n'est pas sauvegardé en mode test.");
 
             toolTip.SetToolTip(txtTestMail,
                 "Adresse qui recevra tous les mails en mode test.");
@@ -786,6 +753,8 @@ namespace DuelDeGateaux.Forms
 
             toolTip.SetToolTip(dgvParticipants,
                 "Liste des participants au concours.\nIls peuvent être challengers ou mangeurs.");
+            toolTip.SetToolTip(btnAddParticipants,
+                "Ajoute un nouveau participant à la liste.");
 
 
             // =============================
