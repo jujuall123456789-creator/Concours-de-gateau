@@ -96,7 +96,7 @@ namespace DuelDeGateaux.Forms
             catch (Exception ex)
             {
                 // Gestion de l'erreur si le fichier JSON est introuvable ou mal formé
-                MessageBox.Show($"Erreur lors du chargement de la configuration :\n{ex.Message}", "Erreur au démarrage", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CustomMessageBox.Show($"Erreur lors du chargement de la configuration :\n{ex.Message}", "Erreur au démarrage", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         private void SetupBindings()
@@ -163,7 +163,7 @@ namespace DuelDeGateaux.Forms
             {                
                 if (!File.Exists(path))
                 {
-                    MessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                    CustomMessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰.","Erreur image",MessageBoxButtons.OK,MessageBoxIcon.Warning);
                     return;
                 }
                 var preview = ImagePreviewService.LoadPreview(path, ThumbnailSize);
@@ -177,7 +177,7 @@ namespace DuelDeGateaux.Forms
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Une erreur est survenue lors du chargement de l'image : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CustomMessageBox.Show($"Une erreur est survenue lors du chargement de l'image : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         /// <summary>
@@ -233,42 +233,59 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void SetTextBoxCursors()
         {
-            // Appelle la nouvelle méthode que tu as créée dans CursorService
-            // (Remplace "LoadCustomTextCursor" par le vrai nom de ta méthode si différent !)
             Cursor? textCursor = CursorService.LoadCustomTextCursor(); 
+            // On récupère le curseur principal (rouleau) pour l'appliquer sur les boutons fléchés
+            Cursor mainCursor = CursorService.LoadCustomCursor() ?? Cursors.Default;
 
             if (textCursor != null)
             {
-                // On lance le scan de la fenêtre pour appliquer le curseur
-                ApplyCustomCursors(this, textCursor);
+                // On passe les deux curseurs à notre méthode de scan
+                ApplyCustomCursors(this, textCursor, mainCursor);
             }
         }
 
         /// <summary>
-        /// Fonction récursive qui fouille dans tous les conteneurs pour trouver les TextBox
-        /// et leur appliquer le curseur personnalisé.
+        /// Fonction récursive qui fouille dans tous les conteneurs pour appliquer les curseurs
+        /// textuels, en gérant spécifiquement les contrôles complexes.
         /// </summary>
-        private void ApplyCustomCursors(Control parent, Cursor customCursor)
+        private void ApplyCustomCursors(Control parent, Cursor textCursor, Cursor mainCursor)
         {
             foreach (Control ctrl in parent.Controls)
             {
-                // Si on trouve une zone de texte, on lui applique le curseur
+                // Cas 1 : Zone de texte classique
                 if (ctrl is TextBox txt)
                 {
-                    txt.Cursor = customCursor;
+                    txt.Cursor = textCursor;
                 }
-                else if (ctrl is NumericUpDown || ctrl is DateTimePicker)
+                // Cas 2 : NumericUpDown (Composite : 1 TextBox + 1 bloc de flèches)
+                else if (ctrl is NumericUpDown num)
                 {
-                    ctrl.Cursor = customCursor;
-                    foreach (Control child in ctrl.Controls)
+                    num.Cursor = mainCursor; // Curseur de base du contrôle
+                    
+                    // On fouille à l'intérieur du NumericUpDown
+                    foreach (Control child in num.Controls)
                     {
-                        child.Cursor = customCursor;
+                        if (child is TextBox)
+                        {
+                            child.Cursor = textCursor; // Pour la partie où on tape le texte
+                        }
+                        else
+                        {
+                            child.Cursor = mainCursor; // Pour les petites flèches (haut/bas)
+                        }
                     }
                 }
-                // Si le contrôle contient d'autres contrôles (ex: un GroupBox), on fouille dedans !
+                // Cas 3 : DateTimePicker (Monolithique natif)
+                else if (ctrl is DateTimePicker dtp)
+                {
+                    // Impossible de séparer la zone de texte des flèches en WinForms standard.
+                    // On applique donc le rouleau (mainCursor) sur tout le composant.
+                    dtp.Cursor = mainCursor; 
+                }
+                // Cas 4 : Conteneur générique (Panel, GroupBox...)
                 else if (ctrl.HasChildren)
                 {
-                    ApplyCustomCursors(ctrl, customCursor);
+                    ApplyCustomCursors(ctrl, textCursor, mainCursor);
                 }
             }
         }
@@ -344,7 +361,7 @@ namespace DuelDeGateaux.Forms
             string randomMessage = funInsults[rng.Next(funInsults.Length)];
             message += randomMessage + "\n";
             
-            MessageBox.Show(message, "Validation impossible", MessageBoxButtons.OK,MessageBoxIcon.Warning);
+            CustomMessageBox.Show(message, "Validation impossible", MessageBoxButtons.OK, MessageBoxIcon.Warning);
         }
 
         private void ResetFieldColors()
@@ -544,7 +561,7 @@ namespace DuelDeGateaux.Forms
             ParticipantService.AddDefaultParticipant(viewModel.Participants, viewModel.SenderEmail.Trim());
             RefreshParticipantDataGrid();
             AudioService.PlayPreviewSound();
-            MessageBox.Show("Participant ajouté. Pensez à sauvegarder pour enregistrer les modifications.");
+            CustomMessageBox.Show("Participant ajouté. Pensez à sauvegarder pour enregistrer les modifications.");
         }
 
         /// <summary>
@@ -559,11 +576,10 @@ namespace DuelDeGateaux.Forms
             if(deleteColumnindex == e.ColumnIndex)
             {
                 //Demande une confirmation de l'utilisateur 
-                var result = MessageBox.Show("Êtes-vous sûr de vouloir supprimer ce gentil participant ?",
+                var result = CustomMessageBox.Show("Êtes-vous sûr de vouloir supprimer ce gentil participant ?",
                     "Confirmer",
                     MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Warning,
-                    MessageBoxDefaultButton.Button2
+                    MessageBoxIcon.Warning
                  );
                 if(result == DialogResult.Yes)
                 {
@@ -649,7 +665,7 @@ namespace DuelDeGateaux.Forms
             }
             else
             {
-                MessageBox.Show("Hé ! On a dit une image, pas un PDF ! 😤", "Erreur de cuisine");
+                CustomMessageBox.Show("Hé ! On a dit une image, pas un PDF ! 😤", "Erreur de cuisine");
             }
         }
 
