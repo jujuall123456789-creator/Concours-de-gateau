@@ -87,14 +87,14 @@ namespace DuelDeGateaux.Forms
             {
                 Text = text.ToUpper(),
                 Width = 110,
-                Height = 20,
-                Margin = new Padding(0, 5, 0, 5),
+                Height = 25,
+                Margin = new Padding(0, 0, 0, 5),
                 Cursor = cursor, // 👆 Le fameux curseur Muffin !
                 FlatStyle = FlatStyle.Flat,
                 BackColor = Color.LightPink,
                 Font = new Font("Segoe UI Emoji", 10F, FontStyle.Bold)
-                
-                
+
+
             };
             btn.FlatAppearance.BorderSize = 0;
             btn.FlatAppearance.MouseOverBackColor = Color.SeaGreen;
@@ -130,6 +130,11 @@ namespace DuelDeGateaux.Forms
         }
 
         private void rtbMessage_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pnlButtons_Paint(object sender, PaintEventArgs e)
         {
 
         }

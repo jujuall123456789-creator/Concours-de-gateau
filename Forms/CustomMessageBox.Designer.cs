@@ -56,6 +56,7 @@
             pnlButtons.Padding = new Padding(10, 0, 10, 0);
             pnlButtons.Size = new Size(404, 34);
             pnlButtons.TabIndex = 1;
+            pnlButtons.Paint += pnlButtons_Paint;
             // 
             // rtbMessage
             // 
@@ -64,6 +65,7 @@
             rtbMessage.Dock = DockStyle.Fill;
             rtbMessage.Font = new Font("Segoe UI Emoji", 10.25F);
             rtbMessage.Location = new Point(80, 0);
+            rtbMessage.Margin = new Padding(3, 100, 3, 3);
             rtbMessage.Name = "rtbMessage";
             rtbMessage.ReadOnly = true;
             rtbMessage.Size = new Size(404, 116);
