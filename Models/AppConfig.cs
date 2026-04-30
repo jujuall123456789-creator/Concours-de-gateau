@@ -23,6 +23,7 @@ namespace DuelDeGateaux.Models
         public string ChallengeRules { get; set; } = string.Empty;
         public string ChallengeParticipationMessage { get; set; } = string.Empty;
         public string ChallengePrice { get; set; } = string.Empty;
+        public string CurrentTournamentName { get; set; } = "Saison 1";
 
         //PARAMETRE
         public int ChallengerNumber { get; set; } = 2;

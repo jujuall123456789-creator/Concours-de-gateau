@@ -117,6 +117,13 @@ namespace DuelDeGateaux.ViewModels
             set => SetProperty(ref challengerNumber, value);
         }
 
+        private string currentTournamentName = "Saison 1";
+        public string CurrentTournamentName
+        {
+            get => currentTournamentName;
+            set => SetProperty(ref currentTournamentName, value);
+        }
+
         #endregion
 
         #region Partie affichage
@@ -222,6 +229,7 @@ namespace DuelDeGateaux.ViewModels
                 ChallengeRules = config.ChallengeRules,
                 ChallengePrice = config.ChallengePrice,
                 ChallengeParticipationMessage = config.ChallengeParticipationMessage,
+                CurrentTournamentName = string.IsNullOrWhiteSpace(config.CurrentTournamentName) ? "Saison 1" : config.CurrentTournamentName,
                 ChallengersTitlesRaw = string.Join(", ", config.ChallengersTitles ?? new()),
                 ChallengerNumber = config.ChallengerNumber,
 
@@ -251,7 +259,7 @@ namespace DuelDeGateaux.ViewModels
                 ChallengeRules = ChallengeRules,
                 ChallengePrice = ChallengePrice,
                 ChallengeParticipationMessage = ChallengeParticipationMessage,
-
+                CurrentTournamentName = CurrentTournamentName,
                 ChallengersTitles = ChallengersTitlesRaw
                     .Split(',', StringSplitOptions.RemoveEmptyEntries)
                     .Select(t => t.Trim())
@@ -284,6 +292,7 @@ namespace DuelDeGateaux.ViewModels
             ChallengeRules = source.ChallengeRules;
             ChallengePrice = source.ChallengePrice;
             ChallengeParticipationMessage = source.ChallengeParticipationMessage;
+            CurrentTournamentName = source.CurrentTournamentName;
             ChallengersTitlesRaw = source.ChallengersTitlesRaw;
             ChallengerNumber = source.ChallengerNumber;
 

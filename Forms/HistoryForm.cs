@@ -43,7 +43,29 @@ namespace DuelDeGateaux.Forms
             dgvHistory.AutoGenerateColumns = false;
 
             //Nettoyage
-           dgvHistory.Columns.Clear();
+            dgvHistory.Columns.Clear();
+
+            //==============================
+            //🏆 COLONNE SAISON (NOUVEAU)
+            //==============================
+            dgvHistory.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "Tournament",
+                HeaderText = "Saison",
+                DataPropertyName = "TournamentName", // Propriété ajoutée tout à l'heure
+                Width = 100
+            });
+
+            //==============================
+            //📌 COLONNE PHASE (NOUVEAU)
+            //==============================
+            dgvHistory.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "Phase",
+                HeaderText = "Phase",
+                DataPropertyName = "PhaseName", // Propriété ajoutée tout à l'heure
+                Width = 100
+            });
 
             //==============================
             //📅 COLONNE DATE
@@ -52,30 +74,42 @@ namespace DuelDeGateaux.Forms
             {
                 Name = "Date",
                 HeaderText = "Date du concours",
-                DataPropertyName = "Date", //correspond à la propriété du modèle
-                Width = 120
+                DataPropertyName = "Date", 
+                Width = 110
             });
+
             //==============================
-            //📅 COLONNE THEME
+            //🎨 COLONNE THEME
             //==============================
             dgvHistory.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "Theme",
                 HeaderText = "Thème",
-                DataPropertyName = "Theme", //correspond à la propriété du modèle
-                Width = 200
+                DataPropertyName = "Theme", 
+                Width = 180
             });
+
             //==============================
-            //📅 COLONNE CHALLENGERS
+            //⚔️ COLONNE CHALLENGERS
             //==============================
             dgvHistory.Columns.Add(new DataGridViewTextBoxColumn
             {
                 Name = "Challengers",
                 HeaderText = "Challengers",
-                DataPropertyName = "Challengers", //correspond à la propriété du modèle
+                DataPropertyName = "Challengers", 
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
 
+            //==============================
+            //👑 COLONNE GAGNANT (NOUVEAU)
+            //==============================
+            dgvHistory.Columns.Add(new DataGridViewTextBoxColumn
+            {
+                Name = "Winner",
+                HeaderText = "Gagnant 👑",
+                DataPropertyName = "Winner", 
+                Width = 120
+            });
 
             //Options Visuelles
             dgvHistory.SelectionMode = DataGridViewSelectionMode.FullRowSelect;

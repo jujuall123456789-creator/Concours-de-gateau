@@ -458,6 +458,20 @@ namespace DuelDeGateaux.Forms
            AudioService.PlayHistorySound();
            new HistoryForm().ShowDialog();
         }
+        // Clic sur "Tableau brut"
+        private void btnMenuHistoryTable_Click(object sender, EventArgs e)
+        {
+            var historyForm = new HistoryForm();
+            historyForm.ShowDialog();
+        }
+
+        // Clic sur "Arbre du Tournoi"
+        private void btnMenuHistoryTree_Click(object sender, EventArgs e)
+        {
+            // On passe la configuration actuelle (qui contient "Saison 1")
+            var tournamentForm = new TournamentForm(_viewModel.ToConfig()); 
+            tournamentForm.ShowDialog();
+        }
 
         /// <summary>
         /// Ouverture du fichier de config au clic sur le bouton
