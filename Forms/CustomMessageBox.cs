@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using System.Drawing.Drawing2D;
 
 namespace DuelDeGateaux.Forms
 {
@@ -16,10 +17,9 @@ namespace DuelDeGateaux.Forms
         {
             // Initialise les composants dessinés dans le Designer
             InitializeComponent();
-
+            this.Padding = new Padding(0, 20, 0, 0);
             this.Text = title;
             rtbMessage.Text = message;
-
             // 🪄 Application du curseur Rouleau à pâtisserie sur le fond
             this.Cursor = CursorService.LoadCustomCursor() ?? Cursors.Default;
             rtbMessage.Cursor = this.Cursor;
@@ -87,7 +87,7 @@ namespace DuelDeGateaux.Forms
             {
                 Text = text.ToUpper(),
                 Width = 110,
-                Height = 25,
+                Height = 30,
                 Margin = new Padding(0, 0, 0, 5),
                 Cursor = cursor, // 👆 Le fameux curseur Muffin !
                 FlatStyle = FlatStyle.Flat,
@@ -104,6 +104,18 @@ namespace DuelDeGateaux.Forms
                 _result = dialogResult;
                 this.Close();
             };
+            // ✂️ MAGIE DU DÉCOUPAGE : On arrondit les angles du bouton !
+            GraphicsPath path = new GraphicsPath();
+            int radius = 15; // L'intensité de l'arrondi (15 donne un bel effet ovale/pilule)            
+            // On dessine les 4 coins arrondis
+            path.AddArc(0, 0, radius, radius, 180, 90);
+            path.AddArc(btn.Width - radius, 0, radius, radius, 270, 90);
+            path.AddArc(btn.Width - radius, btn.Height - radius, radius, radius, 0, 90);
+            path.AddArc(0, btn.Height - radius, radius, radius, 90, 90);
+            path.CloseFigure();
+            
+            // On applique ce masque de découpe au bouton
+            btn.Region = new Region(path);
             return btn;
         }
 
