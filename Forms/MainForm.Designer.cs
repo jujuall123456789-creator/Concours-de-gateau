@@ -697,8 +697,6 @@ namespace DuelDeGateaux.Forms
                 grpParticipants,
                 btnSend, btnPreview, btnSave, btnPrintBallot, btnOpenJson, btnHistory
             });
-            //Initlisation des tooltips
-            InitTooltips();
         }
 
         #endregion

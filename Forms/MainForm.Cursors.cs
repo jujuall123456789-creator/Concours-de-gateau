@@ -1,3 +1,5 @@
+using DuelDeGateaux.Repositories;
+
 namespace DuelDeGateaux.Forms
 {
     /// <summary>

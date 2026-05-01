@@ -1,4 +1,5 @@
 using DuelDeGateaux.Models;
+using System.Text;
 
 namespace DuelDeGateaux.Services
 {
@@ -24,10 +25,6 @@ namespace DuelDeGateaux.Services
 
                     case PictureBox:
                         ctrl.BackColor = Color.Transparent;
-                        break;
-
-                    case DataGridView:
-                        ctrl.BackgroundColor = SystemColors.Control;
                         break;
 
                     default:

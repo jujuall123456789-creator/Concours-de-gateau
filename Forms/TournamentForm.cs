@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using DuelDeGateaux.Models;
+using DuelDeGateaux.Repositories;
 using DuelDeGateaux.Services;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;

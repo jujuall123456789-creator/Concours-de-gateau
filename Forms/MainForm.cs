@@ -2,6 +2,7 @@ using DuelDeGateaux.Helpers;
 using DuelDeGateaux.Models;
 using DuelDeGateaux.Repositories;
 using DuelDeGateaux.Services;
+using DuelDeGateaux.UI;
 using DuelDeGateaux.ViewModels;
 
 namespace DuelDeGateaux.Forms
@@ -345,7 +346,7 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Ouvre l'historique brut (le tableau classique)
         /// </summary>
-        private void btnMenuHistoryTable_Click(object sender?, EventArgs e)
+        private void btnMenuHistoryTable_Click(object sender, EventArgs e)
         {
             var historyForm = new HistoryForm();
             historyForm.ShowDialog();
@@ -354,7 +355,7 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Ouvre le nouvel arbre du tournoi WebView2 !
         /// </summary>
-        private void btnMenuHistoryTree_Click(object sender?, EventArgs e)
+        private void btnMenuHistoryTree_Click(object sender, EventArgs e)
         {
             // On récupère la config à jour (qui contient la Saison actuelle)
             var currentConfig = viewModel.ToConfig();

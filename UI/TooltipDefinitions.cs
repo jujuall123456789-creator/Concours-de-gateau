@@ -1,3 +1,5 @@
+using DuelDeGateaux.Forms;
+
 namespace DuelDeGateaux.UI
 {
     public static class TooltipDefinitions
