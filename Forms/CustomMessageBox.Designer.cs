@@ -77,7 +77,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.White;
+            BackColor = Color.OldLace;
             ClientSize = new Size(484, 150);
             ControlBox = false;
             Controls.Add(rtbMessage);

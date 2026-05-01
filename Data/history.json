@@ -6,7 +6,11 @@
       "Tianning \uD83E\uDDAB",
       "Julien \uD83D\uDC51"
     ],
-    "Challengers": "Tianning \uD83E\uDDAB vs Julien \uD83D\uDC51"
+    "Challengers": "Tianning \uD83E\uDDAB vs Julien \uD83D\uDC51",
+    "PhaseIndex": 0,
+    "PhaseName": "Manche 1",
+    "TournamentName": "Saison 2",
+    "Winner": "Julien \uD83D\uDC51"
   },
   {
     "Date": "28/04/2026",
@@ -15,6 +19,10 @@
       "L\u00E9a \uD83D\uDC08",
       "Mathilde \uD83E\uDD89"
     ],
-    "Challengers": "L\u00E9a \uD83D\uDC08 vs Mathilde \uD83E\uDD89"
+    "Challengers": "L\u00E9a \uD83D\uDC08 vs Mathilde \uD83E\uDD89",
+    "PhaseIndex": 0,
+    "PhaseName": "Manche 1",
+    "TournamentName": "Saison 2",
+    "Winner": "Mathilde \uD83E\uDD89"
   }
 ]
