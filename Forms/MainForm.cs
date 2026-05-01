@@ -30,22 +30,56 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Random utilisé pour randomiser la sélection de certaines string
         /// </summary>
-        private static readonly Random messageRandomizer = new();
+        private static readonly Random _messageRandomizer = new();
         
         /// <summary>
         /// Taille fixe utilisée pour les miniatures affichées dans l'interface.
         /// </summary>
-        private const int ThumbnailSize = 55;
+        private const int _thumbnailSize = 55;
 
         /// <summary>
         /// Extensions de fichiers autorisées pour les images importées.
         /// </summary>
         private static readonly string[] _allowedExtensions = [".jpg", ".jpeg", ".png"];
+        
+        #region UI Exposed Controls
+        // INFOS CONCOURS
+        public DateTimePicker DatePickerControl => datePicker;
+        public DateTimePicker TimePickerControl => timePicker;
 
-        /// <summary>
-        /// Dictionnaire des champs contrôlés
-        /// </summary>
-        private readonly Dictionary<string, Control> validationControls = new();
+        public TextBox RoomControl => txtRoom;
+        public TextBox ThemeControl => txtTheme;
+        public TextBox RulesControl => txtRules;
+        public TextBox PriceControl => txtPrice;
+        public TextBox ParticipationControl => txtParticipation;
+        public TextBox TitlesControl => txtTitles;
+        // AFFICHAGE
+        public NumericUpDown FontSizeControl => numFontSize;
+        public NumericUpDown ImageHeightControl => numImageHeight;
+
+        public PictureBox HeaderImageControl => pictureHeaderImage;
+        public PictureBox FooterImageControl => pictureFooterImage;
+        // EMAIL
+        public TextBox SenderControl => txtSender;
+        public CheckBox TestModeControl => chkTest;
+        public TextBox TestMailControl => txtTestMail;
+        public TextBox SubjectChallengerControl => txtSubjectChallenger;
+        public TextBox SubjectEaterControl => txtSubjectEater;
+        // PARTICIPANTS
+        public Button AddParticipantControl => btnAddParticipants;
+        public DataGridView ParticipantsGridControl => dgvParticipants;
+        // CHALLENGERS
+        public RadioButton TwoChallengersControl => rb2Challengers;
+        public RadioButton ThreeChallengersControl => rb3Challengers;
+        // BOUTONS
+        public Button SendControl => btnSend;
+        public Button PreviewControl => btnPreview;
+        public Button SaveControl => btnSave;
+        public Button PrintBallotControl => btnPrintBallot;
+        public Button HistoryControl => btnHistory;
+        public Button OpenJsonControl => btnOpenJson;
+
+        #endregion
 
         /// <summary>
         /// Constructeur du formulaire principal.
@@ -56,10 +90,10 @@ namespace DuelDeGateaux.Forms
             // Initialise les composants du Designer
             InitializeComponent();
             //On initialise les champs contrôlés
-            InitializeValidationControls();
+            validationControls = ValidationDefinitions.Build(this);
             // Configure les aides à la saisie (bulles d'aide)
             toolTip = TooltipService.BuildDefault();
-            InitTooltips();
+            TooltipUiService.Configure(toolTip, TooltipDefinitions.Build(this));
             // 🪄 MAGIE DU CURSEUR PERSONNALISÉ
             SetCustomCursor();
             // 👆 MAGIE DU SURVOL DES BOUTONS
@@ -104,55 +138,23 @@ namespace DuelDeGateaux.Forms
                 CustomMessageBox.Show($"Erreur lors du chargement de la configuration :\n{ex.Message}", "Erreur au démarrage", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private void SetupBindings()
-        {
-            if (txtTheme.DataBindings.Count > 0)
-                return;
-            txtTheme.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeTheme));
-            txtRoom.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeRoom));
-            txtRules.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeRules));
-            txtPrice.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengePrice));
-            txtParticipation.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengeParticipationMessage));
-            txtTitles.DataBindings.Add("Text", viewModel, nameof(viewModel.ChallengersTitlesRaw));
 
-            timePicker.DataBindings.Add("Value", viewModel, nameof(viewModel.ChallengeTime));
-            datePicker.DataBindings.Add("Value", viewModel, nameof(viewModel.ChallengeDate));
-
-            txtSender.DataBindings.Add("Text", viewModel, nameof(viewModel.SenderEmail));
-            txtTestMail.DataBindings.Add("Text", viewModel, nameof(viewModel.TesterEmail));
-
-            txtSubjectChallenger.DataBindings.Add("Text", viewModel, nameof(viewModel.SubjectMailChallenger));
-            txtSubjectEater.DataBindings.Add("Text", viewModel, nameof(viewModel.SubjectMailEater));
-
-            chkTest.DataBindings.Add("Checked", viewModel, nameof(viewModel.IsTest));
-
-            numFontSize.DataBindings.Add("Value", viewModel, nameof(viewModel.FontSize));
-            numImageHeight.DataBindings.Add("Value", viewModel, nameof(viewModel.ImageHeadingHeight));
-            txtImageHeader.DataBindings.Add("Text", viewModel, nameof(viewModel.PathImageHeading));
-            txtImageFooter.DataBindings.Add("Text", viewModel, nameof(viewModel.PathImageFooter));
-        }        
         private void RefreshImagePreviews()
         {
             SetHeaderPreview(viewModel.PathImageHeading);
             SetFooterPreview(viewModel.PathImageFooter);
         }
-
-        private void SetupParticipantsGrid()
-        {
-            participantBindingSource.DataSource = viewModel.Participants;
-            dgvParticipants.DataSource = participantBindingSource;
-        }
         
         private void SetHeaderPreview(string path)
         {
             pictureHeaderImage.Image?.Dispose();
-            pictureHeaderImage.Image = ImageUiService.LoadPreviewFromConfig(path, ThumbnailSize);
+            pictureHeaderImage.Image = ImageUiService.LoadPreviewFromConfig(path, _thumbnailSize);
         }
 
         private void SetFooterPreview(string path)
         {
             pictureFooterImage.Image?.Dispose();
-            pictureFooterImage.Image = ImageUiService.LoadPreviewFromConfig(path, ThumbnailSize);
+            pictureFooterImage.Image = ImageUiService.LoadPreviewFromConfig(path, _thumbnailSize);
         }
 
         /// <summary>
@@ -168,7 +170,7 @@ namespace DuelDeGateaux.Forms
         {
             try
             {
-                var preview = ImageUiService.LoadPreviewFromUserInput(path, ThumbnailSize);
+                var preview = ImageUiService.LoadPreviewFromUserInput(path, _thumbnailSize);
 
                 if (preview != null)
                 {
@@ -185,157 +187,19 @@ namespace DuelDeGateaux.Forms
                 CustomMessageBox.Show($"Une erreur est survenue lors du chargement de l'image : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        /// <summary>
-        /// Remplace le curseur par défaut par un magnifique rouleau à pâtisserie.
-        /// </summary>
-        private void SetCustomCursor()
-        {
-            Cursor? mycustomCursor = CursorService.LoadCustomCursor();
-            if (mycustomCursor != null)
-            {
-                Cursor = mycustomCursor;
-            }
-        }
         
-        /// <summary>
-        /// Définit le curseur au survol pour les boutons principaux.
-        /// </summary>
-        private void SetButtonCursors()
-        {            
-             Cursor? mycustomCursor = CursorService.LoadCustomButtonCursor();
-            Cursor actionCursor = mycustomCursor ?? Cursors.Default;
-            // Boutons principaux
-            btnSend.Cursor = btnPreview.Cursor = btnSave.Cursor = btnPrintBallot.Cursor = btnHistory.Cursor = btnOpenJson.Cursor = actionCursor;
-            // Boutons d'images et d'ajout
-            btnBrowseHeader.Cursor = btnBrowseFooter.Cursor = btnAddParticipants.Cursor = actionCursor;
-        }
-
-        /// <summary>
-        /// Définit le curseur personnalisé pour toutes les zones de texte.
-        /// </summary>
-        private void SetTextBoxCursors()
-        {
-            Cursor? textCursor = CursorService.LoadCustomTextCursor(); 
-            // On récupère le curseur principal (rouleau) pour l'appliquer sur les boutons fléchés
-            Cursor mainCursor = CursorService.LoadCustomCursor() ?? Cursors.Default;
-
-            if (textCursor != null)
-            {
-                // On passe les deux curseurs à notre méthode de scan
-                ApplyCustomCursors(this, textCursor, mainCursor);
-            }
-        }
-
-        /// <summary>
-        /// Fonction récursive qui fouille dans tous les conteneurs pour appliquer les curseurs
-        /// textuels, en gérant spécifiquement les contrôles complexes.
-        /// </summary>
-        private void ApplyCustomCursors(Control parent, Cursor textCursor, Cursor mainCursor)
-        {
-            foreach (Control ctrl in parent.Controls)
-            {
-                // Cas 1 : Zone de texte classique
-                if (ctrl is TextBox txt)
-                {
-                    txt.Cursor = textCursor;
-                }
-                // Cas 2 : NumericUpDown (Composite : 1 TextBox + 1 bloc de flèches)
-                else if (ctrl is NumericUpDown num)
-                {
-                    num.Cursor = mainCursor; // Curseur de base du contrôle
-                    
-                    // On fouille à l'intérieur du NumericUpDown
-                    foreach (Control child in num.Controls)
-                    {
-                        if (child is TextBox)
-                        {
-                            child.Cursor = textCursor; // Pour la partie où on tape le texte
-                        }
-                        else
-                        {
-                            child.Cursor = mainCursor; // Pour les petites flèches (haut/bas)
-                        }
-                    }
-                }
-                // Cas 3 : DateTimePicker (Monolithique natif)
-                else if (ctrl is DateTimePicker dtp)
-                {
-                    // Impossible de séparer la zone de texte des flèches en WinForms standard.
-                    // On applique donc le rouleau (mainCursor) sur tout le composant.
-                    dtp.Cursor = mainCursor; 
-                }
-                // Cas 4 : Conteneur générique (Panel, GroupBox...)
-                else if (ctrl.HasChildren)
-                {
-                    ApplyCustomCursors(ctrl, textCursor, mainCursor);
-                }
-            }
-        }
 
         /// <summary>
         /// Sauvegarde les entrées de l'utilisateur dans le fichier de config
         /// </summary>
         private void SyncAndSaveConfig()
         {
-            Validate();
+            if (!ValidateFields())
+                return;
             // 👥 GROUPE PARTICIPANTS
             EndEditParticipants();
             ConfigService.Save(viewModel.ToConfig());
-        }
-        /// <summary>
-        /// Valide tous les champs du formulaire et signale les erreurs.
-        /// Cette méthode vérifie que tous les champs obligatoires sont remplis
-        /// et que les adresses e-mail sont valides. Les champs invalides sont
-        /// mis en évidence en les coloriant en rouge, et un message d'erreur est
-        /// affiché si des erreurs sont trouvées.
-        /// </summary>
-        /// <returns>True si tous les champs sont valides, False sinon.</returns>
-        private bool ValidateFields()
-        {
-            EndEditParticipants();
-            var result = FormValidationService.Validate(viewModel);
-
-            ValidationUiService.ResetFieldColors(validationControls);
-
-            if (!result.IsValid)
-            {
-                ValidationUiService.ApplyFieldErrors(result, validationControls);
-                 string message = ValidationUiService.BuildValidationMessage(result,messageRandomizer); 
-                CustomMessageBox.Show(message, "Validation impossible", MessageBoxButtons.OK,MessageBoxIcon.Warning);
-                return false;
-            }
-            return true;
-        }
-
-        private void InitializeValidationControls()
-        {
-            validationControls["Theme"] = txtTheme;
-            validationControls["Room"] = txtRoom;
-            validationControls["Rules"] = txtRules;
-            validationControls["Price"] = txtPrice;
-            validationControls["Participation"] = txtParticipation;
-            validationControls["Titles"] = txtTitles;
-            validationControls["Date"] = datePicker;
-            validationControls["Hour"] = timePicker;
-            validationControls["ImageHeader"] = txtImageHeader;
-            validationControls["ImageFooter"] = txtImageFooter;
-            validationControls["Sender"] = txtSender;
-            validationControls["Tester"] = txtTestMail;
-            validationControls["SubjectChallenger"] = txtSubjectChallenger;
-            validationControls["SubjectEater"] = txtSubjectEater;
-        }
-
-
-        /// <summary>
-        /// Force la fin d'édition de l'utilisateur afin de récupérer sa dernière saisie
-        /// </summary>
-        private void EndEditParticipants()
-        {
-            dgvParticipants.EndEdit();
-            participantBindingSource.EndEdit();
-        }
-
+        } 
         #region Bouton
         #region Actions principales
         /// <summary>
@@ -370,7 +234,7 @@ namespace DuelDeGateaux.Forms
             }
             finally
             {
-                this.Cursor = Cursors.Default;
+                this.Cursor = mainCursor ?? Cursors.Default;
             }
         }
         /// <summary>
@@ -495,31 +359,8 @@ namespace DuelDeGateaux.Forms
             // On récupère la config à jour (qui contient la Saison actuelle)
             var currentConfig = viewModel.ToConfig();
             
-            using (var tournamentForm = new TournamentForm(currentConfig))
-            {
-                /// <summary>
-        /// Ouvre l'historique brut (le tableau classique)
-        /// </summary>
-        private void btnMenuHistoryTable_Click(object sender?, EventArgs e)
-        {
-            var historyForm = new HistoryForm();
-            historyForm.ShowDialog();
-        }
-
-        /// <summary>
-        /// Ouvre le nouvel arbre du tournoi WebView2 !
-        /// </summary>
-        private void btnMenuHistoryTree_Click(object sender?, EventArgs e)
-        {
-            // On récupère la config à jour (qui contient la Saison actuelle)
-            var currentConfig = viewModel.ToConfig();
-            
-            using (var tournamentForm = new TournamentForm(currentConfig))
-            {
-                tournamentForm.ShowDialog();
-            }
-        }.ShowDialog();
-            }
+            using var tournamentForm = new TournamentForm(currentConfig);
+            tournamentForm.ShowDialog();
         }
 
         /// <summary>
@@ -719,131 +560,5 @@ namespace DuelDeGateaux.Forms
         }
         #endregion Sélection challengers
         #endregion Bouton
-
-        #region Tooltip
-        /// <summary>
-        /// Initialisation des tooltips
-        /// </summary>
-        private void InitTooltips()
-        {           
-
-            // =============================
-            // 🧾 INFOS CONCOURS
-            // =============================
-
-            toolTip.SetToolTip(datePicker,
-                "Sélectionnez la date du concours.\nFormat automatique.");
-
-            toolTip.SetToolTip(timePicker,
-                "Sélectionnez l'heure du concours.\nUtilisez les flèches pour ajuster.");
-
-            toolTip.SetToolTip(txtRoom,
-                "Indiquez le lieu du concours.\nEx: Salle réunion 2 ou Open Space.");
-
-            toolTip.SetToolTip(txtTheme,
-                "Thème du concours de gâteau.\nEx: Gâteau au chocolat, citron...");
-
-            toolTip.SetToolTip(txtRules,
-                "Décrivez les règles du concours.\nEx: type de gâteau, contraintes...");
-
-            toolTip.SetToolTip(txtPrice,
-                "Décrivez la récompense du concours.\nEx: repas offert, trophée...");
-
-            toolTip.SetToolTip(txtParticipation,
-                "Message important pour les participants.\nEx: participation obligatoire.");
-
-            toolTip.SetToolTip(txtTitles,
-                "Liste des titres séparés par des virgules.\nEx: Incroyable, Légendaire.\nPrévoyez assez de titres pour le nombre de challengers.");
-
-            toolTip.SetToolTip(rb2Challengers,
-                "Sélectionnez un duel classique avec 2 challengers.");
-
-            toolTip.SetToolTip(rb3Challengers,
-                "Sélectionnez un affrontement royal avec 3 challengers.");
-
-
-            // =============================
-            // 🎨 AFFICHAGE
-            // =============================
-
-            toolTip.SetToolTip(numFontSize,
-                "Taille du texte dans les emails.\nEx: 14 à 18 recommandé.");
-
-            toolTip.SetToolTip(txtImageHeader,
-                "Chemin de l'image en haut du mail.\nCliquez sur ... pour sélectionner.");
-
-            toolTip.SetToolTip(btnBrowseHeader,
-                "Cliquez pour choisir une image depuis votre ordinateur.");
-
-            toolTip.SetToolTip(txtImageFooter,
-                "Chemin de l'image en bas du mail.");
-
-            toolTip.SetToolTip(btnBrowseFooter,
-                "Cliquez pour choisir une image de pied de mail.");
-
-            toolTip.SetToolTip(numImageHeight,
-                "Hauteur de l'image dans l'email.\nAjustez si elle est trop grande/petite.");
-
-            toolTip.SetToolTip(pictureHeaderImage,
-                "Glissez-déposez une image ici pour l'en-tête.");
-
-            toolTip.SetToolTip(pictureFooterImage,
-                "Glissez-déposez une image ici pour le pied de mail.");
-
-
-            // =============================
-            // 📧 SMTP
-            // =============================
-
-            toolTip.SetToolTip(txtSender,
-                "Adresse email utilisée pour envoyer les mails.");           
-
-            toolTip.SetToolTip(chkTest,
-                "Mode test activé :\nTous les mails seront envoyés à une seule adresse. L'historique n'est pas sauvegardé en mode test.");
-
-            toolTip.SetToolTip(txtTestMail,
-                "Adresse qui recevra tous les mails en mode test.");
-            toolTip.SetToolTip(txtSubjectChallenger, 
-                "Sujet du mail pour les challengers.\nAstuce : Laissez le mot {{Date}} pour que le programme insère la date automatiquement !");
-
-            toolTip.SetToolTip(txtSubjectEater, 
-                "Sujet du mail pour le jury.\nAstuce : Laissez le mot {{Date}} pour que le programme insère la date automatiquement !");
-
-
-            // =============================
-            // 👥 PARTICIPANTS
-            // =============================
-
-            toolTip.SetToolTip(dgvParticipants,
-                "Liste des participants au concours.\nIls peuvent être challengers ou mangeurs.");
-            toolTip.SetToolTip(btnAddParticipants,
-                "Ajoute un nouveau participant à la liste.");
-
-
-            // =============================
-            // 🚀 BOUTONS
-            // =============================
-
-            toolTip.SetToolTip(btnSend,
-                "Lance l'envoi des emails.\n⚠️ Vérifie les champs avant !");
-
-            toolTip.SetToolTip(btnPreview,
-                "Preview des mails avec un moteur de rendu HTML.");
-
-            toolTip.SetToolTip(btnSave,
-                "Sauvegarde la configuration dans le fichier JSON.");
-
-            toolTip.SetToolTip(btnPrintBallot,
-                "Ouvre la page d'impression des bulletins de vote.");
-
-            toolTip.SetToolTip(btnHistory,
-                "Ouvre la page d'historique des derniers concours.");
-
-            toolTip.SetToolTip(btnOpenJson,
-                "Ouvre le fichier de configuration dans l'explorateur.");
-
-        }
-        #endregion Tooltip
-
     }
 }

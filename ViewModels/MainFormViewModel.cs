@@ -310,7 +310,12 @@ namespace DuelDeGateaux.ViewModels
             Participants.Clear();
             foreach (var p in source.Participants)
             {
-                Participants.Add(p);
+                Participants.Add(new Participant
+                {
+                    Name = p.Name,
+                    Email = p.Email,
+                    IsEligible = p.IsEligible
+                });
             }
         }
     }

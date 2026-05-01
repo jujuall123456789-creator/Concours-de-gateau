@@ -15,10 +15,25 @@ namespace DuelDeGateaux.Services
         {
             foreach (var ctrl in controls.Values)
             {
-                if (ctrl is TextBox or NumericUpDown)
-                    ctrl.BackColor = SystemColors.Window;
-                else
-                    ctrl.BackColor = SystemColors.Control;
+                switch (ctrl)
+                {
+                    case TextBox:
+                    case NumericUpDown:
+                        ctrl.BackColor = SystemColors.Window;
+                        break;
+
+                    case PictureBox:
+                        ctrl.BackColor = Color.Transparent;
+                        break;
+
+                    case DataGridView:
+                        ctrl.BackgroundColor = SystemColors.Control;
+                        break;
+
+                    default:
+                        ctrl.BackColor = SystemColors.Control;
+                        break;
+                }
             }
         }
 
@@ -26,14 +41,27 @@ namespace DuelDeGateaux.Services
         /// Applique une coloration visuelle aux champs invalides
         /// en fonction des erreurs retournées par la validation métier.
         /// </summary>
-        public static void ApplyFieldErrors(
-            ValidationResult result,
-            Dictionary<string, Control> controls)
+        public static void ApplyFieldErrors(ValidationResult result,Dictionary<string, Control> controls)
         {
             foreach (var key in result.Errors.Keys)
             {
-                if (controls.TryGetValue(key, out var ctrl))
-                    ctrl.BackColor = Color.LightPink;
+                if (!controls.TryGetValue(key, out var ctrl))
+                    continue;
+
+                switch (ctrl)
+                {
+                    case DataGridView dgv:
+                        dgv.BackgroundColor = Color.LightPink;
+                        break;
+
+                    case PictureBox pb:
+                        pb.BackColor = Color.MistyRose;
+                        break;
+
+                    default:
+                        ctrl.BackColor = Color.LightPink;
+                        break;
+                }
             }
         }
 
@@ -41,15 +69,16 @@ namespace DuelDeGateaux.Services
         /// Génère un message lisible regroupant toutes les erreurs
         /// afin d'informer l'utilisateur des corrections à effectuer.
         /// </summary>
-        public static string BuildValidationMessage(
-            ValidationResult result,
-            Random randomizer)
+        public static string BuildValidationMessage(ValidationResult result,Random randomizer)
         {
-            string message = "Le formulaire contient des erreurs :\n\n";
+            var sb = new StringBuilder();
+
+            sb.AppendLine("Le formulaire contient des erreurs :");
+            sb.AppendLine();
 
             foreach (var error in result.Errors.Values)
             {
-                message += "• " + error + "\n";
+                sb.AppendLine("• " + error);
             }
 
             string[] funMessages =
@@ -59,10 +88,10 @@ namespace DuelDeGateaux.Services
                 "⚠️ Un gâteau sans farine, ça ne marche pas. Un formulaire vide non plus 🍰",
                 "⚠️ Allez, on se concentre et on corrige les cases rouges 🎯"
             };
+            sb.AppendLine();
+            sb.AppendLine(funMessages[randomizer.Next(funMessages.Length)]);
 
-            message += "\n" + funMessages[randomizer.Next(funMessages.Length)];
-
-            return message;
+            return sb.ToString();
         }
     }
 }
