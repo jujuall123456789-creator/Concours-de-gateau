@@ -65,7 +65,7 @@ namespace DuelDeGateaux.Forms
                 Font = new Font("Segoe UI", 12, FontStyle.Bold),
                 ForeColor = Color.FromArgb(60, 30, 10),
                 AutoSize = true,
-                Location = new Point(20, 18)
+                Location = new Point(20, 8)
             };
 
             cmbSeasons = new ComboBox
