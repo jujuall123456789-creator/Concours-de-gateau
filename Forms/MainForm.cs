@@ -228,7 +228,7 @@ namespace DuelDeGateaux.Forms
                     SyncAndSaveConfig();                
                     var currentConfig = viewModel.ToConfig();
                     List<Participant> assignments = DrawService.AssignChallengers(currentConfig);
-                    //EmailService.SendDuelEmails(currentConfig, assignments);
+                    EmailService.SendDuelEmails(currentConfig, assignments);
                     if (!currentConfig.IsTest)
                     {
                         HistoryService.Add(currentConfig, assignments);

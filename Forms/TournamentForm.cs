@@ -18,7 +18,7 @@ namespace DuelDeGateaux.Forms
     public class TournamentForm : Form
     {
         private readonly AppConfig _config;
-        
+
         // Contrôles UI
         private Panel pnlTop;
         private Button btnNextSeason;
@@ -76,7 +76,7 @@ namespace DuelDeGateaux.Forms
                 Location = new Point(160, 15),
                 Cursor = this.Cursor
             };
-            cmbSeasons.SelectedIndexChanged += (s, e) => 
+            cmbSeasons.SelectedIndexChanged += (s, e) =>
             {
                 if (cmbSeasons.SelectedItem != null)
                 {
@@ -95,8 +95,9 @@ namespace DuelDeGateaux.Forms
                 Cursor = CursorService.LoadCustomButtonCursor() ?? Cursors.Hand,
                 Dock = DockStyle.Right
             };
-            btnNextSeason.FlatAppearance.BorderSize = 0;            
+            btnNextSeason.FlatAppearance.BorderSize = 0;
             btnNextSeason.Click += BtnNextSeason_Click;
+            btnNextSeason.FlatAppearance.MouseOverBackColor = Color.SeaGreen;
 
             pnlTop.Controls.Add(lblSeasonDesc);
             pnlTop.Controls.Add(cmbSeasons);
@@ -131,7 +132,7 @@ namespace DuelDeGateaux.Forms
             }
 
             cmbSeasons.Items.Clear();
-            foreach(var season in distinctSeasons.OrderBy(s => s)) 
+            foreach (var season in distinctSeasons.OrderBy(s => s))
             {
                 cmbSeasons.Items.Add(season);
             }
@@ -147,7 +148,7 @@ namespace DuelDeGateaux.Forms
         {
             // IMPORTANT : S'assure que WebView2 est bien installé sur la machine
             await webViewTournament.EnsureCoreWebView2Async(null);
-            
+
             // Une fois prêt, on dessine l'arbre !
             RefreshTournamentTree();
         }
@@ -157,6 +158,10 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void RefreshTournamentTree()
         {
+            if (webViewTournament.CoreWebView2 == null)
+            {
+                return;
+            }
             List<ChallengeHistoryEntry> allMatches = HistoryService.Load();
             var currentSeasonMatches = allMatches
                 .Where(m => m.TournamentName == _displayedSeason) // ⬅️ Filtre dynamique !
@@ -180,19 +185,19 @@ namespace DuelDeGateaux.Forms
             html.AppendLine("body { font-family: 'Segoe UI', sans-serif; background-color: #FFFDF0; margin: 0; padding: 40px; color: #3C1E0A; }");
             html.AppendLine(".bracket { display: flex; justify-content: center; gap: 60px; margin-top: 30px; }");
             html.AppendLine(".column { display: flex; flex-direction: column; justify-content: space-around; gap: 30px; }");
-            
+
             // Le style des boîtes
             html.AppendLine(".match { background: white; border: 3px solid #F4E8D1; border-radius: 12px; padding: 15px; min-width: 200px; box-shadow: 0 8px 16px rgba(60,30,10,0.05); transition: transform 0.2s; cursor: pointer; }");
-            html.AppendLine(".match:hover { transform: scale(1.05); border-color: #FFB6C1; }"); 
+            html.AppendLine(".match:hover { transform: scale(1.05); border-color: #FFB6C1; }");
             html.AppendLine(".match-title { font-size: 12px; font-weight: bold; color: #A8957A; text-transform: uppercase; margin: 0 0 10px 0; border-bottom: 1px dashed #F4E8D1; padding-bottom: 5px; text-align: center;}");
-            
+
             // Joueurs et Gagnants
             html.AppendLine(".player { padding: 8px 0; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }");
             html.AppendLine(".winner { font-weight: bold; color: #4CAF50; }");
             html.AppendLine(".loser { color: #CCC; text-decoration: line-through; }"); // Barre le perdant
             html.AppendLine(".crown { font-size: 20px; }");
             html.AppendLine("</style>");
-            
+
             // --- JAVASCRIPT ---
             // C'est ici que le HTML "parle" au C# quand on clique sur un match !
             html.AppendLine("<script>");
@@ -210,7 +215,7 @@ namespace DuelDeGateaux.Forms
             {
                 var matchesInThisPhase = currentSeasonMatches.Where(m => m.PhaseIndex == p).ToList();
                 html.AppendLine("<div class='column'>");
-                
+
                 foreach (var match in matchesInThisPhase)
                 {
                     bool isFinished = !string.IsNullOrEmpty(match.Winner);
@@ -241,10 +246,10 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Événement déclenché quand le Javascript envoie un message (le MatchId cliqué).
         /// </summary>
-       private void WebViewTournament_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        private void WebViewTournament_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             string matchId = e.TryGetWebMessageAsString();
-            
+
             var allMatches = HistoryService.Load();
             var match = allMatches.FirstOrDefault(m => m.MatchId == matchId);
 
@@ -258,16 +263,16 @@ namespace DuelDeGateaux.Forms
                     if (winnerForm.ShowDialog() == DialogResult.OK)
                     {
                         match.Winner = winnerForm.SelectedWinner;
-                        
+
                         // 🛠️ Si l'utilisateur a changé la colonne dans le menu déroulant !
                         if (match.PhaseIndex != winnerForm.SelectedPhaseIndex)
                         {
                             match.PhaseIndex = winnerForm.SelectedPhaseIndex;
                             match.PhaseName = $"Tour {match.PhaseIndex + 1}";
                         }
-                        
-                        HistoryService.Save(allMatches); 
-                        AudioService.PlaySaveSound(); 
+
+                        HistoryService.Save(allMatches);
+                        AudioService.PlaySaveSound();
                         RefreshTournamentTree();
                     }
                 }
@@ -286,22 +291,22 @@ namespace DuelDeGateaux.Forms
             if (result == DialogResult.Yes)
             {
                 string currentName = _config.CurrentTournamentName;
-                int seasonNum = 1; 
-                
+                int seasonNum = 1;
+
                 if (currentName.StartsWith("Saison "))
                 {
                     int.TryParse(currentName.Substring(7), out seasonNum);
                 }
-                
+
                 _config.CurrentTournamentName = $"Saison {seasonNum + 1}";
-                
+
                 // IMPORTANT : Il faut appeler ton ConfigService pour sauvegarder le changement !
                 ConfigService.Save(_config);
 
                 // ⬅️ On actualise la liste et l'affichage !
                 _displayedSeason = _config.CurrentTournamentName;
                 LoadSeasonsList();
-                
+
                 RefreshTournamentTree();
             }
         }
@@ -325,7 +330,7 @@ namespace DuelDeGateaux.Forms
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.BackColor = Color.FromArgb(255, 253, 240);
-            
+
             // 🔄 MAGIE : La fenêtre s'agrandit toute seule pour ne cacher personne !
             this.AutoSize = true;
             this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
@@ -359,13 +364,13 @@ namespace DuelDeGateaux.Forms
                     Text = challenger,
                     Size = new Size(250, 45),
                     // 🦍 Support des Emojis complexes !
-                    Font = new Font("Segoe UI Emoji", 10, FontStyle.Bold), 
+                    Font = new Font("Segoe UI Emoji", 10, FontStyle.Bold),
                     BackColor = Color.White,
                     FlatStyle = FlatStyle.Flat,
                     Cursor = buttonCursor,
                     Margin = new Padding(0, 0, 0, 10)
                 };
-                btn.Click += (s, e) => 
+                btn.Click += (s, e) =>
                 {
                     SelectedWinner = challenger;
                     this.DialogResult = DialogResult.OK;
@@ -391,17 +396,17 @@ namespace DuelDeGateaux.Forms
                 Font = new Font("Segoe UI", 9),
                 Cursor = this.Cursor
             };
-            
+
             // On propose les colonnes existantes + 1 au cas où on veut créer le tour suivant
-            for(int i = 0; i <= maxGlobalPhase + 1; i++)
+            for (int i = 0; i <= maxGlobalPhase + 1; i++)
             {
                 cmbPhase.Items.Add($"Tour {i + 1}");
             }
             cmbPhase.SelectedIndex = currentPhase;
-            
+
             SelectedPhaseIndex = currentPhase;
             cmbPhase.SelectedIndexChanged += (s, e) => { SelectedPhaseIndex = cmbPhase.SelectedIndex; };
-            
+
             flowPanel.Controls.Add(cmbPhase);
             // ------------------------------------------
 
