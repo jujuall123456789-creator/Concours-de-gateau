@@ -96,11 +96,7 @@ namespace DuelDeGateaux.Forms
             toolTip = TooltipService.BuildDefault();
             TooltipUiService.Configure(toolTip, TooltipDefinitions.Build(this));
             // 🪄 MAGIE DU CURSEUR PERSONNALISÉ
-            SetCustomCursor();
-            // 👆 MAGIE DU SURVOL DES BOUTONS
-            SetButtonCursors();
-            // ✍️ MAGIE DU SURVOL DU TEXTE
-            SetTextBoxCursors();           
+            SetupCustomCursors();
             string cakeIconPath = FileSelectionService.FilePathAssets("cakeIcon.ico");
 
             if (File.Exists(cakeIconPath))
@@ -123,20 +119,11 @@ namespace DuelDeGateaux.Forms
             {                
                  // 1) Préparer les bindings une seule fois
                 SetupBindings();
-
-                // 2) Charger la configuration
-                var config = ConfigService.Load();
-                var loadedVm = MainFormViewModel.FromConfig(config);
-                
+                // 2) Chargement de la config et de l'UI
+                ReloadFromConfig();
                 // 3) Connecter la grille
                 SetupParticipantsGrid();
-                
-                // 4) Copier les données dans l'instance existante
-                viewModel.LoadFrom(loadedVm);
-
-                // 5) Charger les aperçus images
-                RefreshImagePreviews();
-                // 6) 🎵 Lancement de la musique de fond !
+                // 4) 🎵 Lancement de la musique de fond !
                 AudioService.PlayBackgroundMusic();
             }
             catch (Exception ex)
@@ -200,13 +187,31 @@ namespace DuelDeGateaux.Forms
         /// Sauvegarde les entrées de l'utilisateur dans le fichier de config
         /// </summary>
         private void SyncAndSaveConfig()
-        {
+        {      
             if (!ValidateFields())
+            {
                 return;
+            }      
             // 👥 GROUPE PARTICIPANTS
             EndEditParticipants();
             ConfigService.Save(viewModel.ToConfig());
-        } 
+        }
+        /// <summary>
+        /// Chargement de la config et de l'UI
+        /// </summary>
+        private void ReloadFromConfig()
+        {
+            SuspendLayout();
+
+            var config = ConfigService.Load();
+            var loadedVm = MainFormViewModel.FromConfig(config);
+            viewModel.LoadFrom(loadedVm);
+
+            RefreshImagePreviews();
+            participantBindingSource.ResetBindings(false);
+
+            ResumeLayout();
+        }
         #region Bouton
         #region Actions principales
         /// <summary>
@@ -216,10 +221,6 @@ namespace DuelDeGateaux.Forms
         /// <param name="e"></param>
         private void BtnRun_Click( object sender, EventArgs e)
         {
-            if (!ValidateFields())
-            {
-                return;
-            }
             this.Cursor = Cursors.WaitCursor;
             try
             {
@@ -252,23 +253,11 @@ namespace DuelDeGateaux.Forms
 
             AudioService.OpenMenuSound();
             // Création du menu déroulant
-            ContextMenuStrip previewMenu = new ContextMenuStrip();
-            previewMenu.Cursor = buttonCursor; // Pour garder un bel aspect au survol
-            previewMenu.Font = new Font("Segoe UI Emoji", 10, FontStyle.Regular);
-
-            // Option 1 : Les Challengers
-            ToolStripMenuItem itemChallenger = new ToolStripMenuItem("⚔️ Aperçu Mail Challengers");
-            itemChallenger.Click += (s, args) => LaunchPreviewWindow(true);
-            
-            // Option 2 : Le Jury (Mangeurs)
-            ToolStripMenuItem itemJury = new ToolStripMenuItem("🤤 Aperçu Mail Jury");
-            itemJury.Click += (s, args) => LaunchPreviewWindow(false);
-
-            // Ajout des options au menu
-            previewMenu.Items.Add(itemChallenger);
-            previewMenu.Items.Add(new ToolStripSeparator()); // Une jolie petite ligne de séparation
-            previewMenu.Items.Add(itemJury);
-
+            ContextMenuStrip previewMenu = BuildMenu(
+                ("⚔️ Aperçu Mail Challengers", () => LaunchPreviewWindow(true)),
+                ("---", null),
+                ("🤤 Aperçu Mail Jury", () => LaunchPreviewWindow(false))
+            );
             // On affiche le menu juste en dessous du bouton cliqué
             Button btn = (Button)sender;
             previewMenu.Show(btn, new Point(0, btn.Height));
@@ -281,10 +270,7 @@ namespace DuelDeGateaux.Forms
         /// <param name="isChallenger">True pour le mail Challenger, False pour le mail Jury.</param>
         private void LaunchPreviewWindow(bool isChallenger)
         {
-            if (!ValidateFields())
-            {
-                return;
-            }
+            SyncAndSaveConfig();
 
             UiHelper.ExecuteWithErrorHandling(() =>
             {
@@ -329,23 +315,11 @@ namespace DuelDeGateaux.Forms
         {            
            AudioService.OpenMenuSound();
            // Création du menu déroulant (comme pour la preview !)
-           ContextMenuStrip historyMenu = new ContextMenuStrip();
-           historyMenu.Cursor = buttonCursor;
-           historyMenu.Font = new Font("Segoe UI Emoji", 10, FontStyle.Regular);
-
-           // Option 1 : Le tableau brut
-           ToolStripMenuItem itemTable = new ToolStripMenuItem("📖 Tableau brut");
-           itemTable.Click += btnMenuHistoryTable_Click;
-           
-           // Option 2 : L'arbre du tournoi
-           ToolStripMenuItem itemTree = new ToolStripMenuItem("🏆 Arbre du Tournoi");
-           itemTree.Click += btnMenuHistoryTree_Click; 
-
-           // Ajout des options au menu
-           historyMenu.Items.Add(itemTable);
-           historyMenu.Items.Add(new ToolStripSeparator());
-           historyMenu.Items.Add(itemTree);
-
+           ContextMenuStrip historyMenu = BuildMenu(
+                ("📖 Tableau brut", OpenHistoryTable),
+                ("---", null),
+                ("🏆 Arbre du Tournoi", OpenTournamentTree)
+           );
            // On affiche le menu juste en dessous du bouton cliqué
            Button btn = (Button)sender;
            historyMenu.Show(btn, new Point(0, btn.Height));
@@ -353,7 +327,7 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Ouvre l'historique brut (le tableau classique)
         /// </summary>
-        private void btnMenuHistoryTable_Click(object sender, EventArgs e)
+        private void OpenHistoryTable()
         {
             AudioService.MenuSelectionSound();
             var historyForm = new HistoryForm();
@@ -363,17 +337,13 @@ namespace DuelDeGateaux.Forms
         /// <summary>
         /// Ouvre le nouvel arbre du tournoi WebView2 !
         /// </summary>
-        private void btnMenuHistoryTree_Click(object sender, EventArgs e)
+        private void OpenTournamentTree()
         {
-            // On récupère la config à jour (qui contient la Saison actuelle)
             AudioService.MenuSelectionSound();
             var currentConfig = viewModel.ToConfig();
-            
             using var tournamentForm = new TournamentForm(currentConfig);
             tournamentForm.ShowDialog();
-            var config = ConfigService.Load();
-            var loadedVm = MainFormViewModel.FromConfig(config);
-            viewModel.LoadFrom(loadedVm);
+            ReloadFromConfig();
         }
 
         /// <summary>
@@ -402,6 +372,52 @@ namespace DuelDeGateaux.Forms
                 BallotService.GenerateAndPrintBallots(viewModel.ToConfig());
                 
             }, null); // Pas de message de succès, l'ouverture du navigateur suffit
+        }
+        /// <summary>
+        /// Construit dynamiquement un menu contextuel avec une liste d'items.
+        /// Permet de factoriser toute la logique de création des menus (Preview, History, etc.).
+        /// Chaque item est défini par :
+        /// - un texte affiché
+        /// - une action à exécuter au clic
+        /// </summary>
+        /// <param name="items">
+        /// Liste des éléments du menu sous forme de tuples :
+        /// (texte affiché, action associée)
+        /// </param>
+        /// <returns>Un ContextMenuStrip prêt à être affiché</returns>
+        private ContextMenuStrip BuildMenu(params (string text, Action onClick)[] items)
+        {
+             // 🎨 Création du menu avec un style commun à toute l'application
+            var menu = new ContextMenuStrip
+            {
+                Cursor = buttonCursor,
+                Font = new Font("Segoe UI Emoji", 10)
+            };
+
+            // 🔁 Construction dynamique de chaque entrée
+            foreach (var (text, onClick) in items)
+            {
+                // ➖ Cas spécial : séparateur visuel
+                if (text == "---")
+                {
+                    menu.Items.Add(new ToolStripSeparator());
+                    continue;
+                }
+
+                // 🧾 Création de l’item
+                var item = new ToolStripMenuItem(text);
+
+                // 🔗 Binding de l’action (si fournie)
+                if (onClick != null)
+                {
+                    item.Click += (s, e) => onClick();
+                }
+
+                // ➕ Ajout au menu
+                menu.Items.Add(item);
+            }
+
+            return menu;
         }
         #endregion Actions principales
         #region Participants
@@ -457,7 +473,7 @@ namespace DuelDeGateaux.Forms
             else
             {
                 // Sinon on remet le curseur par défaut (ton rouleau)
-                dgvParticipants.Cursor = this.Cursor; 
+                dgvParticipants.Cursor = mainCursor; 
             }
         }
         #endregion Participants

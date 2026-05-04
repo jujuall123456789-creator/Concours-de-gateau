@@ -21,14 +21,19 @@ namespace DuelDeGateaux.Forms
         {
             EndEditParticipants();
             var result = FormValidationService.Validate(viewModel);
-
+            
             ValidationUiService.ResetFieldColors(validationControls);
 
             if (!result.IsValid)
             {
                 ValidationUiService.ApplyFieldErrors(result, validationControls);
-                 string message = ValidationUiService.BuildValidationMessage(result,_messageRandomizer); 
+                string message = ValidationUiService.BuildValidationMessage(result,_messageRandomizer); 
                 CustomMessageBox.Show(message, "Validation impossible", MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                var firstErrorKey = result.Errors.Keys.FirstOrDefault();
+                if (firstErrorKey != null && validationControls.TryGetValue(firstErrorKey, out var ctrl))
+                {
+                    ctrl.Focus();
+                }
                 return false;
             }
             return true;

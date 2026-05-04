@@ -135,11 +135,11 @@ namespace DuelDeGateaux.ViewModels
             set => SetProperty(ref fontSize, value);
         }
 
-        private string pathImageHeading = "";
+        private string _pathImageHeading = "";
         public string PathImageHeading
         {
-            get => pathImageHeading;
-            set => SetProperty(ref pathImageHeading, value);
+            get => _pathImageHeading;
+            set => SetProperty(ref _pathImageHeading, value);
         }
 
         private int imageHeadingHeight = 650;
