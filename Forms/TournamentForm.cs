@@ -30,6 +30,10 @@ namespace DuelDeGateaux.Forms
             _config = config;
             InitializeUI();
             InitializeWebViewAsync();
+
+            // 🪄 Application des curseurs personnalisés WinForms
+            this.Cursor = CursorService.LoadCustomCursor() ?? Cursors.Default;
+            btnNextSeason.Cursor = CursorService.LoadCustomButtonCursor() ?? Cursors.Hand;
         }
 
         /// <summary>
@@ -63,10 +67,11 @@ namespace DuelDeGateaux.Forms
             {
                 Text = "🏁 Clôturer la saison",
                 Font = new Font("Segoe UI Emoji", 10, FontStyle.Bold),
-                BackColor = Color.FromArgb(255, 182, 193), // Rose poudré
+                BackColor = Color.FromArgb(255, 182, 193),
                 FlatStyle = FlatStyle.Flat,
-                Size = new Size(200, 40),
-                Cursor = Cursors.Hand
+                Width = 200,
+                Cursor = Cursors.Hand,
+                Dock = DockStyle.Right
             };
             btnNextSeason.FlatAppearance.BorderSize = 0;
             // On le place à droite
@@ -188,11 +193,10 @@ namespace DuelDeGateaux.Forms
             html.AppendLine("</div></body></html>");
             webViewTournament.NavigateToString(html.ToString());
         }
-
         /// <summary>
         /// Événement déclenché quand le Javascript envoie un message (le MatchId cliqué).
         /// </summary>
-        private void WebViewTournament_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+       private void WebViewTournament_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             string matchId = e.TryGetWebMessageAsString();
             
@@ -201,19 +205,24 @@ namespace DuelDeGateaux.Forms
 
             if (match != null && string.IsNullOrEmpty(match.Winner))
             {
-                // On ouvre une petite fenêtre sur-mesure pour choisir le gagnant !
-                using (var winnerForm = new WinnerSelectionForm(match.ChallengersList))
+                // On calcule quelle est la colonne la plus avancée du tournoi actuel
+                int maxGlobalPhase = allMatches.Where(m => m.TournamentName == match.TournamentName).Max(m => m.PhaseIndex);
+
+                using (var winnerForm = new WinnerSelectionForm(match.ChallengersList, match.PhaseIndex, maxGlobalPhase))
                 {
                     if (winnerForm.ShowDialog() == DialogResult.OK)
                     {
-                        // On met à jour le gagnant
                         match.Winner = winnerForm.SelectedWinner;
-                        HistoryService.Save(allMatches); // On sauvegarde le JSON
                         
-                        // Son de victoire !
+                        // 🛠️ Si l'utilisateur a changé la colonne dans le menu déroulant !
+                        if (match.PhaseIndex != winnerForm.SelectedPhaseIndex)
+                        {
+                            match.PhaseIndex = winnerForm.SelectedPhaseIndex;
+                            match.PhaseName = $"Tour {match.PhaseIndex + 1}";
+                        }
+                        
+                        HistoryService.Save(allMatches); 
                         AudioService.PlaySaveSound(); 
-                        
-                        // On redessine l'arbre instantanément
                         RefreshTournamentTree();
                     }
                 }
@@ -257,45 +266,56 @@ namespace DuelDeGateaux.Forms
     internal class WinnerSelectionForm : Form
     {
         public string SelectedWinner { get; private set; }
+        public int SelectedPhaseIndex { get; private set; }
 
-        public WinnerSelectionForm(List<string> challengers)
+        public WinnerSelectionForm(List<string> challengers, int currentPhase, int maxGlobalPhase)
         {
-            this.Text = "Qui a gagné ? 👑";
-            this.Size = new Size(350, 200);
+            this.Text = "Résultat du match 🏆";
+            this.ShowIcon = false;
             this.StartPosition = FormStartPosition.CenterParent;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.BackColor = Color.FromArgb(255, 253, 240);
+            
+            // 🔄 MAGIE : La fenêtre s'agrandit toute seule pour ne cacher personne !
+            this.AutoSize = true;
+            this.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            this.Padding = new Padding(10);
+            this.Cursor = CursorService.LoadCustomCursor() ?? Cursors.Default;
+            Cursor buttonCursor = CursorService.LoadCustomButtonCursor() ?? Cursors.Hand;
+
+            FlowLayoutPanel flowPanel = new FlowLayoutPanel
+            {
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                AutoSize = true,
+                AutoSizeMode = AutoSizeMode.GrowAndShrink,
+                Padding = new Padding(20)
+            };
 
             Label lblInfo = new Label
             {
                 Text = "Choisissez le grand vainqueur :",
-                Dock = DockStyle.Top,
                 TextAlign = ContentAlignment.MiddleCenter,
-                Font = new Font("Segoe UI", 12, FontStyle.Bold),
-                Height = 60
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
+                AutoSize = true,
+                Margin = new Padding(0, 0, 0, 15)
             };
-            this.Controls.Add(lblInfo);
-
-            FlowLayoutPanel flowPanel = new FlowLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                FlowDirection = FlowDirection.TopDown,
-                WrapContents = false,
-                Padding = new Padding(40, 10, 40, 10)
-            };
+            flowPanel.Controls.Add(lblInfo);
 
             foreach (var challenger in challengers)
             {
                 Button btn = new Button
                 {
                     Text = challenger,
-                    Size = new Size(250, 40),
-                    Font = new Font("Segoe UI", 10, FontStyle.Bold),
+                    Size = new Size(250, 45),
+                    // 🦍 Support des Emojis complexes !
+                    Font = new Font("Segoe UI Emoji", 10, FontStyle.Bold), 
                     BackColor = Color.White,
                     FlatStyle = FlatStyle.Flat,
-                    Cursor = Cursors.Hand
+                    Cursor = buttonCursor,
+                    Margin = new Padding(0, 0, 0, 10)
                 };
                 btn.Click += (s, e) => 
                 {
@@ -305,6 +325,37 @@ namespace DuelDeGateaux.Forms
                 };
                 flowPanel.Controls.Add(btn);
             }
+
+            // --- 🛠️ CORRECTEUR DE COLONNE (MANCHE) ---
+            Label lblPhase = new Label
+            {
+                Text = "Si besoin, corriger la colonne du match :",
+                Font = new Font("Segoe UI", 9, FontStyle.Italic),
+                AutoSize = true,
+                Margin = new Padding(0, 15, 0, 5)
+            };
+            flowPanel.Controls.Add(lblPhase);
+
+            ComboBox cmbPhase = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Width = 250,
+                Font = new Font("Segoe UI", 9),
+                Cursor = this.Cursor
+            };
+            
+            // On propose les colonnes existantes + 1 au cas où on veut créer le tour suivant
+            for(int i = 0; i <= maxGlobalPhase + 1; i++)
+            {
+                cmbPhase.Items.Add($"Tour {i + 1}");
+            }
+            cmbPhase.SelectedIndex = currentPhase;
+            
+            SelectedPhaseIndex = currentPhase;
+            cmbPhase.SelectedIndexChanged += (s, e) => { SelectedPhaseIndex = cmbPhase.SelectedIndex; };
+            
+            flowPanel.Controls.Add(cmbPhase);
+            // ------------------------------------------
 
             this.Controls.Add(flowPanel);
         }
