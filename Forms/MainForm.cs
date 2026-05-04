@@ -242,7 +242,7 @@ namespace DuelDeGateaux.Forms
             }
             finally
             {
-                this.Cursor = mainCursor ?? Cursors.Default;
+                this.Cursor = CursorService.MainCursor;
             }
         }
         /// <summary>
@@ -390,7 +390,7 @@ namespace DuelDeGateaux.Forms
              // 🎨 Création du menu avec un style commun à toute l'application
             var menu = new ContextMenuStrip
             {
-                Cursor = buttonCursor,
+                Cursor = CursorService.ButtonCursor,
                 Font = new Font("Segoe UI Emoji", 10)
             };
 
@@ -468,12 +468,12 @@ namespace DuelDeGateaux.Forms
             
             if (e.RowIndex >= 0 && e.ColumnIndex == deleteColumnIndex)
             {
-                dgvParticipants.Cursor = buttonCursor;
+                dgvParticipants.Cursor = CursorService.ButtonCursor;
             }
             else
             {
                 // Sinon on remet le curseur par défaut (ton rouleau)
-                dgvParticipants.Cursor = mainCursor; 
+                dgvParticipants.Cursor = CursorService.MainCursor;
             }
         }
         #endregion Participants

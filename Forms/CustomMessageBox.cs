@@ -21,7 +21,7 @@ namespace DuelDeGateaux.Forms
             this.Text = title;
             rtbMessage.Text = message;
             // 🪄 Application du curseur Rouleau à pâtisserie sur le fond
-            this.Cursor = CursorService.LoadCustomCursor() ?? Cursors.Default;
+            this.Cursor = CursorService.MainCursor;
             rtbMessage.Cursor = this.Cursor;
             LoadCustomIcon(icon);
             SetupButtons(buttons);
@@ -58,7 +58,7 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void SetupButtons(MessageBoxButtons buttons)
         {
-            Cursor buttonCursor = CursorService.LoadCustomButtonCursor() ?? Cursors.Hand;
+            Cursor buttonCursor = CursorService.ButtonCursor;
 
             if (buttons == MessageBoxButtons.YesNo || buttons == MessageBoxButtons.YesNoCancel)
             {
