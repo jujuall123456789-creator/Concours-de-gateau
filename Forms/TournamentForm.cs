@@ -22,13 +22,17 @@ namespace DuelDeGateaux.Forms
         // Contrôles UI
         private Panel pnlTop;
         private Button btnNextSeason;
-        private Label lblTitle;
+        private ComboBox cmbSeasons;
+        private string _displayedSeason; // Retient la saison en cours de visionnage
         private WebView2 webViewTournament;
 
         public TournamentForm(AppConfig config)
         {
             _config = config;
+            _displayedSeason = _config.CurrentTournamentName; // Par défaut, on affiche le présent
+
             InitializeUI();
+            LoadSeasonsList(); // On charge les anciennes saisons
             InitializeWebViewAsync();
 
             // 🪄 Application des curseurs personnalisés WinForms
@@ -55,13 +59,30 @@ namespace DuelDeGateaux.Forms
                 BackColor = Color.FromArgb(255, 253, 240) // Un joli blanc cassé "crème"
             };
 
-            lblTitle = new Label
+            Label lblSeasonDesc = new Label
             {
-                Text = $"Saison actuelle : {_config.CurrentTournamentName}",
-                Font = new Font("Segoe UI", 14, FontStyle.Bold),
-                ForeColor = Color.FromArgb(60, 30, 10), // Marron chocolat
+                Text = "Voir la saison :",
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                ForeColor = Color.FromArgb(60, 30, 10),
                 AutoSize = true,
-                Location = new Point(20, 15)
+                Location = new Point(20, 18)
+            };
+
+            cmbSeasons = new ComboBox
+            {
+                DropDownStyle = ComboBoxStyle.DropDownList,
+                Font = new Font("Segoe UI", 11),
+                Width = 200,
+                Location = new Point(160, 15),
+                Cursor = this.Cursor
+            };
+            cmbSeasons.SelectedIndexChanged += (s, e) => 
+            {
+                if (cmbSeasons.SelectedItem != null)
+                {
+                    _displayedSeason = cmbSeasons.SelectedItem.ToString();
+                    RefreshTournamentTree(); // Redessine l'arbre au changement !
+                }
             };
 
             btnNextSeason = new Button
@@ -77,7 +98,8 @@ namespace DuelDeGateaux.Forms
             btnNextSeason.FlatAppearance.BorderSize = 0;            
             btnNextSeason.Click += BtnNextSeason_Click;
 
-            pnlTop.Controls.Add(lblTitle);
+            pnlTop.Controls.Add(lblSeasonDesc);
+            pnlTop.Controls.Add(cmbSeasons);
             pnlTop.Controls.Add(btnNextSeason);
             pnlTop.Padding = new Padding(10);
 
@@ -93,6 +115,29 @@ namespace DuelDeGateaux.Forms
             // 3. Ajout à la fenêtre
             this.Controls.Add(webViewTournament);
             this.Controls.Add(pnlTop);
+        }
+
+        /// <summary>
+        /// Charge l'historique des saisons pour la liste déroulante
+        /// </summary>
+        private void LoadSeasonsList()
+        {
+            var allMatches = HistoryService.Load();
+            var distinctSeasons = allMatches.Select(m => m.TournamentName).Distinct().ToList();
+
+            if (!distinctSeasons.Contains(_config.CurrentTournamentName))
+            {
+                distinctSeasons.Add(_config.CurrentTournamentName);
+            }
+
+            cmbSeasons.Items.Clear();
+            foreach(var season in distinctSeasons.OrderBy(s => s)) 
+            {
+                cmbSeasons.Items.Add(season);
+            }
+
+            if (cmbSeasons.Items.Contains(_displayedSeason))
+                cmbSeasons.SelectedItem = _displayedSeason;
         }
 
         /// <summary>
@@ -114,14 +159,14 @@ namespace DuelDeGateaux.Forms
         {
             List<ChallengeHistoryEntry> allMatches = HistoryService.Load();
             var currentSeasonMatches = allMatches
-                .Where(m => m.TournamentName == _config.CurrentTournamentName)
+                .Where(m => m.TournamentName == _displayedSeason) // ⬅️ Filtre dynamique !
                 .ToList();
 
             if (!currentSeasonMatches.Any())
             {
                 webViewTournament.NavigateToString($@"
                     <html><body style='background-color:#FFFDF0; font-family:""Segoe UI"", sans-serif; display:flex; flex-direction:column; align-items:center; justify-content:center; height:100vh; margin:0;'>
-                        <h1 style='color:#3C1E0A;'>{_config.CurrentTournamentName}</h1>
+                        <h1 style='color:#3C1E0A;'>{_displayedSeason}</h1>
                         <h3 style='color:#E5D3B3;'>L'arbre est vide... Il faut envoyer un duel ! ⚔️</h3>
                     </body></html>");
                 return;
@@ -157,7 +202,7 @@ namespace DuelDeGateaux.Forms
             html.AppendLine("</script>");
             html.AppendLine("</head><body>");
 
-            html.AppendLine($"<h1 style='text-align: center;'>🏆 {_config.CurrentTournamentName} 🏆</h1>");
+            html.AppendLine($"<h1 style='text-align: center;'>🏆 {_displayedSeason} 🏆</h1>");
             html.AppendLine("<div class='bracket'>");
 
             // --- CONSTRUCTION DES COLONNES ---
@@ -192,6 +237,7 @@ namespace DuelDeGateaux.Forms
             html.AppendLine("</div></body></html>");
             webViewTournament.NavigateToString(html.ToString());
         }
+
         /// <summary>
         /// Événement déclenché quand le Javascript envoie un message (le MatchId cliqué).
         /// </summary>
@@ -248,10 +294,13 @@ namespace DuelDeGateaux.Forms
                 }
                 
                 _config.CurrentTournamentName = $"Saison {seasonNum + 1}";
-                lblTitle.Text = $"Saison actuelle : {_config.CurrentTournamentName}";
                 
                 // IMPORTANT : Il faut appeler ton ConfigService pour sauvegarder le changement !
                 ConfigService.Save(_config);
+
+                // ⬅️ On actualise la liste et l'affichage !
+                _displayedSeason = _config.CurrentTournamentName;
+                LoadSeasonsList();
                 
                 RefreshTournamentTree();
             }
