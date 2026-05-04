@@ -1,5 +1,6 @@
 [
   {
+    "MatchId": "9f1126e2-dc1d-47db-8329-28878e224754",
     "Date": "31/03/2026",
     "Theme": "\uD83D\uDCA9 Mousse au chocolat \uD83D\uDCA9",
     "ChallengersList": [
@@ -7,12 +8,13 @@
       "Julien \uD83D\uDC51"
     ],
     "Challengers": "Tianning \uD83E\uDDAB vs Julien \uD83D\uDC51",
-    "PhaseIndex": 0,
-    "PhaseName": "Manche 1",
     "TournamentName": "Saison 2",
+    "PhaseIndex": 0,
+    "PhaseName": "Tour 1",
     "Winner": "Julien \uD83D\uDC51"
   },
   {
+    "MatchId": "1a35c4aa-0922-4072-8b15-76486773a093",
     "Date": "28/04/2026",
     "Theme": "\uD83C\uDF4B G\u00E2teau moelleux au citron \uD83C\uDF4B",
     "ChallengersList": [
@@ -20,9 +22,23 @@
       "Mathilde \uD83E\uDD89"
     ],
     "Challengers": "L\u00E9a \uD83D\uDC08 vs Mathilde \uD83E\uDD89",
-    "PhaseIndex": 0,
-    "PhaseName": "Manche 1",
     "TournamentName": "Saison 2",
+    "PhaseIndex": 0,
+    "PhaseName": "Tour 1",
     "Winner": "Mathilde \uD83E\uDD89"
+  },
+  {
+    "MatchId": "15ff269c-2a1a-4c6f-9d2c-62234ab1f4d9",
+    "Date": "23-04-2026",
+    "Theme": "\uD83C\uDF4B G\u00E2teau moelleux au citron \uD83C\uDF4B",
+    "ChallengersList": [
+      "Beno\u00EEt \uD83D\uDC17",
+      "Maxime R \uD83E\uDD98"
+    ],
+    "Challengers": "Beno\u00EEt \uD83D\uDC17 vs Maxime R \uD83E\uDD98",
+    "TournamentName": "Saison 2",
+    "PhaseIndex": 0,
+    "PhaseName": "Tour 1",
+    "Winner": null
   }
 ]

@@ -29,11 +29,11 @@ namespace DuelDeGateaux.Forms
         private void SetButtonCursors()
         {            
             buttonCursor = CursorService.LoadCustomButtonCursor();
-            Cursor actionCursor = buttonCursor ?? Cursors.Default;
+            buttonCursor = buttonCursor ?? Cursors.Default;
             // Boutons principaux
-            btnSend.Cursor = btnPreview.Cursor = btnSave.Cursor = btnPrintBallot.Cursor = btnHistory.Cursor = btnOpenJson.Cursor = actionCursor;
+            btnSend.Cursor = btnPreview.Cursor = btnSave.Cursor = btnPrintBallot.Cursor = btnHistory.Cursor = btnOpenJson.Cursor = buttonCursor;
             // Boutons d'images et d'ajout
-            btnBrowseHeader.Cursor = btnBrowseFooter.Cursor = btnAddParticipants.Cursor = actionCursor;
+            btnBrowseHeader.Cursor = btnBrowseFooter.Cursor = btnAddParticipants.Cursor = buttonCursor;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace DuelDeGateaux.Forms
             if (textCursor != null)
             {
                 // On passe les deux curseurs à notre méthode de scan
-                ApplyCustomCursors(this, textCursor, mainCursor);
+                ApplyCustomCursors(this, textCursor, fallbackMainCursor);
             }
         }
 

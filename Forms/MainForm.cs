@@ -100,7 +100,13 @@ namespace DuelDeGateaux.Forms
             // 👆 MAGIE DU SURVOL DES BOUTONS
             SetButtonCursors();
             // ✍️ MAGIE DU SURVOL DU TEXTE
-            SetTextBoxCursors();
+            SetTextBoxCursors();           
+            string cakeIconPath = FileSelectionService.FilePathAssets("cakeIcon.ico");
+
+            if (File.Exists(cakeIconPath))
+            {
+                this.Icon = Icon.ExtractAssociatedIcon(cakeIconPath);
+            }
             //Assignation des valeurs du viewmodel aux composants
             rb2Challengers.Checked = viewModel.ChallengerNumber == 2;
             rb3Challengers.Checked = viewModel.ChallengerNumber == 3;
@@ -222,7 +228,7 @@ namespace DuelDeGateaux.Forms
                     SyncAndSaveConfig();                
                     var currentConfig = viewModel.ToConfig();
                     List<Participant> assignments = DrawService.AssignChallengers(currentConfig);
-                    EmailService.SendDuelEmails(currentConfig, assignments);
+                    //EmailService.SendDuelEmails(currentConfig, assignments);
                     if (!currentConfig.IsTest)
                     {
                         HistoryService.Add(currentConfig, assignments);
@@ -243,9 +249,11 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void BtnPreview_Click(object sender, EventArgs e)
         {
+
+            AudioService.OpenMenuSound();
             // Création du menu déroulant
             ContextMenuStrip previewMenu = new ContextMenuStrip();
-            previewMenu.Cursor = Cursors.Hand; // Pour garder un bel aspect au survol
+            previewMenu.Cursor = buttonCursor; // Pour garder un bel aspect au survol
             previewMenu.Font = new Font("Segoe UI Emoji", 10, FontStyle.Regular);
 
             // Option 1 : Les Challengers
@@ -264,7 +272,7 @@ namespace DuelDeGateaux.Forms
             // On affiche le menu juste en dessous du bouton cliqué
             Button btn = (Button)sender;
             previewMenu.Show(btn, new Point(0, btn.Height));
-            
+
         }
 
         /// <summary>
@@ -280,8 +288,7 @@ namespace DuelDeGateaux.Forms
 
             UiHelper.ExecuteWithErrorHandling(() =>
             {
-                // On joue le petit son de bulle qu'on a configuré !
-                AudioService.PlayPreviewSound();
+                AudioService.MenuSelectionSound();
 
                 // On met à jour la configuration en mémoire
                 var currentConfig = viewModel.ToConfig();
@@ -320,10 +327,10 @@ namespace DuelDeGateaux.Forms
         /// <param name="e"></param>
         private void BtnHistory_Click(object sender, EventArgs e)
         {            
-           AudioService.PlayHistorySound();
+           AudioService.OpenMenuSound();
            // Création du menu déroulant (comme pour la preview !)
            ContextMenuStrip historyMenu = new ContextMenuStrip();
-           historyMenu.Cursor = Cursors.Hand; 
+           historyMenu.Cursor = buttonCursor;
            historyMenu.Font = new Font("Segoe UI Emoji", 10, FontStyle.Regular);
 
            // Option 1 : Le tableau brut
@@ -348,6 +355,7 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         private void btnMenuHistoryTable_Click(object sender, EventArgs e)
         {
+            AudioService.MenuSelectionSound();
             var historyForm = new HistoryForm();
             historyForm.ShowDialog();
         }
@@ -358,6 +366,7 @@ namespace DuelDeGateaux.Forms
         private void btnMenuHistoryTree_Click(object sender, EventArgs e)
         {
             // On récupère la config à jour (qui contient la Saison actuelle)
+            AudioService.MenuSelectionSound();
             var currentConfig = viewModel.ToConfig();
             
             using var tournamentForm = new TournamentForm(currentConfig);
@@ -402,7 +411,7 @@ namespace DuelDeGateaux.Forms
         {
             // Ajoute une ligne exemple que l'utilisateur pourra modifier dans la grille
             ParticipantService.AddDefaultParticipant(viewModel.Participants, viewModel.SenderEmail.Trim());
-            AudioService.PlayPreviewSound();
+            AudioService.MenuSelectionSound();
             CustomMessageBox.Show("Participant ajouté. Pensez à sauvegarder pour enregistrer les modifications.");
         }
 
@@ -426,7 +435,7 @@ namespace DuelDeGateaux.Forms
                 if(result == DialogResult.Yes)
                 {
                     viewModel.Participants.RemoveAt(e.RowIndex);
-                    AudioService.PlayPreviewSound();
+                    AudioService.MenuSelectionSound();
                 }
             }
         }
@@ -440,7 +449,7 @@ namespace DuelDeGateaux.Forms
             
             if (e.RowIndex >= 0 && e.ColumnIndex == deleteColumnIndex)
             {
-                dgvParticipants.Cursor = CursorService.LoadCustomButtonCursor() ?? Cursors.Default;
+                dgvParticipants.Cursor = buttonCursor;
             }
             else
             {
@@ -534,7 +543,7 @@ namespace DuelDeGateaux.Forms
         private void PictureBox_MouseEnter(object sender, EventArgs e)
         {
             PictureBox pb = (PictureBox)sender;
-            pb.Cursor = Cursors.Hand;
+            pb.Cursor = buttonCursor;
             pb.BackColor = Color.LightYellow; // Petit flash au survol
             // Optionnel : tu peux aussi changer la BorderStyle
             pb.BorderStyle = BorderStyle.FixedSingle;

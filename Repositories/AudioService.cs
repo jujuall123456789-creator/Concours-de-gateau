@@ -15,9 +15,9 @@ namespace DuelDeGateaux.Repositories
         private const string SendSoundFileName = "ovenSound.mp3";
         private const string SaveSoundFileName = "success.mp3";
         private const string OpenJsonSoundFileName = "openDoor.mp3";
-        private const string HistorySoundFileName = "slurpLick.mp3";
+        private const string OpenMenuFileName = "slurpLick.mp3";
         private const string PrintBallotSoundFileName = "cartoonPoof.mp3";
-        private const string PreviewSoundFileName = "bubble.mp3";
+        private const string MenuSelectionFileName = "bubble.mp3";
         private const string MusicName = "shortChillMusic.mp3";
 
 
@@ -90,12 +90,12 @@ namespace DuelDeGateaux.Repositories
         public static void PlayOpenJsonSound() => PlayAudio(OpenJsonSoundFileName, "sfx");
 
         /// <summary>Joue le son d'ouverture de l'historique (slurp).</summary>
-        public static void PlayHistorySound() => PlayAudio(HistorySoundFileName, "sfx");
+        public static void OpenMenuSound() => PlayAudio(OpenMenuFileName, "sfx");
 
         /// <summary>Joue le son de l'impression des bulletins (poof).</summary>
         public static void PlayPrintBallotSound() => PlayAudio(PrintBallotSoundFileName, "sfx");
 
         /// <summary>Joue le son de la prévisualisation (bulle).</summary>
-        public static void PlayPreviewSound() => PlayAudio(PreviewSoundFileName, "sfx");
+        public static void MenuSelectionSound() => PlayAudio(MenuSelectionFileName, "sfx");
     }
 }

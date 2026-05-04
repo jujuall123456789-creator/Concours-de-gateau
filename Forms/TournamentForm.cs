@@ -45,6 +45,7 @@ namespace DuelDeGateaux.Forms
             this.Size = new Size(1100, 750);
             this.StartPosition = FormStartPosition.CenterParent;
             this.BackColor = Color.White;
+            this.ShowIcon = false;
 
             // 1. Le bandeau du haut
             pnlTop = new Panel
@@ -70,17 +71,15 @@ namespace DuelDeGateaux.Forms
                 BackColor = Color.FromArgb(255, 182, 193),
                 FlatStyle = FlatStyle.Flat,
                 Width = 200,
-                Cursor = Cursors.Hand,
+                Cursor = CursorService.LoadCustomButtonCursor() ?? Cursors.Hand,
                 Dock = DockStyle.Right
             };
-            btnNextSeason.FlatAppearance.BorderSize = 0;
-            // On le place à droite
-            btnNextSeason.Location = new Point(this.ClientSize.Width - 220, 10);
-            btnNextSeason.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            btnNextSeason.FlatAppearance.BorderSize = 0;            
             btnNextSeason.Click += BtnNextSeason_Click;
 
             pnlTop.Controls.Add(lblTitle);
             pnlTop.Controls.Add(btnNextSeason);
+            pnlTop.Padding = new Padding(10);
 
             // 2. Le composant WebView2
             webViewTournament = new WebView2
