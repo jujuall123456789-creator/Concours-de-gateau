@@ -161,6 +161,10 @@ namespace DuelDeGateaux.Forms
         private Button btnHistory;
         private Button btnPrintBallot;
 
+        /// <summary>
+        /// Instance invisible de WebView2 pour garder le moteur Edge Chromium "à chaud" en arrière-plan.
+        /// </summary>
+        private Microsoft.Web.WebView2.WinForms.WebView2 dummyWebView;
 
         /// <summary>
         /// Required designer variable.
@@ -190,6 +194,9 @@ namespace DuelDeGateaux.Forms
         {
             SuspendLayout();
             this.Load += new System.EventHandler(this.MainForm_Load);
+            // Initialisation du WebView2 fantôme
+            dummyWebView = new Microsoft.Web.WebView2.WinForms.WebView2();
+            ((System.ComponentModel.ISupportInitialize)(dummyWebView)).BeginInit();
             // 
             // MainForm
             // 
@@ -689,14 +696,25 @@ namespace DuelDeGateaux.Forms
             btnHistory.Font = new Font("Segoe UI Emoji", 9, FontStyle.Bold);
 
             // =============================
+            // 👻 WEBVIEW2 FANTÔME (Préchauffage)
+            // =============================
+            dummyWebView.Location = new Point(0, 0);
+            dummyWebView.Name = "dummyWebView";
+            dummyWebView.Size = new Size(1, 1);
+            dummyWebView.Visible = false;
+            dummyWebView.Enabled = false;
+
+            // =============================
             // AJOUT FINAL
             // =============================
             this.Controls.AddRange(new Control[]
             {
                 grpContest, grpDisplay, grpSmtp,
                 grpParticipants,
-                btnSend, btnPreview, btnSave, btnPrintBallot, btnOpenJson, btnHistory
+                btnSend, btnPreview, btnSave, btnPrintBallot, btnOpenJson, btnHistory,
+                dummyWebView
             });
+            ((System.ComponentModel.ISupportInitialize)(dummyWebView)).EndInit();
         }
 
         #endregion
