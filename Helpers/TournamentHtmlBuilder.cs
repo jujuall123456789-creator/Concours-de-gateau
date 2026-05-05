@@ -35,9 +35,10 @@ namespace DuelDeGateaux.Helpers
             html.AppendLine($"body {{ font-family: 'Segoe UI', sans-serif; background-color: #FFFDF0; margin: 0; padding: 40px; color: #3C1E0A; cursor: {defaultCursor}; }}");
             html.AppendLine(".bracket { display: flex; justify-content: center; gap: 60px; margin-top: 30px; }");
             html.AppendLine(".column { display: flex; flex-direction: column; justify-content: space-around; gap: 30px; }");
-            html.AppendLine($".match {{ background: white; border: 3px solid #F4E8D1; border-radius: 12px; padding: 15px; min-width: 200px; box-shadow: 0 8px 16px rgba(60,30,10,0.05); transition: transform 0.2s; cursor: {pointerCursor}; }}");
+            html.AppendLine($".match {{ background: white; border: 3px solid #F4E8D1; border-radius: 12px; padding: 15px; min-width: 200px; max-width: 200px; box-shadow: 0 8px 16px rgba(60,30,10,0.05); transition: transform 0.2s; cursor: {pointerCursor}; }}");
             html.AppendLine($".match:hover {{ transform: scale(1.05); border-color: #FFB6C1; cursor: {pointerCursor}; }}");
-            html.AppendLine(".match-title { font-size: 12px; font-weight: bold; color: #A8957A; text-transform: uppercase; margin: 0 0 10px 0; border-bottom: 1px dashed #F4E8D1; padding-bottom: 5px; text-align: center;}");
+            html.AppendLine(".match-title { font-size: 12px; font-weight: bold; color: #A8957A; text-transform: uppercase; margin: 0 0 10px 0; border-bottom: 1px dashed #F4E8D1; padding-bottom: 5px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }");
+            
             html.AppendLine(".player { padding: 8px 0; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }");
             html.AppendLine(".winner { font-weight: bold; color: #4CAF50; }");
             html.AppendLine(".loser { color: #CCC; text-decoration: line-through; }");
@@ -65,7 +66,11 @@ namespace DuelDeGateaux.Helpers
                 {
                     bool isFinished = !string.IsNullOrEmpty(match.Winner);
                     html.AppendLine($"<div class='match' onclick='selectWinner(\"{match.MatchId}\")'>");
-                    html.AppendLine($"<div class='match-title'>{match.PhaseName}</div>");
+                    
+                    // 🏷️ GESTION DU TITRE ET DE L'INFOBULLE
+                    string displayTitle = !string.IsNullOrEmpty(match.Theme) ? match.Theme : match.PhaseName;
+                    string safeTitleAttr = displayTitle.Replace("'", "&#39;").Replace("\"", "&quot;"); // Sécurité anti-plantage HTML
+                    html.AppendLine($"<div class='match-title' title='{safeTitleAttr}'>{displayTitle}</div>");
 
                     foreach (var player in match.ChallengersList)
                     {
