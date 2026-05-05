@@ -26,19 +26,5 @@
     "PhaseIndex": 0,
     "PhaseName": "Tour 1",
     "Winner": "Mathilde \uD83E\uDD89"
-  },
-  {
-    "MatchId": "15ff269c-2a1a-4c6f-9d2c-62234ab1f4d9",
-    "Date": "23-04-2026",
-    "Theme": "\uD83C\uDF4B G\u00E2teau moelleux au citron \uD83C\uDF4B",
-    "ChallengersList": [
-      "Beno\u00EEt \uD83D\uDC17",
-      "Maxime R \uD83E\uDD98"
-    ],
-    "Challengers": "Beno\u00EEt \uD83D\uDC17 vs Maxime R \uD83E\uDD98",
-    "TournamentName": "Saison 2",
-    "PhaseIndex": 0,
-    "PhaseName": "Tour 1",
-    "Winner": null
-  }
+  } 
 ]

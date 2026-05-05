@@ -50,7 +50,7 @@ namespace DuelDeGateaux.Forms
 
             pnlTop = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = _bgColor, Padding = new Padding(10) };
 
-            var lblSeasonDesc = new Label { Text = "Voir la saison :", Font = new Font("Segoe UI", 12, FontStyle.Bold), ForeColor = Color.FromArgb(60, 30, 10), AutoSize = true, Location = new Point(20, 8) };
+            var lblSeasonDesc = new Label { Text = "Voir la saison :", Font = new Font("Segoe UI", 12, FontStyle.Bold), ForeColor = Color.FromArgb(60, 30, 10), AutoSize = true, Location = new Point(20, 13) };
 
             cmbSeasons = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Font = new Font("Segoe UI", 11), Width = 200, Location = new Point(160, 15) };
             cmbSeasons.SelectedIndexChanged += CmbSeasons_SelectedIndexChanged;
