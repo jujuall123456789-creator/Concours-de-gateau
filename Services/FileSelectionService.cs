@@ -1,4 +1,6 @@
-﻿namespace DuelDeGateaux.Services
+﻿using System.IO;
+
+namespace DuelDeGateaux.Services
 {
     internal static class FileSelectionService
     {

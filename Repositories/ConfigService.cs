@@ -1,5 +1,6 @@
 ﻿using DuelDeGateaux.Models;
 using System.Diagnostics;
+using System.IO;
 using System.Text.Json;
 
 namespace DuelDeGateaux.Services
@@ -25,7 +26,7 @@ namespace DuelDeGateaux.Services
         {
             try
             {
-                if (!File.Exists(ConfigPath))
+                if (!FileSelectionService.FileExists(ConfigPath))
                 {
                     // Si le fichier est absent, on informe l'utilisateur
                     MessageBox.Show($"Fichier de configuration introuvable à l'emplacement : {ConfigPath}\nUne configuration par défaut sera utilisée.", 

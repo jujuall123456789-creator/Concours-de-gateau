@@ -1,8 +1,5 @@
 using DuelDeGateaux.Models;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using UTIL_SMTPLib;
 
 namespace DuelDeGateaux.Services

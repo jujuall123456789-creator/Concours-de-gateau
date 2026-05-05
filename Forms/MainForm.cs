@@ -4,6 +4,7 @@ using DuelDeGateaux.Repositories;
 using DuelDeGateaux.Services;
 using DuelDeGateaux.UI;
 using DuelDeGateaux.ViewModels;
+using System.IO;
 
 namespace DuelDeGateaux.Forms
 {
@@ -126,7 +127,7 @@ namespace DuelDeGateaux.Forms
                 // 4) 🎵 Lancement de la musique de fond !
                 AudioService.PlayBackgroundMusic();
                 // 5) 🔥 Préchauffage du navigateur invisible !
-                WarmUpWebView2()
+                WarmUpWebView2();
             }
             catch (Exception ex)
             {
