@@ -16,6 +16,8 @@ namespace DuelDeGateaux.Forms
             InitializeComponent();
             //configuration du DataGridView au démarrage
             ConfigureGrid();
+            // 🍰 Ajout de l'icône
+            IconService.ApplyIconToForm(this);
 
         }
         /// <summary>

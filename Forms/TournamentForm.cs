@@ -37,6 +37,8 @@ namespace DuelDeGateaux.Forms
 
             // 🪄 MAGIE : On appelle le service après avoir créé l'interface UI
             CursorService.ApplyCursorsToForm(this);
+            // 🍰 Ajout de l'icône
+            IconService.ApplyIconToForm(this);
         }
 
         private void InitializeUI()
@@ -45,7 +47,6 @@ namespace DuelDeGateaux.Forms
             this.Size = new Size(1100, 750);
             this.StartPosition = FormStartPosition.CenterParent;
             this.BackColor = Color.White;
-            this.ShowIcon = false;
 
             pnlTop = new Panel { Dock = DockStyle.Top, Height = 60, BackColor = _bgColor, Padding = new Padding(10) };
 

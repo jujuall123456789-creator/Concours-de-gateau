@@ -98,12 +98,8 @@ namespace DuelDeGateaux.Forms
             TooltipUiService.Configure(toolTip, TooltipDefinitions.Build(this));
             // 🪄 MAGIE DU CURSEUR PERSONNALISÉ
             SetupCustomCursors();
-            string cakeIconPath = FileSelectionService.FilePathAssets("cakeIcon.ico");
-
-            if (File.Exists(cakeIconPath))
-            {
-                this.Icon = Icon.ExtractAssociatedIcon(cakeIconPath);
-            }
+            // 🍰 MAGIE DE L'ICÔNE
+            IconService.ApplyIconToForm(this);
             //Assignation des valeurs du viewmodel aux composants
             rb2Challengers.Checked = viewModel.ChallengerNumber == 2;
             rb3Challengers.Checked = viewModel.ChallengerNumber == 3;

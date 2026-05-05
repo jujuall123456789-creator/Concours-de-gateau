@@ -21,6 +21,8 @@ namespace DuelDeGateaux.Forms
             Controls.Add(webView);
 
             InitializeWebView();
+            // 🍰 Ajout de l'icône
+            IconService.ApplyIconToForm(this);
         }
 
         private async void InitializeWebView()

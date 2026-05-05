@@ -182,116 +182,64 @@ namespace DuelDeGateaux.Services
         // ==========================================
         // 4. TEMPLATE : LE JURY (MANGEURS)
         // ==========================================
+        // ==========================================
+        // 4. TEMPLATE : LE JURY (MANGEURS)
+        // ==========================================
         private static string GenerateEaterHtml(AppConfig config, string eaterName, string challengersAnnouncement, string headerBase64, string footerBase64)
         {
             // FIX OUTLOOK : width="600" et height="{config.ImageHeadingHeight}" sans 'px' !
-            string headerRow = string.IsNullOrEmpty(headerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-bottom:20px;'><img src='data:image/jpeg;base64,{headerBase64}' width='600' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:600px; height:{config.ImageHeadingHeight}px;'></td></tr>";
+            string headerImageHtml = string.IsNullOrEmpty(headerBase64) ? "" :
+                $@"<tr><td align='center' bgcolor='#FBEEE6'><img src='data:image/jpeg;base64,{headerBase64}' width='600' height='{config.ImageHeadingHeight}' style='display:block; border:none; max-width:600px; height:{config.ImageHeadingHeight}px;' alt='Header'></td></tr>";
 
-            string footerRow = string.IsNullOrEmpty(footerBase64) ? "" :
-                $@"<tr><td align='center' style='padding-top:40px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' height='250' style='display:block; border:none; max-width:250px;'></td></tr>";
-
-            string spacer30 = "<table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'><tr><td height='30' style='font-size:0px; line-height:0px;'>&nbsp;</td></tr></table>";
+            string footerImageHtml = string.IsNullOrEmpty(footerBase64) ? "" :
+                $@"<tr><td align='center' style='padding-top:20px;'><img src='data:image/jpeg;base64,{footerBase64}' width='250' height='250' style='display:block; border:none; max-width:250px;' alt='Footer'></td></tr>";
 
             return $@"
-                <!DOCTYPE html>
-                <html>
-                <body style='margin:0; padding:0; background-color:#ffffff;'>
-                    <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
-                      <tr>
-                        <td align='center' style='padding: 20px 0;'>
-                          <table role='presentation' width='600' cellspacing='0' cellpadding='0' border='0' style='font-family: ""Trebuchet MS"", sans-serif; line-height: 1.8;'>
-                
-                            {headerRow}
+            <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#f4f4f4'>
+              <tr>
+                <td align='center' style='padding: 20px 0;'>
+                  <table role='presentation' width='600' cellspacing='0' cellpadding='0' border='0' bgcolor='#FBEEE6' style='border: 1px solid #dddddd; font-family: ""Segoe UI"", Arial, sans-serif;'>
+                    {headerImageHtml}
+                    <tr>
+                      <td bgcolor='#D35400' align='center' style='padding: 20px; color: #ffffff;'>
+                        <h1 style='margin: 0; font-size: 24px; letter-spacing: 2px;'>🧑‍⚖️ À VOS FOURCHETTES 🧑‍⚖️</h1>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style='padding: 30px; color: #2C3E50; font-size: {config.FontSize}px; line-height: 1.6;'>
+                        <p style='margin-top: 0;'>Cher/Chère <strong>{eaterName.ToUpper()}</strong> 👮,</p>
+                        <p>Grande nouvelle (et pas moyen d'y échapper) : {challengersAnnouncement} ont été sélectionnés comme Challengers à notre grand concours de gâteaux !</p>
+                        
+                        <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
+                          <tr><td height='20' style='font-size:0px; line-height:0px;'>&nbsp;</td></tr> 
+                          <tr>
+                            <td bgcolor='#ffffff' style='padding: 15px; border-left: 4px solid #D35400;'>
+                              <p style='margin: 0;'><strong>🎯 Thème :</strong> {config.ChallengeTheme}</p>
+                              <p style='margin: 5px 0 0 0;'><strong>🧑‍🍳 Consigne :</strong> {config.ChallengeRules}</p>
+                            </td>
+                          </tr>
+                          <tr><td height='20' style='font-size:0px; line-height:0px;'>&nbsp;</td></tr> 
+                        </table>
 
-                            <tr>
-                              <td style='padding: 10px 20px;'>
-                    
-                                <h2 style='font-size: 22px; color: #444BAD; margin-bottom: 25px;'>
-                                  Cher/Chère <span style='color: #DB1616;'>{eaterName.ToUpper()}</span> 👮,
-                                </h2>
-                    
-                                <p style='color: #444BAD; font-weight: bold; font-size: {config.FontSize}px;'>
-                                  Grande nouvelle (et pas moyen d'y échapper) : {challengersAnnouncement} ont été sélectionnés comme Challengers à notre grand concours de gâteaux sur le thème « {config.ChallengeTheme} » !
-                                </p>
-                    
-                                <p style='color: #444BAD; font-size: {config.FontSize}px;'>
-                                  🧑‍🍳 <strong>Ils ont la consigne suivante : {config.ChallengeRules}</strong>
-                                </p>
-                    
-                                <p style='color: #DB1616; font-size: 20px; font-weight: bold; text-align: center; margin: 35px 0;'>
-                                  {config.ChallengeParticipationMessage}
-                                </p>
+                        <p><strong>📅 Rendez-vous le :</strong> {config.ChallengeDate} à {config.ChallengeHour}</p>
+                        <p><strong>📍 Lieu du combat :</strong> {config.ChallengeRoom}</p>
+                        <p><strong>🏆 À la clé pour eux :</strong> {config.ChallengePrice}</p>
 
-                                {spacer30} 
-                                
-                                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
-                                  <tr>
-                                    <td bgcolor='#FCE4EC' style='padding: 30px; border-radius: 15px; border: 1px solid #F8BBD0;'>
-                                      <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
-                                        <tr>
-                                          <td width='60' valign='top' style='font-size: 28px; padding-bottom: 20px;'>🗓️</td>
-                                          <td style='padding-bottom: 20px; border-bottom: 1px solid #F8BBD0;'>
-                                            <span style='color: #444BAD; font-weight: bold; text-transform: uppercase; font-size: 11px; letter-spacing: 2px;'>Quand ?</span><br>
-                                            <span style='font-size: 19px; color: #333333; font-weight: bold;'>{config.ChallengeDate}</span>
-                                          </td>
-                                        </tr>
-                                        <tr>
-                                          <td width='60' valign='top' style='font-size: 28px; padding: 20px 0;'>📍</td>
-                                          <td style='padding: 20px 0; border-bottom: 1px solid #F8BBD0;'>
-                                            <span style='color: #444BAD; font-weight: bold; text-transform: uppercase; font-size: 11px; letter-spacing: 2px;'>Où se situe le combat ?</span><br>
-                                            <span style='font-size: 19px; color: #333333; font-weight: bold;'>{config.ChallengeRoom}</span>
-                                          </td>
-                                        </tr>
-                                        <tr>
-                                          <td width='60' valign='top' style='font-size: 28px; padding-top: 20px;'>⏰</td>
-                                          <td style='padding-top: 20px;'>
-                                            <span style='color: #444BAD; font-weight: bold; text-transform: uppercase; font-size: 11px; letter-spacing: 2px;'>À quelle heure ?</span><br>
-                                            <span style='font-size: 19px; color: #333333; font-weight: bold;'>{config.ChallengeHour}</span>
-                                          </td>
-                                        </tr>
-                                      </table>
-                                    </td>
-                                  </tr>
-                                </table>
+                        <p style='margin-top: 15px;'><em>Les règles sont simples : ils pâtissent, on déguste, et on élit le meilleur gâteau ! Préparez vos bavoirs. 👅</em></p>
 
-                                {spacer30} 
-                                
-                                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' bgcolor='#ffffff' style='border: 2px dashed #F8BBD0; border-radius: 15px;'>
-                                  <tr>
-                                    <td align='center' style='padding: 20px; font-size: 16px; color: #333333; font-weight: bold;'>
-                                      Les règles sont simples : ils pâtissent, on déguste, et on élit le meilleur gâteau.<br>                                      
-                                      <span style='font-size: 18px; color: #DB1616; font-weight: bold;'>{config.ChallengePrice} 😋</span>
-                                    </td>
-                                  </tr>
-                                </table>
-                    
-                                {spacer30} 
-                                
-                                <table role='presentation' width='100%' cellspacing='0' cellpadding='15' border='0' bgcolor='#1A1A1A' style='border-radius: 8px;'>
-                                  <tr>
-                                    <td align='center' style='color: #ffffff; font-weight: bold; font-size: 16px; letter-spacing: 1.5px; text-transform: uppercase;'>
-                                      Préparez vos bavoirs, on a hâte ! 👅
-                                    </td>
-                                  </tr>
-                                </table>
-
-                                <table width='100%'>
-                                    {footerRow}
-                                </table>
-                    
-                                <p style='font-size: 10px; color: #A1A1A1; text-align: center; margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 15px;'>
-                                  You received this email because you suck.
-                                </p>
-
-                              </td>
-                            </tr>
-                          </table>
-                        </td>
-                      </tr>
-                    </table>
-                </body>
-                </html>";
+                        <p style='margin-top: 25px; color: #D35400; font-weight: bold; text-align: center;'>{config.ChallengeParticipationMessage}</p>
+                        
+                        {footerImageHtml}
+                        
+                        <p style='font-size: 12px; color: #7f8c8d; text-align: center; margin-top: 30px;'>
+                          You received this email because you suck.
+                        </p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>";
         }
 
         // ==========================================
