@@ -125,6 +125,8 @@ namespace DuelDeGateaux.Forms
                 SetupParticipantsGrid();
                 // 4) 🎵 Lancement de la musique de fond !
                 AudioService.PlayBackgroundMusic();
+                // 5) 🔥 Préchauffage du navigateur invisible !
+                WarmUpWebView2()
             }
             catch (Exception ex)
             {
@@ -149,6 +151,18 @@ namespace DuelDeGateaux.Forms
         {
             pictureFooterImage.Image?.Dispose();
             pictureFooterImage.Image = ImageUiService.LoadPreviewFromConfig(path, _thumbnailSize);
+        }
+        /// <summary>
+        /// Démarre le moteur Edge en arrière-plan pour que l'ouverture de l'arbre soit instantanée plus tard.
+        /// </summary>
+        private async void WarmUpWebView2()
+        {
+            try
+            {
+                using var dummyWebView = new Microsoft.Web.WebView2.WinForms.WebView2();
+                await dummyWebView.EnsureCoreWebView2Async(null);
+            }
+            catch { /* On ignore si ça échoue, c'est juste de l'optimisation */ }
         }
 
         /// <summary>
@@ -385,7 +399,7 @@ namespace DuelDeGateaux.Forms
         /// (texte affiché, action associée)
         /// </param>
         /// <returns>Un ContextMenuStrip prêt à être affiché</returns>
-        private ContextMenuStrip BuildMenu(params (string text, Action onClick)[] items)
+        private ContextMenuStrip BuildMenu(params (string text, Action? onClick)[] items)
         {
             // 🎨 Création du menu avec un style commun à toute l'application
             var menu = new ContextMenuStrip
@@ -513,7 +527,7 @@ namespace DuelDeGateaux.Forms
                 e.Effect = DragDropEffects.Copy;
         }
 
-        private void PictureBox_DragDrop(object sender, DragEventArgs e, bool isHeader)
+        private void PictureBox_DragDrop(object? sender, DragEventArgs e, bool isHeader)
         {
             if (e.Data?.GetData(DataFormats.FileDrop) is not string[] files || files.Length == 0)
                 return;

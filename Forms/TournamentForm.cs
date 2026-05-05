@@ -21,10 +21,10 @@ namespace DuelDeGateaux.Forms
         private readonly Color _btnColor = Color.FromArgb(255, 182, 193);
 
         // UI Controls
-        private Panel pnlTop;
-        private Button btnNextSeason;
-        private ComboBox cmbSeasons;
-        private WebView2 webViewTournament;
+        private Panel pnlTop = null!;
+        private Button btnNextSeason = null!;
+        private ComboBox cmbSeasons = null!;
+        private WebView2 webViewTournament = null!;
 
         public TournamentForm(AppConfig config)
         {
@@ -70,11 +70,11 @@ namespace DuelDeGateaux.Forms
             this.Controls.Add(pnlTop);
         }
 
-        private void CmbSeasons_SelectedIndexChanged(object sender, EventArgs e)
+        private void CmbSeasons_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (cmbSeasons.SelectedItem != null)
             {
-                _displayedSeason = cmbSeasons.SelectedItem.ToString();
+                _displayedSeason = cmbSeasons.SelectedItem?.ToString() ?? string.Empty;
                 RefreshTournamentTree();
             }
         }
@@ -97,8 +97,24 @@ namespace DuelDeGateaux.Forms
 
         private async void InitializeWebViewAsync()
         {
-            await webViewTournament.EnsureCoreWebView2Async(null);
-            RefreshTournamentTree();
+            try
+            {
+                await webViewTournament.EnsureCoreWebView2Async(null);
+                
+                // Si l'utilisateur a déjà fermé la fenêtre, on ne fait rien !
+                if (!this.IsDisposed)
+                {
+                    RefreshTournamentTree();
+                }
+            }
+            catch (System.Runtime.InteropServices.COMException)
+            {
+                // L'utilisateur a fermé la fenêtre super vite, on ignore l'erreur silencieusement 🥷
+            }
+            catch (Exception)
+            {
+                // Capture de sécurité pour toute autre erreur de démarrage
+            }
         }
 
         private void RefreshTournamentTree()
@@ -117,7 +133,7 @@ namespace DuelDeGateaux.Forms
             webViewTournament.NavigateToString(html);
         }
 
-        private void WebViewTournament_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        private void WebViewTournament_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             string matchId = e.TryGetWebMessageAsString();
             var allMatches = HistoryService.Load();
@@ -146,7 +162,7 @@ namespace DuelDeGateaux.Forms
             }
         }
 
-        private void BtnNextSeason_Click(object sender, EventArgs e)
+        private void BtnNextSeason_Click(object? sender, EventArgs e)
         {
             var result = MessageBox.Show(
                 $"Es-tu sûr de vouloir clôturer la {_config.CurrentTournamentName} ?\n\nLe prochain mail envoyé démarrera automatiquement une nouvelle saison.",

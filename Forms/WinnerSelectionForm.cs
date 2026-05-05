@@ -7,7 +7,7 @@ namespace DuelDeGateaux.Forms
 {
     public class WinnerSelectionForm : Form
     {
-        public string SelectedWinner { get; private set; }
+        public string SelectedWinner { get; private set; } = string.Empty;
         public int SelectedPhaseIndex { get; private set; }
 
         private readonly Color _bgColor = Color.FromArgb(255, 253, 240);
