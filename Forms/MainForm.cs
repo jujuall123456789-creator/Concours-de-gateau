@@ -27,12 +27,12 @@ namespace DuelDeGateaux.Forms
         /// Composant permettant d'afficher des bulles d'aide quand l'utilisateur survole un champ avec la souris
         /// </summary>
         private readonly ToolTip toolTip;
-        
+
         /// <summary>
         /// Random utilisé pour randomiser la sélection de certaines string
         /// </summary>
         private static readonly Random _messageRandomizer = new();
-        
+
         /// <summary>
         /// Taille fixe utilisée pour les miniatures affichées dans l'interface.
         /// </summary>
@@ -42,7 +42,7 @@ namespace DuelDeGateaux.Forms
         /// Extensions de fichiers autorisées pour les images importées.
         /// </summary>
         private static readonly string[] _allowedExtensions = [".jpg", ".jpeg", ".png"];
-        
+
         #region UI Exposed Controls
         // INFOS CONCOURS
         public DateTimePicker DatePickerControl => datePicker;
@@ -116,8 +116,8 @@ namespace DuelDeGateaux.Forms
         private void MainForm_Load(object sender, EventArgs e)
         {
             try
-            {                
-                 // 1) Préparer les bindings une seule fois
+            {
+                // 1) Préparer les bindings une seule fois
                 SetupBindings();
                 // 2) Chargement de la config et de l'UI
                 ReloadFromConfig();
@@ -138,7 +138,7 @@ namespace DuelDeGateaux.Forms
             SetHeaderPreview(viewModel.PathImageHeading);
             SetFooterPreview(viewModel.PathImageFooter);
         }
-        
+
         private void SetHeaderPreview(string path)
         {
             pictureHeaderImage.Image?.Dispose();
@@ -174,24 +174,24 @@ namespace DuelDeGateaux.Forms
             }
             catch (FileNotFoundException)
             {
-                CustomMessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰","Erreur image", MessageBoxButtons.OK,MessageBoxIcon.Warning);
+                CustomMessageBox.Show("Image introuvable...\nT'as mangé le fichier ? 🍰", "Erreur image", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             catch (Exception ex)
             {
                 CustomMessageBox.Show($"Une erreur est survenue lors du chargement de l'image : {ex.Message}", "Erreur de chargement", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        
+
 
         /// <summary>
         /// Sauvegarde les entrées de l'utilisateur dans le fichier de config
         /// </summary>
         private void SyncAndSaveConfig()
-        {      
+        {
             if (!ValidateFields())
             {
                 return;
-            }      
+            }
             // 👥 GROUPE PARTICIPANTS
             EndEditParticipants();
             ConfigService.Save(viewModel.ToConfig());
@@ -219,14 +219,14 @@ namespace DuelDeGateaux.Forms
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void BtnRun_Click( object sender, EventArgs e)
+        private void BtnRun_Click(object sender, EventArgs e)
         {
             this.Cursor = Cursors.WaitCursor;
             try
             {
                 UiHelper.ExecuteWithErrorHandling(() =>
                 {
-                    SyncAndSaveConfig();                
+                    SyncAndSaveConfig();
                     var currentConfig = viewModel.ToConfig();
                     List<Participant> assignments = DrawService.AssignChallengers(currentConfig);
                     //EmailService.SendDuelEmails(currentConfig, assignments);
@@ -237,7 +237,7 @@ namespace DuelDeGateaux.Forms
 
                     /// 💥 Joue le son d'effet spécial d'envoi !
                     AudioService.PlaySendSound();
-                    
+
                 }, "🎉 Emails envoyés et challengers désignés ! Préparez les fourchettes 🍴");
             }
             finally
@@ -280,7 +280,7 @@ namespace DuelDeGateaux.Forms
                 var currentConfig = viewModel.ToConfig();
 
                 string title = isChallenger ? "Mail Challengers ⚔️" : "Mail Jury (Mangeurs) 🤤";
-                
+
                 // On récupère le HTML
                 string html = EmailService.GetPreviewHtml(currentConfig, isChallenger);
 
@@ -300,10 +300,10 @@ namespace DuelDeGateaux.Forms
         private void BtnSave_Click(object sender, EventArgs e)
         {
             UiHelper.ExecuteWithErrorHandling(() =>
-            {                
+            {
                 SyncAndSaveConfig();
                 AudioService.PlaySaveSound();
-            },"Configuration sauvegardée! ");
+            }, "Configuration sauvegardée! ");
         }
 
         /// <summary>
@@ -312,17 +312,17 @@ namespace DuelDeGateaux.Forms
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void BtnHistory_Click(object sender, EventArgs e)
-        {            
-           AudioService.OpenMenuSound();
-           // Création du menu déroulant (comme pour la preview !)
-           ContextMenuStrip historyMenu = BuildMenu(
-                ("📖 Tableau brut", OpenHistoryTable),
-                ("---", null),
-                ("🏆 Arbre du Tournoi", OpenTournamentTree)
-           );
-           // On affiche le menu juste en dessous du bouton cliqué
-           Button btn = (Button)sender;
-           historyMenu.Show(btn, new Point(0, btn.Height));
+        {
+            AudioService.OpenMenuSound();
+            // Création du menu déroulant (comme pour la preview !)
+            ContextMenuStrip historyMenu = BuildMenu(
+                 ("📖 Tableau brut", OpenHistoryTable),
+                 ("---", null),
+                 ("🏆 Arbre du Tournoi", OpenTournamentTree)
+            );
+            // On affiche le menu juste en dessous du bouton cliqué
+            Button btn = (Button)sender;
+            historyMenu.Show(btn, new Point(0, btn.Height));
         }
         /// <summary>
         /// Ouvre l'historique brut (le tableau classique)
@@ -366,11 +366,11 @@ namespace DuelDeGateaux.Forms
             UiHelper.ExecuteWithErrorHandling(() =>
             {
                 // On sauvegarde d'abord pour être sûr d'avoir la bonne date et le bon nombre de gâteaux (2 ou 3)
-                SyncAndSaveConfig(); 
-                
+                SyncAndSaveConfig();
+
                 // On lance la génération HTML et l'impression !
                 BallotService.GenerateAndPrintBallots(viewModel.ToConfig());
-                
+
             }, null); // Pas de message de succès, l'ouverture du navigateur suffit
         }
         /// <summary>
@@ -387,7 +387,7 @@ namespace DuelDeGateaux.Forms
         /// <returns>Un ContextMenuStrip prêt à être affiché</returns>
         private ContextMenuStrip BuildMenu(params (string text, Action onClick)[] items)
         {
-             // 🎨 Création du menu avec un style commun à toute l'application
+            // 🎨 Création du menu avec un style commun à toute l'application
             var menu = new ContextMenuStrip
             {
                 Cursor = CursorService.ButtonCursor,
@@ -443,7 +443,7 @@ namespace DuelDeGateaux.Forms
                 return;
             //Index de la colonne "corbeille" dernière colonne
             int deleteColumnindex = dgvParticipants.Columns.GetLastColumn(DataGridViewElementStates.None, DataGridViewElementStates.None).Index;
-            if(deleteColumnindex == e.ColumnIndex)
+            if (deleteColumnindex == e.ColumnIndex)
             {
                 //Demande une confirmation de l'utilisateur 
                 var result = CustomMessageBox.Show("Êtes-vous sûr de vouloir supprimer ce gentil participant ?",
@@ -451,7 +451,7 @@ namespace DuelDeGateaux.Forms
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Warning
                  );
-                if(result == DialogResult.Yes)
+                if (result == DialogResult.Yes)
                 {
                     viewModel.Participants.RemoveAt(e.RowIndex);
                     AudioService.MenuSelectionSound();
@@ -465,7 +465,7 @@ namespace DuelDeGateaux.Forms
         {
             // Si on survole la colonne de suppression (la dernière)
             int deleteColumnIndex = dgvParticipants.Columns.GetLastColumn(DataGridViewElementStates.None, DataGridViewElementStates.None).Index;
-            
+
             if (e.RowIndex >= 0 && e.ColumnIndex == deleteColumnIndex)
             {
                 dgvParticipants.Cursor = CursorService.ButtonCursor;
@@ -491,7 +491,7 @@ namespace DuelDeGateaux.Forms
                 UpdateHeaderImage(path);
             }
         }
-        
+
         /// <summary>
         /// Événement permettant de sélectionner une image pour le header.
         /// </summary>
@@ -562,7 +562,7 @@ namespace DuelDeGateaux.Forms
         private void PictureBox_MouseEnter(object sender, EventArgs e)
         {
             PictureBox pb = (PictureBox)sender;
-            pb.Cursor = buttonCursor;
+            pb.Cursor = CursorService.ButtonCursor;
             pb.BackColor = Color.LightYellow; // Petit flash au survol
             // Optionnel : tu peux aussi changer la BorderStyle
             pb.BorderStyle = BorderStyle.FixedSingle;
