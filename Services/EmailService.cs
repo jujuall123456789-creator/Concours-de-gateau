@@ -193,7 +193,7 @@ namespace DuelDeGateaux.Services
         private static string GenerateEaterHtml(AppConfig config, string eaterName, string challengersAnnouncement, string headerBase64, string footerBase64)
         {
             string bodyHtml = $@"
-                <p style='margin-top: 0;'>Cher/Chère <strong>{eaterName.ToUpper()}</strong> 👮,</p>
+                <p style='margin-top: 0;'>Cher/Chère <strong>{eaterName.ToUpper()}</strong>,</p>
                 <p>Grande nouvelle (et pas moyen d'y échapper) : {challengersAnnouncement} ont été sélectionnés comme Challengers à notre grand concours de gâteaux !</p>
                 
                 <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
